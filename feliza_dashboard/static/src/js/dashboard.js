@@ -604,10 +604,7 @@ export class FelizaDashboard extends Component {
         if (v === null || v === undefined) return "—";
         const n = Number(v);
         if (!isFinite(n)) return "—";
-        const a = Math.abs(n);
-        if (a >= 1e9) return (n / 1e9).toFixed(2).replace(".", ",") + " mlrd";
-        if (a >= 1e6) return (n / 1e6).toFixed(1).replace(".", ",") + " mln";
-        if (a >= 1e3) return Math.round(n / 1e3).toLocaleString("ru-RU") + " ming";
+        // To'liq summa (oxirgi so'mgacha), bo'sh joy bilan ajratilgan
         return Math.round(n).toLocaleString("ru-RU");
     }
     num(v, d = 0) {
