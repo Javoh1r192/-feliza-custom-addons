@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="hide_invoice_button" xml:space="preserve">
+    <t t-name="hide_invoice_button" t-inherit="point_of_sale.PaymentScreenButtons" t-inherit-mode="extension">
+        <xpath expr="//button[contains(@class, 'js_invoice')]" position="attributes">
+            <attribute name="t-if">!this.pos.cashier.pw_disable_customer_account</attribute>
+        </xpath>
+    </t>
+</templates>

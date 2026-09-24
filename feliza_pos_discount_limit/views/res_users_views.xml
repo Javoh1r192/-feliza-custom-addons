@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_users_form_pos_discount" model="ir.ui.view">
+        <field name="name">res.users.form.pos.discount.limit</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="POS chegirma" name="feliza_pos_discount_limit">
+                    <group>
+                        <group string="Kassa chegirma cheklovi">
+                            <field name="pos_max_discount"/>
+                        </group>
+                    </group>
+                    <p class="text-muted">
+                        100 = cheksiz (standart). Masalan 25 qo'ysangiz, bu foydalanuvchi
+                        POS kassada 25% dan ortiq chegirma bera olmaydi.
+                    </p>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

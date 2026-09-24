@@ -1,0 +1,101 @@
+// ==========================================================================
+//  POS — QAYTARISH («Заказы») EKRANI
+//
+//  MUAMMO. Kassir «Заказы» ga kirib chekni tanlaganda, qaytariladigan
+//  tovarlar o'ng panelda ko'rsatiladi. Odoo'da bu panel — `.leftpane` —
+//  qat'iy 450px kenglikda (planshetda 400px, pos.scss:73). Balandlikni
+//  esa numpad (4 qator katta tugma), «Возврат» tugmasi va uchta
+//  boshqaruv tugmasi egallab oladi. Natijada tovarlar ro'yxatiga
+//  atigi 2-3 qator joy qoladi va kassir nimani qaytarayotganini
+//  ko'rmaydi.
+//
+//  YECHIM. Faqat shu ekranda:
+//    1. panelni kengaytiramiz,
+//    2. ro'yxatga kafolatlangan balandlik beramiz,
+//    3. past ekranda tugmalarni ixchamlashtiramiz — bo'shagan joy
+//       ro'yxatga o'tadi.
+//
+//  DIQQAT: `.ticket-screen` ichida yozilgan — sotuv ekranidagi savat,
+//  numpad va «To'lash» tugmasi umuman o'zgarmaydi.
+//
+//  Bootstrap'ning `py-2`, `lh-lg` kabi utility klasslari `!important`
+//  bilan keladi, shuning uchun ustidan yozish uchun bu yerda ham
+//  `!important` ishlatilgan — boshqa yo'l yo'q.
+// ==========================================================================
+
+.pos .ticket-screen {
+
+    // ---------------------------------------------------------------- //
+    //  1. Panel kengligi
+    //     Faqat katta ekranda. Planshet/telefonda Odoo panellarni
+    //     almashtirib ko'rsatadi (ui.isSmall) — u yerda kenglik allaqachon
+    //     to'liq, tegsak buziladi.
+    // ---------------------------------------------------------------- //
+    @media (min-width: 992px) {
+        .leftpane {
+            width: 42vw !important;
+            min-width: 430px !important;
+            max-width: 760px !important;
+        }
+    }
+
+    // ---------------------------------------------------------------- //
+    //  2. Tovar qatorlari ro'yxati
+    //     `flex-grow` bor, lekin `min-height: auto` sabab pastdagi
+    //     tugmalar uni nolgacha siqib qo'yishi mumkin.
+    // ---------------------------------------------------------------- //
+    .order-container {
+        min-height: 150px;
+    }
+
+    // Uzun nomlar qatorni ikki qavat qilib yubormasin — o'lcham va rang
+    // ko'rinib tursin, lekin joy kam yesin.
+    .orderline .attribute-line {
+        font-size: 85%;
+    }
+
+    // ---------------------------------------------------------------- //
+    //  3. Past ekran (noutbuk 1366x768, kassa monitori va h.k.)
+    //     Numpad tugmalari `py-2 fs-3 lh-lg` — har biri ~60px.
+    //     To'rt qator = 240px. Ixchamlashtirsak ~100px bo'shaydi.
+    // ---------------------------------------------------------------- //
+    @media (max-height: 900px) {
+
+        .pads {
+            .control-button {
+                padding: .3rem .5rem !important;
+                font-size: .8125rem !important;
+                line-height: 1.35 !important;
+            }
+
+            .numpad-button {
+                padding-top: .2rem !important;
+                padding-bottom: .2rem !important;
+                font-size: 1.15rem !important;
+                line-height: 1.55 !important;
+            }
+
+            .actionpad .pay-order-button {
+                padding-top: .45rem !important;
+                padding-bottom: .45rem !important;
+            }
+        }
+
+        // qatorlar ixchamroq — ekranga ko'proq tovar sig'adi
+        .orderline {
+            padding-top: .2rem !important;
+            padding-bottom: .2rem !important;
+        }
+    }
+
+    // Juda past ekran (masalan 1024x600 planshet)
+    @media (max-height: 700px) {
+        .pads .numpad-button {
+            font-size: 1rem !important;
+            line-height: 1.35 !important;
+        }
+        .order-container {
+            min-height: 110px;
+        }
+    }
+}

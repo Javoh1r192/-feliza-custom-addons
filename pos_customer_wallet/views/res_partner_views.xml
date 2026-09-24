@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_partner_form_wallet" model="ir.ui.view">
+        <field name="name">res.partner.form.wallet</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                <button class="oe_stat_button" type="object"
+                        name="action_view_wallet_card" icon="fa-money">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Cashback karta</span>
+                    </div>
+                </button>
+            </xpath>
+            <xpath expr="//field[@name='category_id']" position="after">
+                <field name="wallet_currency_id" invisible="1"/>
+                <field name="wallet_balance" widget="monetary"
+                       options="{'currency_field': 'wallet_currency_id'}"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

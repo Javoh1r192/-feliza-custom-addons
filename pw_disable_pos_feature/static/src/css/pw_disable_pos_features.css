@@ -1,0 +1,23 @@
+.pw_disable_button {
+    pointer-events: none !important;
+    opacity: 0.4 !important;
+}
+
+
+.product-list .product.disabled-product {
+    opacity: 0.4;          
+    pointer-events: none;  
+    filter: grayscale(60%); 
+}
+
+
+.pos .order .orderline {
+    pointer-events: none !important;
+    opacity: 0.5;
+}
+
+
+.list-none-all {
+    pointer-events: none !important;
+}
+

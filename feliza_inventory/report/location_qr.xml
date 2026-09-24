@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 58 x 40 mm yorliq (XP-420B) -->
+    <record id="paperformat_location_qr" model="report.paperformat">
+        <field name="name">Javon QR 58x40mm</field>
+        <field name="format">custom</field>
+        <field name="page_width">58</field>
+        <field name="page_height">40</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">0</field>
+        <field name="margin_bottom">0</field>
+        <field name="margin_left">0</field>
+        <field name="margin_right">0</field>
+        <field name="header_spacing">0</field>
+        <field name="dpi">96</field>
+    </record>
+
+    <template id="report_location_qr">
+        <t t-call="web.html_container">
+            <div class="article">
+                <t t-set="scale" t-value="docs and docs[0]._loc_label_scale() or '1'"/>
+                <style>
+                    .locqr {
+                        width: 58mm; height: 39.5mm; overflow: hidden;
+                        box-sizing: border-box; page-break-after: always;
+                        text-align: center; font-family: Arial, sans-serif;
+                        padding-top: 1.5mm;
+                    }
+                    .locqr .lq-code {
+                        font-size: 18pt; font-weight: bold; line-height: 1;
+                    }
+                    .locqr img {
+                        width: 22mm; height: 22mm; margin-top: 1.5mm;
+                        max-width: none !important;
+                    }
+                    .locqr .lq-path {
+                        font-size: 8pt; color: #333; line-height: 1.1;
+                        margin-top: 1.5mm;
+                    }
+                </style>
+                <t t-foreach="docs" t-as="doc">
+                    <t t-set="qr" t-value="doc._loc_qr_datauri()"/>
+                    <div class="locqr" t-attf-style="zoom: {{ scale }}">
+                        <div class="lq-code" t-out="doc.barcode or doc.name"/>
+                        <img t-if="qr" t-att-src="qr"/>
+                        <div class="lq-path" t-out="doc.complete_name"/>
+                    </div>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    <record id="action_report_location_qr" model="ir.actions.report">
+        <field name="name">Javon QR yorlig'i</field>
+        <field name="model">stock.location</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">feliza_inventory.report_location_qr</field>
+        <field name="report_file">feliza_inventory.report_location_qr</field>
+        <field name="paperformat_id" ref="paperformat_location_qr"/>
+        <field name="binding_model_id" ref="stock.model_stock_location"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

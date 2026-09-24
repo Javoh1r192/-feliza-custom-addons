@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        MAVJUD TUGMALARNI QAYTA YO'NALTIRAMIZ
+        =====================================
+        Xodim odatdagidek «Печать» tugmasini bosadi — lekin endi yangi
+        ko'rinishdagi hujjat chiqadi. Yangi menyu bandi qo'shilmaydi,
+        xodimni qayta o'qitish shart emas.
+
+        Modul o'chirilganda `uninstall_hook` eski qiymatlarni qaytaradi
+        (qarang: hooks.py) — hech narsa buzilib qolmaydi.
+    -->
+
+    <!-- Qabul va ichki ko'chirish: «Операции сборки» -->
+    <record id="stock.action_report_picking" model="ir.actions.report">
+        <field name="report_name">feliza_nakladnoy.report_nakladnoy</field>
+        <field name="report_file">feliza_nakladnoy.report_nakladnoy</field>
+        <field name="paperformat_id" ref="feliza_nakladnoy.paperformat_nakladnoy"/>
+        <field name="name">Nakladnoy</field>
+    </record>
+
+    <!-- Jo'natish: «Доставка - Лист» -->
+    <record id="stock.action_report_delivery" model="ir.actions.report">
+        <field name="report_name">feliza_nakladnoy.report_nakladnoy</field>
+        <field name="report_file">feliza_nakladnoy.report_nakladnoy</field>
+        <field name="paperformat_id" ref="feliza_nakladnoy.paperformat_nakladnoy"/>
+        <field name="name">Nakladnoy</field>
+    </record>
+</odoo>

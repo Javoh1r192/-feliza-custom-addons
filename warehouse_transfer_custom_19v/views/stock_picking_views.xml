@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_picking_form_inherit_inter_warehouse" model="ir.ui.view">
+        <field name="name">stock.picking.form.inherit.inter.warehouse</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="warehouse_id" invisible="1" />
+                <field name="picking_type_code" invisible="1" />
+
+                <!--
+                    DESTINATION WAREHOUSE (outgoing deliveries)
+                    ============================================
+                    Draft state  → editable Many2one with all_warehouses context so
+                                   the dropdown lists every warehouse in the same
+                                   company, bypassing the allowed_user_ids record rule.
+                    Confirmed+   → readonly Char field backed by a sudo()-computed
+                                   value so the name always renders even when the
+                                   user is not in the warehouse's allowed_user_ids.
+                -->
+                <field
+                    name="destination_warehouse_id"
+                    options="{'no_create': True, 'no_open': True}"
+                    context="{'all_warehouses': True}"
+                    domain="[('id', '!=', warehouse_id), ('company_id', '=', company_id)]"
+                    invisible="picking_type_code != 'outgoing' or state != 'draft'"
+                />
+                <field
+                    name="destination_warehouse_display"
+                    readonly="1"
+                    invisible="picking_type_code != 'outgoing' or state == 'draft'"
+                />
+
+                <!--
+                    SOURCE WAREHOUSE (incoming receipts / zayavka)
+                    ===============================================
+                    Same pattern as above.
+                -->
+                <field
+                    name="source_warehouse_id"
+                    options="{'no_create': True, 'no_open': True}"
+                    context="{'all_warehouses': True}"
+                    domain="[('id', '!=', warehouse_id), ('company_id', '=', company_id)]"
+                    invisible="picking_type_code != 'incoming' or state != 'draft'"
+                />
+                <field
+                    name="source_warehouse_display"
+                    readonly="1"
+                    invisible="picking_type_code != 'incoming' or state == 'draft'"
+                />
+            </xpath>
+        </field>
+    </record>
+</odoo>

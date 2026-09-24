@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Atribut formasiga "O'lcham atributi" bayrog'ini qo'shamiz -->
+    <record id="product_attribute_view_form_size" model="ir.ui.view">
+        <field name="name">product.attribute.form.size</field>
+        <field name="model">product.attribute</field>
+        <field name="inherit_id" ref="product.product_attribute_view_form"/>
+        <field name="arch" type="xml">
+            <field name="create_variant" position="after">
+                <field name="is_size"/>
+            </field>
+            <!-- Atribut qiymatlari ro'yxatiga "Belgilanmagan o'lcham" ustunini qo'shamiz -->
+            <xpath expr="//field[@name='value_ids']/list" position="inside">
+                <field name="is_size_placeholder"
+                       optional="show"
+                       column_invisible="not parent.is_size"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

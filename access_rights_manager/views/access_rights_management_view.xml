@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="access_management_form_view_ah" model="ir.ui.view">
+            <field name="name">access_management_form_view_ah</field>
+            <field name="group_ids" eval="[(4, ref('access_right_control_group'))]"/>
+            <field name="model">access.rights.management</field>
+            <field name="arch" type="xml">
+                <form context="{'buypass_access':True}">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name" default_focus="1" required='1'/>
+                                <field name="user_ids" widget="many2many_tags" options="{'no_create': True}"
+                                       domain="[('share','=',False)]"/>
+
+                                <field name="company_ids" options="{'no_create': True}" widget="many2many_tags"
+                                       groups="base.group_multi_company"/>
+                            </group>
+
+                        </group>
+                        <group>
+                            <group>
+                                <field name="readonly"/>
+                                <field name="disable_import"/>
+                                <field name="disable_delete"/>
+                                <field name="disable_developer_mode"/>
+                            </group>
+                            <group>
+                                <field name="disable_export"/>
+                                <field name="disable_archive"/>
+                                <field name="hide_chatter"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string='Hide Menu'>
+                                <field name="self_module_menu_ids" widget="many2many_tags" invisible="1"/>
+                                <field name='hide_menu_ids' domain="[('menu_id','not in',self_module_menu_ids)]"/>
+                            </page>
+
+                            <page string='Model/Report/Action Access'>
+                                <field name='remove_action_ids'>
+                                    <list editable='bottom'>
+                                        <field name="model_id" context="{'is_access_rights': True}"
+                                               options="{'no_open': True, 'no_create': True, 'no_create_edit': True}"
+                                               width='13' required='1'
+                                               domain="[('model','not in',['access.rights.management', 'action.data', 'hide.field', 'hide.view.nodes', 'store.model.nodes', 'remove.action', 'view.data'])]"/>
+                                        <field name="report_action_ids" width='13' widget="many2many_tags"
+                                               options="{'no_create': True}"/>
+                                        <field name="server_action_ids" width='13' widget="many2many_tags"
+                                               options="{'no_create': True}"/>
+                                        <field name="restrict_create" width='10'/>
+                                        <field name="restrict_edit" width='10'/>
+                                        <field name="restrict_delete" width='10'/>
+                                        <field name="restrict_duplicate" width='10'/>
+                                        <field name="restrict_import" width='10'/>
+                                        <field name="restrict_export" width='10'/>
+                                        <field name="restrict_archive" width='10'/>
+                                    </list>
+                                </field>
+                            </page>
+                            <page string='Field Access'>
+                                <field name='hide_field_ids'>
+                                    <list editable='bottom'>
+                                        <!-- <field name="model_id" options="{'no_create': True}" domain="[('id','not in',parent.self_model_ids),('abstract','=',False)]" /> -->
+                                        <field name="model_id" context="{'is_access_rights': True}"
+                                               options="{'no_open': True, 'no_create': True, 'no_create_edit': True}"
+                                               required='1'
+                                               domain="[('model','not in',['access.rights.management', 'action.data', 'hide.field', 'hide.view.nodes', 'store.model.nodes', 'remove.action', 'view.data'])]"/>
+                                        <field name="field_id" context="{'is_access_rights': True}"
+                                               options="{'no_open': True, 'no_create': True, 'no_create_edit': True}"
+                                               widget='many2many_tags' domain="[('model_id','=',model_id)]"/>
+                                        <field name="invisible"/>
+                                        <field name="readonly" column_invisible="parent.readonly == True "/>
+                                        <field name="required"/>
+                                        <field name="external_link"/>
+                                    </list>
+                                </field>
+                            </page>
+                            <page string='Button/Tab Access'>
+                                <field name='hide_view_nodes_ids'>
+                                    <list editable="bottom">
+                                        <field name="model_id" context="{'is_access_rights': True}"
+                                               options="{'no_open': True, 'nos_create': True, 'no_create_edit': True}"
+                                               domain="[('model','not in',['access.rights.management', 'action.data', 'hide.field', 'hide.view.nodes', 'store.model.nodes', 'remove.action', 'view.data'])]"/>
+                                        <!-- <field name="model_name" invisible="1"/> -->
+                                        <!-- <field name="model_name"/> -->
+                                        <field name="btn_store_model_nodes_ids" widget="many2many_tags"
+                                               domain="[('model_id','=',model_id),('node_option','=','button')]"
+                                               options="{'no_create': True}"/>
+                                        <field name="page_store_model_nodes_ids" widget="many2many_tags"
+                                               domain="[('model_id','=',model_id),('node_option','=','page')]"
+                                               options="{'no_create': True}"/>
+                                    </list>
+                                </field>
+                            </page>
+                            <page string='Domain Access'>
+                                <field name='domain_access_ids'>
+                                    <list create="1" edit="1">
+                                        <field name="model_id"
+                                               options="{'no_open':True,'no_create':True,'no_quick_create': True, 'no_create_edit': True}"/>
+                                        <field name="model_name"/>
+                                        <field name="assignment_domain" widget="domain"
+                                               options="{'model': 'model_name'}"/>
+                                    </list>
+                                    <form>
+                                        <group>
+                                            <field name="model_id"
+                                                   options="{'no_open':True,'no_create':True,'no_quick_create': True, 'no_create_edit': True}"/>
+                                            <field name="model_name"/>
+                                            <field name="assignment_domain" widget="domain"
+                                                   options="{'model': 'model_name'}"/>
+                                        </group>
+
+                                    </form>
+                                </field>
+                            </page>
+                            <page string='Hide Chatter'>
+                                <field name='hide_chatter_ids'>
+                                    <list editable="bottom">
+                                        <field name="model_id"
+                                               options="{'no_open':True,'no_create':True,'no_quick_create': True, 'no_create_edit': True}"/>
+                                        <field name="hide_chatter"/>
+                                    </list>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="access_management_search_view" model="ir.ui.view">
+            <field name="name">access.rights.management.search.view</field>
+            <field name="model">access.rights.management</field>
+            <field name="arch" type="xml">
+                <search string="Access rights Manager">
+                    <field name="name" string="Name"/>
+
+                    <field name="active"/>
+                    <field name="create_uid"/>
+                    <separator/>
+                    <filter string="All" name="all" domain="['|', ('active', '=', False), ('active', '=', True)]"/>
+                    <separator/>
+                    <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                    <filter string="Created By" name="created_by" domain="[]" context="{'group_by': 'create_uid'}"/>
+                </search>
+            </field>
+        </record>
+
+
+        <record id="access_management_list_view_ah" model="ir.ui.view">
+            <field name="name">access_management_list_view_ah</field>
+            <field name="group_ids" eval="[(4, ref('access_right_control_group'))]"/>
+            <field name="model">access.rights.management</field>
+            <field name="arch" type="xml">
+                <list decoration-muted="(not active)">
+                    <field name="name"/>
+                    <field name="create_uid"/>
+                    <field name="create_date"/>
+                    <field name="write_uid" optional="show"/>
+                    <field name="write_date" optional="show"/>
+                    <field name="user_ids" widget="many2many_tags"/>
+                    <field name="active" invisible="0" widget="boolean_toggle"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="action_access_management_ah" model="ir.actions.act_window">
+            <field name="name">Access rights Manager</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">access.rights.management</field>
+            <field name="view_mode">list,form</field>
+            <field name="context">{'search_default_all': 1}</field>
+        </record>
+
+        <menuitem id="main_menu_access_rights_manager" name="Access Rights manager" action="action_access_management_ah"
+                  groups="access_right_control_group"
+                  web_icon="access_rights_manager,static/description/icon.png"/>
+
+    </data>
+</odoo>

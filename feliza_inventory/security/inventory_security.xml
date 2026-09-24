@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Ruxsatni Sozlamalar > Foydalanuvchilar formasida ko'rsatish uchun
+         (Odoo 19: ir.module.category -> res.groups.privilege -> res.groups).
+         Foydalanuvchi formasida "Inventarizatsiya (Skaner)" bo'limida bitta
+         ochiluvchi ro'yxat chiqadi:
+             (bo'sh) / Inventarizatchi / Inventarizatsiya rahbari
+         shu orqali adminlar har bir userga bu appga dostupni oson beradi. -->
+    <record id="module_category_feliza_inventory" model="ir.module.category">
+        <field name="name">Inventarizatsiya (Skaner)</field>
+        <field name="description">Feliza skaner-inventarizatsiya moduliga ruxsat</field>
+        <field name="sequence">21</field>
+    </record>
+
+    <record id="privilege_feliza_inventory" model="res.groups.privilege">
+        <field name="name">Inventarizatsiya</field>
+        <field name="category_id" ref="module_category_feliza_inventory"/>
+        <field name="sequence">10</field>
+    </record>
+
+    <record id="group_feliza_inventory_user" model="res.groups">
+        <field name="name">Inventarizatchi</field>
+        <field name="privilege_id" ref="privilege_feliza_inventory"/>
+        <field name="comment">Inventarizatsiya qila oladi (skaner, sanash).</field>
+    </record>
+
+    <record id="group_feliza_inventory_manager" model="res.groups">
+        <field name="name">Inventarizatsiya rahbari</field>
+        <field name="privilege_id" ref="privilege_feliza_inventory"/>
+        <field name="implied_ids" eval="[(4, ref('group_feliza_inventory_user'))]"/>
+        <field name="comment">Barcha sessiyalar va hisobotlarni ko'radi, boshqaradi.</field>
+    </record>
+</odoo>

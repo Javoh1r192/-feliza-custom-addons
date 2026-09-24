@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem id="menu_customer_wallet_transaction"
+              name="Mijoz hamyoni"
+              parent="point_of_sale.menu_point_rep"
+              action="action_customer_wallet_transaction"
+              sequence="20"/>
+
+</odoo>

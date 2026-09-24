@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Mahsulot kartasiga «Artikul + Barkod generatsiya» tugmasi -->
+    <record id="view_product_template_form_feliza_codes" model="ir.ui.view">
+        <field name="name">product.template.form.feliza.codes</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="before">
+                <header>
+                    <button name="action_feliza_generate_codes" type="object"
+                            string="🏷 Artikul + Barkod generatsiya"
+                            class="btn-primary"
+                            help="Kategoriya seriyasidan artikul + har variantga barkod. Faqat bo'sh maydonlarni to'ldiradi, tartib buzilmaydi."/>
+                </header>
+            </xpath>
+        </field>
+    </record>
+</odoo>

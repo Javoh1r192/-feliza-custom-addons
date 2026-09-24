@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="paperformat_pos_close" model="report.paperformat">
+        <field name="name">Kassa yopish chek 80mm</field>
+        <field name="format">custom</field>
+        <field name="page_width">80</field>
+        <field name="page_height">200</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">3</field>
+        <field name="margin_bottom">3</field>
+        <field name="margin_left">3</field>
+        <field name="margin_right">3</field>
+        <field name="header_spacing">2</field>
+        <field name="dpi">96</field>
+    </record>
+
+    <template id="report_pos_close">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="sess">
+                <t t-set="d" t-value="sess._feliza_close_data()"/>
+                <div class="article" style="width:74mm; font-family:Arial,sans-serif;
+                                         font-size:10pt; color:#000;">
+                    <div style="text-align:center; font-size:13pt; font-weight:bold;">
+                        FELIZA - KASSA YOPISH
+                    </div>
+                    <div style="text-align:center; font-size:9pt;">
+                        <t t-out="d['config']"/>
+                    </div>
+                    <div style="border-top:1px dashed #000; margin:2mm 0;"/>
+                    <table style="width:100%; font-size:9pt;">
+                        <tr><td>Kassir:</td><td style="text-align:right;"><t t-out="d['cashier']"/></td></tr>
+                        <tr><td>Ochilish:</td><td style="text-align:right;"
+                                t-out="d['start_at']" t-options="{'widget':'datetime'}"/></tr>
+                        <tr><td>Yopilish:</td><td style="text-align:right;"
+                                t-out="d['stop_at']" t-options="{'widget':'datetime'}"/></tr>
+                    </table>
+                    <div style="border-top:1px dashed #000; margin:2mm 0;"/>
+                    <table style="width:100%; font-size:10pt;">
+                        <tr><td>Savdolar soni:</td>
+                            <td style="text-align:right;" t-out="d['order_count']"/></tr>
+                        <tr style="font-weight:bold;"><td>Jami savdo:</td>
+                            <td style="text-align:right;"><t t-out="d['order_total']"/></td></tr>
+                    </table>
+                    <div style="border-top:1px dashed #000; margin:2mm 0;"/>
+                    <div style="font-weight:bold; font-size:10pt;">TO'LOV USULLARI</div>
+                    <table style="width:100%; font-size:10pt;">
+                        <t t-foreach="d['payments']" t-as="p">
+                            <tr>
+                                <td><t t-out="p['name']"/></td>
+                                <td style="text-align:right;"><t t-out="p['amount']"/></td>
+                            </tr>
+                        </t>
+                        <tr style="font-weight:bold; border-top:1px solid #000;">
+                            <td>JAMI TUSHUM:</td>
+                            <td style="text-align:right;"><t t-out="d['total_payments']"/></td>
+                        </tr>
+                    </table>
+                    <t t-if="d['has_cash_moves']">
+                        <div style="border-top:1px dashed #000; margin:2mm 0;"/>
+                        <div style="font-weight:bold; font-size:10pt;">NAXT KIRIM / CHIQIM (HARAJATLAR)</div>
+                        <table style="width:100%; font-size:9pt;">
+                            <t t-foreach="d['cash_moves']" t-as="m">
+                                <tr>
+                                    <td><t t-out="'- ' if m['is_out'] else '+ '"/><t t-out="m['name']"/></td>
+                                    <td t-attf-style="text-align:right; color:#{'red' if m['is_out'] else 'green'};">
+                                        <t t-out="m['amount']"/></td>
+                                </tr>
+                            </t>
+                            <tr style="font-weight:bold; border-top:1px solid #000;">
+                                <td>Jami chiqim (harajat):</td>
+                                <td style="text-align:right;"><t t-out="d['cash_out_total']"/></td>
+                            </tr>
+                        </table>
+                    </t>
+                    <div style="border-top:1px dashed #000; margin:2mm 0;"/>
+                    <div style="font-weight:bold; font-size:10pt;">NAXT PUL (KASSA)</div>
+                    <table style="width:100%; font-size:10pt;">
+                        <tr><td>Ochilishda bor edi:</td>
+                            <td style="text-align:right;"><t t-out="d['cash_start']"/></td></tr>
+                        <tr><td>Bo'lishi kerak edi:</td>
+                            <td style="text-align:right;"><t t-out="d['cash_expected']"/></td></tr>
+                        <tr style="font-weight:bold;"><td>Chiqdi (sanaldi):</td>
+                            <td style="text-align:right;"><t t-out="d['cash_real']"/></td></tr>
+                        <tr style="font-weight:bold;">
+                            <td>FARQ:</td>
+                            <td t-attf-style="text-align:right; color:#{'red' if d['cash_diff_neg'] else 'black'};">
+                                <t t-out="d['cash_diff']"/></td></tr>
+                    </table>
+                    <div style="border-top:1px dashed #000; margin:2mm 0;"/>
+                    <div style="text-align:center; font-size:8pt;">
+                        <t t-out="d['sess_name']"/>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_pos_close" model="ir.actions.report">
+        <field name="name">Kassa yopish cheki</field>
+        <field name="model">pos.session</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">feliza_pos_close_receipt.report_pos_close</field>
+        <field name="report_file">feliza_pos_close_receipt.report_pos_close</field>
+        <field name="paperformat_id" ref="paperformat_pos_close"/>
+        <field name="binding_model_id" ref="point_of_sale.model_pos_session"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

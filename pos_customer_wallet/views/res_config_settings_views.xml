@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_form_wallet" model="ir.ui.view">
+        <field name="name">res.config.settings.form.wallet</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="point_of_sale.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <setting id="payment_methods_new" position="after">
+                <setting id="pos_wallet_settings" string="Mijoz hamyoni (Cashback)"
+                         help="Cashback ballarini POS'da to'lov usuli sifatida sarflash uchun qaysi Loyalty dasturi ishlatilishini tanlang">
+                    <div class="content-group">
+                        <div class="row mt16">
+                            <label for="pos_wallet_loyalty_program_id" class="col-lg-6 o_light_label"/>
+                            <field name="pos_wallet_loyalty_program_id"/>
+                        </div>
+                    </div>
+                </setting>
+            </setting>
+        </field>
+    </record>
+
+</odoo>

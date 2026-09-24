@@ -1,0 +1,107 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* ombor_hisoboti_19v
+# BUILD-MARKER: FIX-v3-2026-08-04 (code: refs include file+line; no ir.module.module entries)
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-04 14:44+0000\n"
+"PO-Revision-Date: 2026-08-04 14:44+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: ombor_hisoboti_19v
+#: model:ir.model,name:ombor_hisoboti_19v.model_stock_warehouse_monthly_report
+msgid "Ombor hisoboti (oylik kirim/chiqim/qoldiq)"
+msgstr ""
+
+#. module: ombor_hisoboti_19v
+#: model:ir.model.fields,field_description:ombor_hisoboti_19v.field_stock_warehouse_monthly_report__warehouse_id
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_list
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_pivot
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_graph
+msgid "Ombor"
+msgstr ""
+
+#. module: ombor_hisoboti_19v
+#: model:ir.model.fields,field_description:ombor_hisoboti_19v.field_stock_warehouse_monthly_report__product_id
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_list
+msgid "Mahsulot"
+msgstr ""
+
+#. module: ombor_hisoboti_19v
+#: model:ir.model.fields,field_description:ombor_hisoboti_19v.field_stock_warehouse_monthly_report__date
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_list
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_pivot
+msgid "Oy"
+msgstr ""
+
+#. module: ombor_hisoboti_19v
+#: model:ir.model.fields,field_description:ombor_hisoboti_19v.field_stock_warehouse_monthly_report__kirim_qty
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_list
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_pivot
+msgid "Kirim"
+msgstr ""
+
+#. module: ombor_hisoboti_19v
+#: model:ir.model.fields,field_description:ombor_hisoboti_19v.field_stock_warehouse_monthly_report__chiqim_qty
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_list
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_pivot
+msgid "Chiqim"
+msgstr ""
+
+#. module: ombor_hisoboti_19v
+#: model:ir.model.fields,field_description:ombor_hisoboti_19v.field_stock_warehouse_monthly_report__qoldiq_qty
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_list
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_pivot
+msgid "Qoldiq"
+msgstr ""
+
+#. module: ombor_hisoboti_19v
+#: model:ir.model.fields,field_description:ombor_hisoboti_19v.field_stock_warehouse_monthly_report__qoldiq_value
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_list
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_pivot
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_graph
+msgid "Qoldiq qiymati"
+msgstr ""
+
+#. module: ombor_hisoboti_19v
+#: model:ir.model.fields,help:ombor_hisoboti_19v.field_stock_warehouse_monthly_report__qoldiq_value
+msgid "Qoldiq miqdori x mahsulotning HOZIRGI tannarxi (SQL view'ning o'zida hisoblanadi - har doim joriy narxni aks ettiradi)."
+msgstr ""
+
+#. module: ombor_hisoboti_19v
+#: model:ir.model.fields,field_description:ombor_hisoboti_19v.field_stock_warehouse_monthly_report__company_id
+msgid "Kompaniya"
+msgstr ""
+
+#. module: ombor_hisoboti_19v
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_list
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_pivot
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_graph
+#: model:ir.ui.menu,name:ombor_hisoboti_19v.menu_warehouse_monthly_report
+#: model:ir.actions.act_window,name:ombor_hisoboti_19v.action_warehouse_monthly_report
+msgid "Ombor hisoboti"
+msgstr ""
+
+#. module: ombor_hisoboti_19v
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_list
+msgid "Jami"
+msgstr ""
+
+#. module: ombor_hisoboti_19v
+#: model_terms:ir.actions.act_window,help:ombor_hisoboti_19v.action_warehouse_monthly_report
+msgid "Hozircha ma'lumot yo'q"
+msgstr ""
+
+#. module: ombor_hisoboti_19v
+#: model_terms:ir.actions.act_window,help:ombor_hisoboti_19v.action_warehouse_monthly_report
+msgid "Bu hisobot har bir ombor (filial) bo'yicha, oylik kesimda kirim (xarid + transfer + qaytarish), chiqim (sotuv + POS + transfer) va yig'ma qoldiqni (miqdor va qiymat) ko'rsatadi."
+msgstr ""
+

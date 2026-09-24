@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        OMBOR HUJJATLARINI KO'RISH QOIDASI
+        ==================================
+
+        Xodim faqat o'ziga biriktirilgan omborning hujjatlarini ko'radi.
+        Ombor xodimlari «Ombor» kartochkasidagi «Ruxsat etilgan
+        foydalanuvchilar» ro'yxatida belgilanadi.
+
+        MUHIM: hujjatning `picking_type_id.warehouse_id` maydoni —
+        JO'NATUVCHI ombor. Ya'ni Asosiy ombor Chilonzorga yuk
+        chiqarganda hujjat «Asosi/OUT/xxxxx» bo'lib, ASOSIY omborga
+        tegishli bo'ladi. Shu sababli qabul qiluvchi do'kon boshlig'i
+        o'ziga kelayotgan yukni ko'ra olmasdi.
+
+        Shuning uchun oxirgi shart qo'shilgan: hujjat QABUL QILUVCHI
+        ombori (`destination_warehouse_id`) xodimning ombori bo'lsa ham
+        ko'rinadi. Bu qo'shimcha ma'lumot ochmaydi — xodim faqat
+        o'ziga kelayotgan hujjatni ko'radi, boshqa omborlarniki
+        avvalgidek yopiq qoladi.
+
+        `user.id == 2` — Administrator, unga cheklov qo'llanmaydi.
+    -->
+    <record id="rule_stock_picking_allowed_warehouse" model="ir.rule">
+        <field name="name">Personal Transfers Only dostup</field>
+        <field name="model_id" ref="stock.model_stock_picking"/>
+        <field name="groups" eval="[(5, 0, 0)]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+        <field name="domain_force">['|', '|', '|',
+    ('picking_type_id.warehouse_id', '=', False),
+    ('picking_type_id.warehouse_id.allowed_user_ids', 'in', [user.id]) if not user.id == 2 else ('id', '!=', False),
+    ('picking_type_id.warehouse_id.allowed_user_ids', '=', False),
+    ('destination_warehouse_id.allowed_user_ids', 'in', [user.id])]</field>
+    </record>
+
+    <!--
+        OPERATSIYA TURI QOIDASI
+        =======================
+
+        Yuqoridagi qoida hujjatni ko'rsatadi, lekin hujjat formasi
+        `picking_type_id` maydonini ham o'qiydi. Bu qoida esa operatsiya
+        turini faqat o'z ombori bo'yicha ochardi — natijada hujjat
+        ro'yxatda ko'rinib, ochilganda yangi «Ошибка доступа» chiqardi.
+
+        Oxirgi shart shuni yopadi: xodimning omboriga yuk jo'natgan
+        omborlarning operatsiya turlari ham ochiladi (qarang:
+        `res.users.interwh_visible_picking_type_ids`). Boshqa omborlar
+        avvalgidek yopiq — «Ombor ko'rinishi» sahifasi o'zgarmaydi.
+    -->
+    <record id="rule_stock_picking_type_allowed_warehouse" model="ir.rule">
+        <field name="name">Personal Warehouse Only dostup</field>
+        <field name="model_id" ref="stock.model_stock_picking_type"/>
+        <field name="groups" eval="[(5, 0, 0)]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+        <field name="domain_force">['|', '|', '|',
+    ('warehouse_id', '=', False),
+    ('warehouse_id.allowed_user_ids', 'in', [user.id]) if not user.id == 2 else ('id', '!=', False),
+    ('warehouse_id.allowed_user_ids', '=', False),
+    ('id', 'in', user.interwh_visible_picking_type_ids.ids)]</field>
+    </record>
+
+    <!--
+        «OMBOR KO'RINISHI» (Обзор) SAHIFASI
+        ===================================
+
+        Yuqoridagi qoida xodimga o'ziga yuk jo'natgan omborning operatsiya
+        turini O'QISHGA ruxsat beradi — bu hujjatni ocha olish uchun shart.
+        Lekin uning yon ta'siri bor edi: o'sha turlar «Ombor ko'rinishi»
+        sahifasida ham kartochka bo'lib chiqib qolardi (masalan ombor
+        xodimiga «Uchtepa», «Yunusobod» kartochkalari).
+
+        Shuning uchun sahifaning o'z domenini cheklab qo'yamiz: ro'yxatda
+        faqat xodimning O'Z omborlari ko'rinadi. Hujjatni ochish esa
+        avvalgidek ishlaydi — qoida buni ta'minlaydi.
+
+        Administrator barcha omborlarning «Ruxsat etilgan foydalanuvchilar»
+        ro'yxatida bo'lgani uchun hammasini ko'raveradi.
+    -->
+    <record id="stock.stock_picking_type_action" model="ir.actions.act_window">
+        <field name="domain">['|', '|',
+    ('warehouse_id', '=', False),
+    ('warehouse_id.allowed_user_ids', '=', False),
+    ('warehouse_id.allowed_user_ids', 'in', [uid])]</field>
+    </record>
+
+    <record id="stock.action_picking_type_list" model="ir.actions.act_window">
+        <field name="domain">['|', '|',
+    ('warehouse_id', '=', False),
+    ('warehouse_id.allowed_user_ids', '=', False),
+    ('warehouse_id.allowed_user_ids', 'in', [uid])]</field>
+    </record>
+
+</odoo>

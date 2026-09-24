@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_employee_form_inherit_pw_disable_pos_features" model="ir.ui.view">
+            <field name="name">hr.employee.view.form.inherit.disable.pos.features</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="hr.view_employee_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page" position="after">
+                    <page name="pos" string="Point Of Sale">
+                        <group col="2" style="white-space: nowrap;">
+                            <field name="pw_disable_discount"/>
+                            <!-- <field name="pw_disable_products"/> -->
+                            <field name="pw_disable_price"/>
+                            <field name="pw_disable_qty"/>
+                            <field name="pw_disable_pos_numpad_plus_minus" />
+                            <!-- <field name="pw_disable_payment"/>
+                            <field name="pw_disable_remove_orderline"/>
+                            <field name="pw_disable_customer_account"/>
+                            <field name="pw_disable_closeregister"/>
+                            <field name="pw_disable_cashinout"/>
+                            <field name="pw_disable_refund"/> -->
+                        </group>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

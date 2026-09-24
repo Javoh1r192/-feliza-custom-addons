@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.pyo
+*.bak*
+*.dump
+*.sql
+*.log
+*.swp
+.DS_Store
+verify_po.py

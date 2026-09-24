@@ -1,0 +1,14 @@
+<odoo>
+    <record id="view_users_form_inherit_journals" model="ir.ui.view">
+        <field name="name">res.users.form.inherit.journals</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='access_rights']" position="inside">
+                <group string="To'lov cheklovlari">
+                    <field name="x_allowed_journal_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

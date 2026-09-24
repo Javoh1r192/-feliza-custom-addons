@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="pos_qr_customer_search.PartnerList"
+       t-inherit="point_of_sale.PartnerList"
+       t-inherit-mode="extension">
+
+        <!-- Kamera QR tugmasi. Apparat (barcode/QR) skaner esa avtomatik ishlaydi. -->
+        <xpath expr="//Input" position="after">
+            <button
+                class="btn btn-secondary btn-lg ms-2 d-flex align-items-center gap-2"
+                t-on-click="startQrScan"
+                title="Kamera orqali QR o'qish. Apparat skaner (aparad) esa avtomatik ishlaydi — shu ekranda QR/kodni skanerlang.">
+                <i class="fa fa-camera fa-lg"/>
+                <span t-if="!ui.isSmall">Kamera QR</span>
+            </button>
+        </xpath>
+
+        <!-- Kamera skanerlash paneli (jadvaldan oldin) -->
+        <xpath expr="//table[hasclass('table-hover')]" position="before">
+            <div t-if="qrState.scanning or qrState.error"
+                 class="qr-scan-panel d-flex flex-column align-items-center justify-content-center py-4">
+
+                <!-- Kamera xato xabari -->
+                <div t-if="qrState.error" class="alert alert-danger d-flex align-items-center gap-2 mb-3">
+                    <i class="fa fa-exclamation-triangle fa-lg"/>
+                    <span t-esc="qrState.error"/>
+                </div>
+
+                <!-- Kamera oynasi (scanning rejimi) -->
+                <t t-if="qrState.scanning">
+                    <div class="qr-video-wrapper mb-3">
+                        <video t-ref="qr-video"
+                               class="qr-video"
+                               autoplay="true"
+                               playsinline="true"
+                               muted="true"/>
+                        <!-- Nishon ramkasi -->
+                        <div class="qr-target-box">
+                            <span class="qr-corner qr-corner-tl"/>
+                            <span class="qr-corner qr-corner-tr"/>
+                            <span class="qr-corner qr-corner-bl"/>
+                            <span class="qr-corner qr-corner-br"/>
+                        </div>
+                    </div>
+                    <p class="text-muted mb-3 text-center">
+                        QR kodni kamera oldiga tuting
+                    </p>
+                </t>
+
+                <!-- Yashirin canvas (jsQR uchun piksel o'qish) -->
+                <canvas t-ref="qr-canvas" class="d-none"/>
+
+                <button class="btn btn-secondary d-flex align-items-center gap-2"
+                        t-on-click="stopQrScan">
+                    <i class="fa fa-times"/>
+                    Bekor qilish
+                </button>
+            </div>
+        </xpath>
+
+        <!-- Skanerlash rejimida jadvalni yashirish -->
+        <xpath expr="//table[hasclass('table-hover')]" position="attributes">
+            <attribute name="t-if">!qrState.scanning and !qrState.error</attribute>
+        </xpath>
+
+        <!-- Skanerlash rejimida "mijoz topilmadi" xabarini yashirish -->
+        <xpath expr="//div[@class='text-center']" position="attributes">
+            <attribute name="t-if" add="!qrState.scanning and !qrState.error" separator=" and "/>
+        </xpath>
+
+    </t>
+
+</templates>

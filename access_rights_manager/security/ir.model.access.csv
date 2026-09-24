@@ -1,0 +1,10 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_access_rights_management,access.access.rights.management,model_access_rights_management,,1,1,1,1
+access_remove_action,access.remove.action,model_remove_action,,1,1,1,1
+access_hide_field,access.hide.field,model_hide_field,,1,1,1,1
+access_action_data,access.action.data,model_action_data,,1,1,1,1
+access_hide_view_nodes,access.hide.view.nodes,model_hide_view_nodes,,1,1,1,1
+access_store_model_nodes,access.store.model.nodes,model_store_model_nodes,,1,1,1,1
+access_menu_item,access.menu.item,model_menu_item,,1,1,1,1
+access_user_domain,access.user.domain,model_user_domain_access,,1,1,1,1
+access_hide_chatter,access.hide.chatter,model_model_hide_chatter,,1,1,1,1

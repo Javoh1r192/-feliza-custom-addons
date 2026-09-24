@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="product_barcode_support.ProductSelectionPopup">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <h4 class="modal-title">Shtrix-kod bo'yicha mahsulotni tanlang</h4>
+                </header>
+                <main class="modal-body">
+                    <p class="text-muted">Ushbu shtrix-kod bir nechta mahsulotga biriktirilgan. Iltimos, keraklisini tanlang:</p>
+                    <div class="list-group">
+                        <button t-foreach="props.products" t-as="product" t-key="product.id"
+                                type="button"
+                                class="list-group-item list-group-item-action d-flex justify-content-between align-content-center py-3"
+                                t-on-click="() => this.selectProduct(product.id)">
+                            <div>
+                                <strong t-esc="product.display_name"/>
+                                <div t-if="product.lst_price" class="text-sm text-muted">
+                                    Narxi: <t t-esc="product.lst_price"/> so'm
+                                </div>
+                            </div>
+                            <span class="badge bg-primary rounded-pill d-flex align-items-center px-3">Tanlash</span>
+                        </button>
+                    </div>
+                </main>
+                <footer class="modal-footer justify-content-end">
+                    <button class="btn btn-secondary" t-on-click="cancel">Yopish</button>
+                </footer>
+            </div>
+        </div>
+    </t>
+</templates>

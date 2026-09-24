@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="location_inter_warehouse" model="stock.location">
+            <field name="name">Inter Warehouse Transfer</field>
+            <field name="usage">internal</field>
+            <field name="location_id" eval="False"/>
+            <field name="barcode">INTER-WH-TRANS</field>
+        </record>
+    </data>
+</odoo>

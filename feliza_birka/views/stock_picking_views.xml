@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_picking_form_feliza_birka" model="ir.ui.view">
+        <field name="name">stock.picking.form.feliza.birka</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+
+            <!-- ============ 0. INLINE SKANER (+1) ============
+                 «Операции» varag'i tepasida, tovar ro'yxatidan oldin.
+                 Faqat OCHIQ hujjatda (yopilmagan). Skaner: barkod -> +1. -->
+            <xpath expr="//field[@name='move_ids']" position="before">
+                <div class="alert alert-info d-flex align-items-center flex-wrap gap-2"
+                     role="status"
+                     invisible="state in ('done','cancel')">
+                    <div>
+                        <b>📷 Skaner:</b> tovar barkodini skanerlang —
+                        har skanda <b>+1</b> qo'shiladi (qatorda yo'q bo'lsa
+                        yangi qator ochiladi).
+                    </div>
+                    <field name="feliza_scan_input" widget="feliza_picking_scan"
+                           nolabel="1"/>
+                </div>
+            </xpath>
+
+            <!-- ============ 1. Qabul qiluvchi ombordagi qoldiq ============
+                 «Upakovka» dan keyin, «Talab» (product_uom_qty) dan oldin —
+                 buyurtmachi so'ragan joy. -->
+            <xpath expr="//field[@name='move_ids']/list/field[@name='product_uom_qty']"
+                   position="before">
+                <field name="feliza_src_name" column_invisible="1"/>
+                <field name="feliza_dest_name" column_invisible="1"/>
+                <field name="feliza_src_qty" string="Bizda"
+                       optional="show" readonly="1" widget="integer"/>
+                <field name="feliza_dest_qty" string="Do'konda"
+                       optional="show" readonly="1" widget="integer"/>
+            </xpath>
+
+            <!-- ============ 2. Birka bo'limi ============
+                 «Zametka» varag'idan keyin. -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Birka" name="feliza_birka">
+                    <div class="oe_button_box mb-2">
+                        <button name="action_feliza_labels_fill" type="object"
+                                class="btn btn-secondary"
+                                icon="fa-refresh"
+                                string="Hujjatdagi tovarlardan to'ldirish"/>
+                        <button name="action_feliza_print_labels" type="object"
+                                class="btn btn-primary ms-2"
+                                icon="fa-print"
+                                string="Chop etish"/>
+                        <span class="ms-3 text-muted">
+                            Jami birka:
+                            <field name="feliza_label_count" nolabel="1"
+                                   class="fw-bold" readonly="1"/>
+                        </span>
+                    </div>
+                    <div class="alert alert-info" role="alert">
+                        Ro'yxat hujjatdagi tovarlar va ularning soni bo'yicha
+                        to'ldiriladi — kerak bo'lsa sonini o'zgartiring.
+                        <b>Chegirmasiz narx</b> to'ldirilgan qatorlar
+                        <b>sariq birka</b> bo'lib chiqadi: POS
+                        «Skidki i loyalnost» dagi aksiyalar avtomat
+                        olinadi, lekin qo'lda ham yozish mumkin.
+                    </div>
+                    <field name="feliza_label_ids" nolabel="1">
+                        <list editable="bottom">
+                            <field name="product_id" readonly="1"
+                                   options="{'no_open': True}"/>
+                            <field name="artikul" readonly="1"/>
+                            <field name="barcode" readonly="1"/>
+                            <field name="color" readonly="1" optional="show"/>
+                            <field name="size" readonly="1" optional="show"/>
+                            <field name="price"/>
+                            <field name="old_price"/>
+                            <field name="discount_pct" optional="show"/>
+                            <field name="qty" sum="Jami"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

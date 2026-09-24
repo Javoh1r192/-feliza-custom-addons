@@ -1,0 +1,17 @@
+/* Feliza POS — tovar nomlari va atributlarini QALIN (bold) qilish.
+   Faqat POS assetlariga yuklanadi; boshqa joyga ta'sir qilmaydi.
+   Qaytarish uchun: modulni uninstall qiling. */
+
+/* Mahsulot kartasidagi nom (grid va list ko'rinish) */
+.product .product-name,
+.product-name {
+    font-weight: 700 !important;
+}
+
+/* Buyurtma (savat) satridagi mahsulot nomi va atributlari */
+.orderline .product-name,
+.orderline .info-list,
+.orderline .info,
+.product-information {
+    font-weight: 700 !important;
+}

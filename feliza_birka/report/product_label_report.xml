@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- TOVAR KARTASIDAN birka: report_feliza_label bilan AYNAN bir xil maket,
+         faqat hujjat = wizard (picking emas). Uslublar (label_styles) ulashiladi. -->
+    <template id="report_product_label">
+        <t t-call="web.html_container">
+            <div class="article" t-att-data-oe-model="docs and docs[0]._name"
+                 t-att-data-oe-id="docs and docs[0].id">
+              <t t-set="fz_scale" t-value="docs and docs[0]._feliza_label_scale() or '1'"/>
+              <t t-call="feliza_birka.label_styles"/>
+              <t t-foreach="docs" t-as="doc">
+                <t t-foreach="doc._feliza_label_rows()" t-as="lbl">
+                    <div t-attf-class="fz-label #{'fz-sale' if lbl['discount'] else ''}"
+                         t-attf-style="zoom: {{ fz_scale }}">
+                        <div class="fz-bg" t-if="lbl['discount']"/>
+                        <div class="fz-in">
+                        <table class="fz-row">
+                            <tr>
+                                <td t-attf-class="fz-name #{'fz-name-s5' if lbl['name_len'] &gt; 44 else ('fz-name-s4' if lbl['name_len'] &gt; 36 else ('fz-name-s3' if lbl['name_len'] &gt; 28 else ('fz-name-s2' if lbl['name_len'] &gt; 20 else '')))}" t-out="lbl['name']"/>
+                                <td class="fz-rt fz-size" t-out="lbl['size']"/>
+                            </tr>
+                        </table>
+                        <div class="fz-art" t-out="lbl['artikul']"/>
+                        <table class="fz-row">
+                            <tr>
+                                <td class="fz-color" t-out="lbl['color']"/>
+                                <td class="fz-rt fz-sizelab">&#1088;&#1072;&#1079;&#1084;&#1077;&#1088;</td>
+                            </tr>
+                        </table>
+                        <t t-set="narx_matn"
+                           t-value="'{:,.0f}'.format(lbl['price']).replace(',', ' ')"/>
+                        <t t-set="eski_matn"
+                           t-value="'{:,.0f}'.format(lbl['old_price']).replace(',', ' ') if lbl['discount'] else ''"/>
+                        <t t-set="uzunlik" t-value="len(narx_matn) + len(eski_matn)"/>
+                        <div t-attf-class="fz-price #{'fz-p3' if uzunlik &gt; 18 else ('fz-p2' if uzunlik &gt; 14 else '')}">
+                            <span t-out="narx_matn"/><span class="fz-cur"> uzs</span><span
+                                  class="fz-old" t-if="lbl['discount']"
+                                  t-out="eski_matn"/>
+                        </div>
+                        <div t-attf-class="fz-bc #{'fz-bc-qr' if lbl['barcode_is_qr'] else ''}">
+                            <img t-if="lbl['barcode_img']" t-att-src="lbl['barcode_img']"
+                                 t-att-style="'width:14mm;height:14mm' if lbl['barcode_is_qr'] else 'width:52mm;height:7.4mm'"/>
+                        </div>
+                        <div class="fz-bcnum" t-out="lbl['barcode']"/>
+                        <div class="fz-abcd">
+                            <div class="fz-cap">ABCD HOLATI &#8212; HAR HAFTA BELGILANG</div>
+                            <table class="fz-week">
+                                <tr class="fz-num">
+                                    <td class="fz-let"/>
+                                    <td>1</td><td>2</td><td>3</td><td>4</td>
+                                    <td>5</td><td>6</td><td>7</td>
+                                </tr>
+                                <tr>
+                                    <td class="fz-let">A</td>
+                                    <td><span class="fz-o"/></td>
+                                    <td><span class="fz-o"/></td>
+                                    <td><span class="fz-o"/></td>
+                                    <td><span class="fz-o"/></td>
+                                    <td><span class="fz-o"/></td>
+                                    <td><span class="fz-o"/></td>
+                                    <td><span class="fz-o"/></td>
+                                </tr>
+                            </table>
+                        </div>
+                        </div>
+                    </div>
+                </t>
+              </t>
+            </div>
+        </t>
+    </template>
+
+    <record id="action_report_product_label" model="ir.actions.report">
+        <field name="name">Birka (tovar kartasi)</field>
+        <field name="model">feliza.product.label.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">feliza_birka.report_product_label</field>
+        <field name="report_file">feliza_birka.report_product_label</field>
+        <field name="paperformat_id" ref="feliza_birka.paperformat_feliza_label"/>
+        <field name="print_report_name">'Birka - %s' % (object.product_tmpl_id.name or '')</field>
+    </record>
+</odoo>

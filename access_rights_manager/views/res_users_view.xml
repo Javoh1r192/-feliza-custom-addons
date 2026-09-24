@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="security_res_users_inherit_form_view_ah" model="ir.ui.view">
+            <field name="name">security.res.users.inherit.form.view.ah</field>
+            <field name="model">res.users</field>
+            <field name="inherit_id" ref="base.view_users_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//notebook" position="inside">
+                    <page string='Access rights Management' groups="access_rights_manager.access_right_control_group">
+                        <field name='access_rights_management_ids'>
+                            <list>
+                                <field name="name" />
+                            </list>
+                        </field>
+                    </page>
+                </xpath>
+
+            </field>
+        </record>
+    </data>
+</odoo>

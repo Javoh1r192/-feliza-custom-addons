@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_purchase_variant_wizard,purchase.variant.wizard,model_purchase_variant_wizard,base.group_user,1,1,1,1
+access_purchase_variant_wizard_attr,purchase.variant.wizard.attr,model_purchase_variant_wizard_attr,base.group_user,1,1,1,1
+access_purchase_variant_wizard_line,purchase.variant.wizard.line,model_purchase_variant_wizard_line,base.group_user,1,1,1,1
+access_pev_attr_value_purchase,product.attribute.value (zakup),product.model_product_attribute_value,purchase.group_purchase_user,1,1,1,0

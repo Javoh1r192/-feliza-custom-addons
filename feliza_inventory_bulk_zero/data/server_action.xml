@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_feliza_bulk_zero" model="ir.actions.server">
+        <field name="name">🗑 Tanlanganni 0 qilish (o'chirish)</field>
+        <field name="model_id" ref="feliza_inventory.model_feliza_inventory_product"/>
+        <field name="binding_model_id" ref="feliza_inventory.model_feliza_inventory_product"/>
+        <field name="binding_type">action</field>
+        <field name="state">code</field>
+        <field name="code"><![CDATA[
+if not records:
+    raise UserError("Hech qanday tovar tanlanmadi.")
+Scan = env["feliza.inventory.scan"].sudo()
+Line = env["feliza.inventory.line"].sudo()
+zeroed = 0
+skipped = 0
+for rec in records:
+    session = rec.session_id
+    if not session:
+        continue
+    if session.applied:
+        skipped += 1
+        continue
+    lines = Line.search([("session_id", "=", session.id),
+                         ("product_id", "=", rec.product_id.id)])
+    for line in lines:
+        cur = line.counted_qty
+        if abs(cur) > 0.0001:
+            Scan.create({"line_id": line.id, "qty": -cur,
+                         "is_manual": True, "is_delete": True})
+            zeroed += 1
+msg = "%s tovar 0 qilindi (o'chirildi). Endi qayta skanerlashingiz mumkin." % zeroed
+if skipped:
+    msg += " (%s applied sessiya o'tkazildi)" % skipped
+action = {
+    "type": "ir.actions.client",
+    "tag": "display_notification",
+    "params": {
+        "title": "Bajarildi",
+        "message": msg,
+        "type": "success",
+        "sticky": False,
+        "next": {"type": "ir.actions.client", "tag": "soft_reload"},
+    },
+}
+]]></field>
+    </record>
+</odoo>

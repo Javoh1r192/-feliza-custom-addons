@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_form_feliza_birka" model="ir.ui.view">
+        <field name="name">res.config.settings.form.feliza.birka</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="stock.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='barcode_setting_container']"
+                   position="after">
+                <block title="Feliza: artikul va barkod navbati"
+                       name="feliza_birka_block">
+                    <setting id="feliza_birka_kod_turi_setting"
+                             string="Birkadagi kod turi"
+                             help="Birkada chiziqli barkod (EAN-13) yoki QR kod chiqishini tanlaydi. QR kod kichik joyda ham chiroyli ko'rinadi va telefon bilan ham o'qiladi. Chiqadigan barkod/QR qiymati bir xil (mahsulot barkodi).">
+                        <field name="feliza_birka_kod_turi" widget="radio"/>
+                    </setting>
+
+                    <setting id="feliza_auto_artikul_setting"
+                             string="Artikulni avtomat berish"
+                             help="Zakup oynasida YANGI mahsulot yaratilganda artikul o'zi qo'yiladi. Band raqamlar o'tkazib yuboriladi — xatolik chiqmaydi. Mavjud mahsulotga hech qachon yangi raqam berilmaydi. Artikul mahsulotga bitta — nechta variant bo'lsa ham o'zgarmaydi. Belgini olib tashlasangiz, artikulni xodim o'zi qo'lda kiritadi.">
+                        <field name="feliza_auto_artikul"/>
+                        <div class="content-group"
+                             invisible="not feliza_auto_artikul">
+                            <div class="row mt16">
+                                <label for="feliza_last_artikul" class="col-lg-5 o_light_label"/>
+                                <field name="feliza_last_artikul" placeholder="masalan 107944"/>
+                            </div>
+                            <div class="row">
+                                <label for="feliza_next_artikul_preview" class="col-lg-5 o_light_label"/>
+                                <field name="feliza_next_artikul_preview" readonly="1"/>
+                            </div>
+                            <div class="text-muted mt8">
+                                Bu umumiy navbat — faqat mahsulot kategoriyasi
+                                uchun seriya topilmagan holatda ishlatiladi.
+                            </div>
+                        </div>
+                    </setting>
+
+                    <setting id="feliza_auto_barcode_setting"
+                             string="Barkodni avtomat berish"
+                             help="Har bir yangi VARIANTGA alohida EAN-13 barkod beriladi, nazorat raqami avtomat hisoblanadi. Band barkodlar o'tkazib yuboriladi. Belgini olib tashlasangiz, barkod berilmaydi — xodim o'zi kiritadi yoki tashqi barkodni yopishtiradi.">
+                        <field name="feliza_auto_barcode"/>
+                        <div class="content-group"
+                             invisible="not feliza_auto_barcode">
+                            <div class="row mt16">
+                                <label for="feliza_last_barcode" class="col-lg-5 o_light_label"/>
+                                <field name="feliza_last_barcode" placeholder="masalan 2000000131344"/>
+                            </div>
+                            <div class="row">
+                                <label for="feliza_next_barcode_preview" class="col-lg-5 o_light_label"/>
+                                <field name="feliza_next_barcode_preview" readonly="1"/>
+                            </div>
+                        </div>
+                    </setting>
+
+                    <!--
+                        `class="col-lg-12"` — jadval BUTUN kenglikni olsin.
+                        Odoo har bir `setting` ga `col-lg-6` beradi, ya'ni
+                        yarim ustun. Jadval o'sha yarimga tiqilib qolgach
+                        ustun sarlavhalari «Kategoriya...», «Oxirgi ishla...»
+                        bo'lib kesilib ketardi va oxirgi ustun umuman
+                        ko'rinmasdi. `col-lg-12` Bootstrap'da keyinroq
+                        e'lon qilinganligi uchun `col-lg-6` ni bosadi.
+                    -->
+                    <setting id="feliza_artikul_series_setting"
+                             class="col-lg-12"
+                             string="Artikul seriyalari — kategoriya bo'yicha"
+                             help="Artikul bitta uzluksiz raqam emas: har bir tovar guruhi o'z seriyasidan yuradi (kiyim 1xxxxx, atir 4xxxxx, sumka 6xxxxx va h.k.). Yangi mahsulot yaratilganda uning kategoriyasiga qarab kerakli seriyadan raqam olinadi. Bola kategoriya alohida seriyaga biriktirilgan bo'lsa — o'sha kuchliroq (masalan «Аксессуар» 3xxxxx, lekin «Аксессуар / Сумка» 6xxxxx).">
+                        <field name="feliza_artikul_series_ids" nolabel="1"
+                               invisible="not feliza_auto_artikul">
+                            <list editable="bottom">
+                                <field name="sequence" widget="handle"/>
+                                <field name="name" string="Seriya" width="220px"/>
+                                <field name="categ_ids" widget="many2many_tags"
+                                       string="Kategoriyalar"
+                                       options="{'no_create': True}"/>
+                                <field name="last_code" string="Oxirgi"
+                                       width="120px"/>
+                                <field name="next_code" string="Keyingisi"
+                                       width="120px" readonly="1"/>
+                            </list>
+                        </field>
+                        <div class="text-muted"
+                             invisible="feliza_auto_artikul">
+                            Artikulni avtomat berish o'chirilgan — seriyalar
+                            ishlatilmaydi.
+                        </div>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

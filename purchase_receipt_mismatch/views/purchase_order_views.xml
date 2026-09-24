@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="purchase_order_list_mismatch" model="ir.ui.view">
+        <field name="name">purchase.order.list.mismatch</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_kpis_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='state']" position="before">
+                <field name="receipt_mismatch" string="Qabul" widget="badge"
+                       decoration-danger="receipt_mismatch in ('less', 'mixed')"
+                       decoration-warning="receipt_mismatch == 'more'"
+                       decoration-success="receipt_mismatch == 'ok'"
+                       optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

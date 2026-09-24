@@ -1,0 +1,21 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* feliza_stock_catalog
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#. module: feliza_stock_catalog
+#. odoo-javascript
+#: code:addons/feliza_stock_catalog/static/src/product_catalog/order_line.js:0
+msgid "Back to Transfer"
+msgstr "Назад к перемещению"

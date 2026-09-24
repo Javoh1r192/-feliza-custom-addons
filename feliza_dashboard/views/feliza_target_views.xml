@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_feliza_sales_target_list" model="ir.ui.view">
+        <field name="name">feliza.sales.target.list</field>
+        <field name="model">feliza.sales.target</field>
+        <field name="arch" type="xml">
+            <list string="Savdo rejasi" editable="bottom" multi_edit="1"
+                  default_order="date_month desc">
+                <field name="date_month" string="Oy"/>
+                <field name="config_id" string="Do'kon (kassa)"/>
+                <field name="amount" string="Oylik reja" sum="Jami"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="company_id" column_invisible="1"/>
+                <field name="note" string="Izoh" optional="hide"/>
+                <button name="action_copy_previous_month" type="object"
+                        string="Keyingi oyga nusxalash" icon="fa-copy"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_feliza_sales_target_form" model="ir.ui.view">
+        <field name="name">feliza.sales.target.form</field>
+        <field name="model">feliza.sales.target</field>
+        <field name="arch" type="xml">
+            <form string="Savdo rejasi">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="config_id"/>
+                            <field name="date_month"/>
+                        </group>
+                        <group>
+                            <field name="amount"/>
+                            <field name="currency_id" groups="base.group_multi_currency"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="note" placeholder="Ixtiyoriy izoh…"/>
+                    </group>
+                    <div class="alert alert-info" role="alert">
+                        <b>Kunlik reja qanday hisoblanadi:</b> oylik reja kunlarga
+                        teng bo'lib emas, <b>hafta kunlari og'irligi</b> bo'yicha
+                        taqsimlanadi (shanba dushanbadan ~1,8 barobar ko'p).
+                        Aks holda dam olish kunlari reja doim «bajarilgan»,
+                        ish kunlari doim «bajarilmagan» ko'rinardi.
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!--
+        ODOO 19 ESLATMASI: search view ichidagi <group> elementiga
+        'expand' va 'string' atributlari RUXSAT ETILMAGAN
+        (odoo/addons/base/rng/common.rng). Guruhlash filtrlari
+        atributsiz <group> ichida turishi va har birida domain="[]"
+        bo'lishi kerak — Odoo 19 ning o'z modullaridagi namuna shunday.
+    -->
+    <record id="view_feliza_sales_target_search" model="ir.ui.view">
+        <field name="name">feliza.sales.target.search</field>
+        <field name="model">feliza.sales.target</field>
+        <field name="arch" type="xml">
+            <search string="Savdo rejasi">
+                <field name="config_id"/>
+                <field name="date_month"/>
+                <filter name="this_year" string="Joriy yil"
+                        domain="[('date_month', '&gt;=', context_today().strftime('%Y-01-01'))]"/>
+                <group>
+                    <filter name="gb_config" string="Do'kon" domain="[]"
+                            context="{'group_by': 'config_id'}"/>
+                    <filter name="gb_month" string="Oy" domain="[]"
+                            context="{'group_by': 'date_month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_feliza_sales_target" model="ir.actions.act_window">
+        <field name="name">Savdo rejasi</field>
+        <field name="res_model">feliza.sales.target</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Birinchi rejani kiriting</p>
+            <p>
+                Har bir do'kon (kassa) uchun <b>oylik savdo rejasi</b>ni kiriting.
+                Panel shu asosda «reja bajarilishi» foizini hisoblaydi.
+            </p>
+            <p>
+                Reja kiritilmasa panel baribir ishlaydi — faqat reja foizi
+                o'rniga «—» ko'rsatiladi.
+            </p>
+        </field>
+    </record>
+
+</odoo>

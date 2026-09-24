@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Tugma «Операции» varag'ida, «Добавить товар» yonida turadi:
+         omborchi qatorni qo'lda qo'shadigan joyning o'zi. -->
+    <record id="view_picking_form_feliza_import" model="ir.ui.view">
+        <field name="name">stock.picking.form.feliza.import</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//header" position="inside">
+                <button name="action_feliza_import_lines" type="object"
+                        string="Excel'dan yuklash" class="btn-secondary"
+                        icon="fa-file-excel-o"
+                        invisible="state in ('done', 'cancel')"
+                        groups="stock.group_stock_user"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,119 @@
+/* Skan/jadval sarlavhasi (ustun nomlari) pastga skroll qilinganda tepada
+   qotib tursin — skan tarixi, mahsulot kesimi, javonlar va dialog ro'yxatlari.
+
+   DARK MODE TUZATISHI: ilgari fon uchun var(--o-webclient-background-color, #fff)
+   ishlatilgan edi. Lekin Odoo 19'da bu RUNTIME CSS o'zgaruvchisi EMAS (faqat
+   SCSS kompilyatsiya o'zgaruvchisi) -> brauzerda doim #fff (OQ) ga tushib
+   qolardi. Yorug' mavzuda bu bilinmasdi, DARK mode'da sarlavha oppoq bo'lib
+   qolardi ("bazi joylar oq bolib qolgan"). Endi Odoo ro'yxatining HAQIQIY
+   runtime o'zgaruvchisi --ListRenderer-thead-bg-color ishlatiladi: u dark
+   bundle'da avtomatik qorayadi. Zaxira sifatida --table-bg / --bs-body-bg. */
+.fz_scan_panel .o_list_renderer {
+    max-height: 60vh;
+    overflow: auto;
+}
+.fz_scan_panel .o_list_renderer table.o_list_table thead th,
+.o_dialog .o_list_renderer table.o_list_table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background-color: var(--ListRenderer-thead-bg-color,
+                      var(--table-bg,
+                      var(--bs-body-bg, #fff)));
+    color: var(--bs-body-color, inherit);
+    box-shadow: inset 0 -1px 0 var(--ListRenderer-thead-border-end-color,
+                                 var(--bs-border-color, #dee2e6));
+}
+
+/* Skan kiritish maydoni va inline "sanalgan" tahriri ham mavzuga mos rang
+   olsin — dark mode'da oq quti bo'lib qolib ketmasin. --o-input-background-color
+   Odoo'ning haqiqiy runtime o'zgaruvchisi (mavzu bilan flip bo'ladi). */
+.o_inventory_scan .o_input {
+    background-color: var(--o-input-background-color,
+                      var(--bs-body-bg, #fff));
+    color: var(--bs-body-color, inherit);
+}
+
+/* "Sanalgan" BULUT/PILL — chip ko'rinishida, bosib ichiga son yoziladi.
+   Ixcham: har qatorda doim turadi, joy egallamasin. */
+.fz_count_pill {
+    display: inline-block;
+    min-width: 38px;
+    max-width: 62px;
+    text-align: center;
+    font-weight: 700;
+    padding: 0px 7px;
+    border-radius: 11px;
+    border: 1px solid var(--bs-border-color, #ced4da);
+    background: var(--o-input-background-color, var(--bs-body-bg, #fff));
+    color: var(--bs-body-color, inherit);
+    line-height: 1.5;
+    font-size: 13px;
+    height: 22px;
+}
+input.fz_count_edit {
+    cursor: text;
+    box-shadow: none;
+}
+input.fz_count_edit:hover {
+    border-color: var(--bs-primary, #714B67);
+}
+input.fz_count_edit:focus {
+    border-color: var(--bs-primary, #714B67);
+    box-shadow: 0 0 0 2px rgba(113, 75, 103, .25);
+    outline: none;
+}
+.fz_count_ro {
+    background: transparent;
+    border-color: transparent;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+/* "Javonlar" (joy) BULUT — bosilsa javonni o'zgartirish (ko'chirish) oynasi. */
+.fz_loc_pill {
+    display: inline-block;
+    padding: 1px 9px;
+    border-radius: 11px;
+    border: 1px solid var(--bs-border-color, #ced4da);
+    background: transparent;
+    line-height: 1.5;
+    max-width: 170px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+    font-size: 13px;
+}
+.fz_loc_edit {
+    cursor: pointer;
+}
+.fz_loc_edit:hover {
+    border-color: var(--bs-primary, #714B67);
+    background: var(--o-input-background-color, rgba(113, 75, 103, .07));
+}
+
+/* "To'liq qidiruv / tuzatish" dialogini KATTAROQ qilish — deyarli to'liq
+   ekran (kenglik ~94vw, balandlik ~90vh), ko'p tovar bir ekranda ko'rinsin. */
+.modal-dialog:has(.fz_inv_search_list) {
+    max-width: 94vw !important;
+    width: 94vw !important;
+    margin: 1.5vh auto !important;
+}
+.modal-dialog:has(.fz_inv_search_list) .modal-content {
+    height: 92vh;
+}
+.modal-dialog:has(.fz_inv_search_list) .modal-body {
+    overflow: auto;
+}
+
+/* Inventarizatsiya sessiya formasi TO'LIQ kenglikda — o'ng tarafdagi katta
+   bo'sh joyni yo'qotadi (jadval keng, tovar/javon/son ustunlari kichraymaydi).
+   Faqat shu forma (fz_inv_session klassi qaysi ajdodda bo'lsa ham). */
+.fz_inv_session .o_form_sheet,
+.fz_inv_session.o_form_sheet {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}

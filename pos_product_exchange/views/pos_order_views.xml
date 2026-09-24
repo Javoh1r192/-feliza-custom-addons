@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Add a small, optional column to the backend Orders list view -->
+    <record id="view_pos_order_tree_exchange" model="ir.ui.view">
+        <field name="name">pos.order.list.exchange</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_order_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='invoice_status']" position="after">
+                <field name="is_exchange" string="Almashtirish" optional="show" widget="boolean_toggle"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Show the flag on the order form, in the "Other Information" group -->
+    <record id="view_pos_pos_form_exchange" model="ir.ui.view">
+        <field name="name">pos.order.form.exchange</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='other_information']" position="inside">
+                <field name="is_exchange" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Allow filtering / grouping by exchange orders -->
+    <record id="view_pos_order_filter_exchange" model="ir.ui.view">
+        <field name="name">pos.order.list.select.exchange</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_order_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='cancelled']" position="after">
+                <filter string="Almashtirilgan (Exchange)" name="is_exchange" domain="[('is_exchange', '=', True)]"/>
+            </xpath>
+            <xpath expr="//group/filter[@name='status']" position="after">
+                <filter string="Almashtirish" name="group_is_exchange" domain="[]" context="{'group_by': 'is_exchange'}"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

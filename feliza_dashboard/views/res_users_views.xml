@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Foydalanuvchiga do'kon biriktirish.
+        MUHIM: groups= orqali faqat RAHBAR tahrirlashi mumkin.
+        Aks holda do'kon boshlig'i o'ziga boshqa do'konlarni qo'shib
+        olishi mumkin bo'lardi.
+    -->
+    <record id="view_users_form_feliza_dashboard" model="ir.ui.view">
+        <field name="name">res.users.form.feliza.dashboard</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Feliza Dashboard"
+                      name="feliza_dashboard"
+                      groups="feliza_dashboard.group_feliza_dashboard_manager">
+                    <group>
+                        <field name="feliza_dashboard_config_ids"
+                               widget="many2many_tags"
+                               options="{'no_create': True}"
+                               placeholder="Kassalarni tanlang…"/>
+                        <field name="feliza_dashboard_warehouse_ids"
+                               widget="many2many_tags"
+                               options="{'no_create': True}"
+                               placeholder="Omborlarni tanlang…"/>
+                    </group>
+                    <div class="alert alert-warning" role="alert">
+                        <b>Do'kon boshlig'i</b> guruhidagi foydalanuvchi faqat
+                        shu yerda tanlangan kassalar ma'lumotini ko'radi.
+                        <br/>
+                        Bo'sh qoldirilsa — <b>hech qanday ma'lumot ko'rinmaydi</b>
+                        (xavfsizlik uchun ataylab shunday).
+                        <br/><br/>
+                        <b>Rahbar</b> guruhidagi foydalanuvchi uchun bu maydon
+                        ahamiyatsiz — u barcha do'konlarni ko'radi.
+                        <br/><br/>
+                        <b>Ombor xodimi</b> guruhidagi foydalanuvchi faqat
+                        yuqorida tanlangan <b>omborlar</b>ni ko'radi
+                        (bo'sh qoldirilsa — barchasini).
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

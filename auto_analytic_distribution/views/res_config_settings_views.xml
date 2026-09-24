@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Accounting Settings - Analitik sozlamalari -->
+        <record id="view_account_config_settings_inherit_analytic" model="ir.ui.view">
+            <field name="name">res.config.settings.view.form.inherit.auto.analytic</field>
+            <field name="model">res.config.settings</field>
+            <field name="inherit_id" ref="account.res_config_settings_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@id='analytic_accounting_setting']" position="after">
+                    <div class="col-12 col-lg-6 o_setting_box" id="auto_analytic_distribution_settings">
+                        <div class="o_setting_left_pane">
+                            <field name="exclude_analytic_account_types" widget="radio"/>
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <label for="exclude_analytic_account_types"/>
+                            <div class="text-muted">
+                                Jurnaldan avtomatik analitik distribyutsiya qaysi hisoblardan chiqarib tashlansin
+                            </div>
+                        </div>
+                    </div>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!--
+        POS Config sozlamalari.
+        Sotuvchilar ro'yxati pos.config.employee_ids dan avtomatik olinadi –
+        qo'shimcha sozlama kerak emas.
+        Kelajakda bu yerga "Sotuvchi tanlashni yoqish" switch qo'shish mumkin.
+    -->
+</odoo>

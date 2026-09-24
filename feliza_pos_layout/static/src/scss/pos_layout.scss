@@ -1,0 +1,102 @@
+/*
+    Feliza POS Layout
+    =================
+    - Kassa (chap panel: buyurtma + raqamlar paneli + "To'lov" tugmasi) kengaytiriladi.
+    - Panelning o'ng chekkasida SUDRAB O'LCHASH dastagi bor (sichqoncha + sensor).
+      Mantiq: static/src/js/pos_resize.js
+    - Mahsulotlar setkasi ixchamlashtiriladi — bir ekranda ko'proq mahsulot ko'rinadi.
+
+    >>> SOZLASH: quyidagi 2 ta boshlang'ich qiymatni o'zgartirsangiz kifoya. <<<
+*/
+
+:root {
+    // Boshlang'ich kassa kengligi (foydalanuvchi hali tortmagan bo'lsa).
+    // Odoo standarti: 450px.
+    --feliza-leftpane-default: 520px;
+
+    // Bitta mahsulot katakchasining eng kichik kengligi.
+    // Kichikroq = bir qatorda ko'proq mahsulot. Odoo standarti: 115px.
+    --feliza-product-min-width: 100px;
+}
+
+/*
+    Faqat kompyuter va kassa (all-in-one) ekranlariga qo'llanadi.
+    Telefon ko'rinishi (<= 992px) Odoo standarti bo'yicha qoladi.
+*/
+@media screen and (min-width: 993px) {
+
+    // --- Kassa panel kengligi ---
+    // Jonli qiymat: --feliza-leftpane-width (JS tomonidan tortilganda o'rnatiladi).
+    // Agar hali tortilmagan bo'lsa, --feliza-leftpane-default ishlatiladi.
+    .product-screen .leftpane {
+        width: var(--feliza-leftpane-width, var(--feliza-leftpane-default)) !important;
+        max-width: var(--feliza-leftpane-width, var(--feliza-leftpane-default)) !important;
+        position: relative;
+    }
+
+    // --- Sudrab o'lchash dastagi (panel o'ng chekkasi) ---
+    .product-screen .leftpane::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 14px;
+        cursor: col-resize;
+        z-index: 50;
+        touch-action: none; // sensor ekranda sahifa siljib ketmasligi uchun
+        // markazda nozik vertikal "grip" chiziq
+        background: linear-gradient(
+            to right,
+            transparent 5px,
+            rgba(120, 120, 120, 0.30) 5px,
+            rgba(120, 120, 120, 0.30) 9px,
+            transparent 9px
+        );
+        transition: background 0.15s ease;
+    }
+
+    // Ustiga kelganda yoki tortayotganda dastak yorqinlashadi (Feliza ko'k rangi)
+    .product-screen .leftpane:hover::after,
+    body.feliza-resizing .product-screen .leftpane::after {
+        background: linear-gradient(
+            to right,
+            transparent 4px,
+            rgba(1, 126, 132, 0.85) 4px,
+            rgba(1, 126, 132, 0.85) 10px,
+            transparent 10px
+        );
+    }
+
+    // Tortish paytida butun ekranda matn tanlanib ketmasligi va kursor mosligi
+    body.feliza-resizing,
+    body.feliza-resizing * {
+        cursor: col-resize !important;
+        user-select: none !important;
+    }
+
+    // --- Mahsulotlar setkasini ixchamlashtirish ---
+    .product-screen .product-list {
+        grid-template-columns: repeat(
+            auto-fill,
+            minmax(var(--feliza-product-min-width, 100px), 1fr)
+        ) !important;
+    }
+}
+
+// --- Tortayotganda ko'rinadigan jonli px ko'rsatkichi ---
+.feliza-resize-tooltip {
+    position: fixed;
+    display: none;
+    z-index: 2000;
+    padding: 3px 9px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.78);
+    border-radius: 6px;
+    pointer-events: none;
+    white-space: nowrap;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}

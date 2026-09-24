@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="feliza_pos_artikul.OrderlineArtikul"
+       t-inherit="point_of_sale.Orderline"
+       t-inherit-mode="extension">
+        <xpath expr="//t[@t-esc='vals.name']" position="after">
+            <span t-if="felizaArtikul" class="feliza-ol-artikul" t-esc="felizaArtikul"/>
+        </xpath>
+    </t>
+
+</templates>

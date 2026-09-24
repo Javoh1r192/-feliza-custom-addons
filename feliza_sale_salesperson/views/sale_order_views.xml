@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Sotuv buyurtmasi formasiga "Sotuvchi (Asosiy)" maydonini qo'shamiz —
+         Klient (partner) yonida, klsnet uslubidagidek tanlanadi. -->
+    <record id="view_order_form_feliza_salesperson" model="ir.ui.view">
+        <field name="name">sale.order.form.feliza.salesperson</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="feliza_salesperson_id"
+                       options="{'no_quick_create': False}"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Buyurtmalar ro'yxatida ham ko'rinsin (ixtiyoriy ustun) -->
+    <record id="view_order_tree_feliza_salesperson" model="ir.ui.view">
+        <field name="name">sale.order.list.feliza.salesperson</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_tree"/>
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="feliza_salesperson_id" optional="show"/>
+            </field>
+        </field>
+    </record>
+</odoo>

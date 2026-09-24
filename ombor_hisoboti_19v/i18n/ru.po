@@ -1,0 +1,108 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* ombor_hisoboti_19v
+# BUILD-MARKER: FIX-v3-2026-08-04 (code: refs include file+line; no ir.module.module entries)
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-04 14:44+0000\n"
+"PO-Revision-Date: 2026-08-04 14:44+0000\n"
+"Last-Translator: \n"
+"Language-Team: Russian\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
+
+#. module: ombor_hisoboti_19v
+#: model:ir.model,name:ombor_hisoboti_19v.model_stock_warehouse_monthly_report
+msgid "Ombor hisoboti (oylik kirim/chiqim/qoldiq)"
+msgstr "Складской отчёт (месячный приход/расход/остаток)"
+
+#. module: ombor_hisoboti_19v
+#: model:ir.model.fields,field_description:ombor_hisoboti_19v.field_stock_warehouse_monthly_report__warehouse_id
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_list
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_pivot
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_graph
+msgid "Ombor"
+msgstr "Склад"
+
+#. module: ombor_hisoboti_19v
+#: model:ir.model.fields,field_description:ombor_hisoboti_19v.field_stock_warehouse_monthly_report__product_id
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_list
+msgid "Mahsulot"
+msgstr "Товар"
+
+#. module: ombor_hisoboti_19v
+#: model:ir.model.fields,field_description:ombor_hisoboti_19v.field_stock_warehouse_monthly_report__date
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_list
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_pivot
+msgid "Oy"
+msgstr "Месяц"
+
+#. module: ombor_hisoboti_19v
+#: model:ir.model.fields,field_description:ombor_hisoboti_19v.field_stock_warehouse_monthly_report__kirim_qty
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_list
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_pivot
+msgid "Kirim"
+msgstr "Приход"
+
+#. module: ombor_hisoboti_19v
+#: model:ir.model.fields,field_description:ombor_hisoboti_19v.field_stock_warehouse_monthly_report__chiqim_qty
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_list
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_pivot
+msgid "Chiqim"
+msgstr "Расход"
+
+#. module: ombor_hisoboti_19v
+#: model:ir.model.fields,field_description:ombor_hisoboti_19v.field_stock_warehouse_monthly_report__qoldiq_qty
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_list
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_pivot
+msgid "Qoldiq"
+msgstr "Остаток"
+
+#. module: ombor_hisoboti_19v
+#: model:ir.model.fields,field_description:ombor_hisoboti_19v.field_stock_warehouse_monthly_report__qoldiq_value
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_list
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_pivot
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_graph
+msgid "Qoldiq qiymati"
+msgstr "Стоимость остатка"
+
+#. module: ombor_hisoboti_19v
+#: model:ir.model.fields,help:ombor_hisoboti_19v.field_stock_warehouse_monthly_report__qoldiq_value
+msgid "Qoldiq miqdori x mahsulotning HOZIRGI tannarxi (SQL view'ning o'zida hisoblanadi - har doim joriy narxni aks ettiradi)."
+msgstr "Количество остатка x ТЕКУЩАЯ себестоимость товара (вычисляется в самом SQL-представлении — всегда отражает текущую цену)."
+
+#. module: ombor_hisoboti_19v
+#: model:ir.model.fields,field_description:ombor_hisoboti_19v.field_stock_warehouse_monthly_report__company_id
+msgid "Kompaniya"
+msgstr "Компания"
+
+#. module: ombor_hisoboti_19v
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_list
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_pivot
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_graph
+#: model:ir.ui.menu,name:ombor_hisoboti_19v.menu_warehouse_monthly_report
+#: model:ir.actions.act_window,name:ombor_hisoboti_19v.action_warehouse_monthly_report
+msgid "Ombor hisoboti"
+msgstr "Отчёт по складу"
+
+#. module: ombor_hisoboti_19v
+#: model_terms:ir.ui.view,arch_db:ombor_hisoboti_19v.view_warehouse_monthly_report_list
+msgid "Jami"
+msgstr "Итого"
+
+#. module: ombor_hisoboti_19v
+#: model_terms:ir.actions.act_window,help:ombor_hisoboti_19v.action_warehouse_monthly_report
+msgid "Hozircha ma'lumot yo'q"
+msgstr "Пока нет данных"
+
+#. module: ombor_hisoboti_19v
+#: model_terms:ir.actions.act_window,help:ombor_hisoboti_19v.action_warehouse_monthly_report
+msgid "Bu hisobot har bir ombor (filial) bo'yicha, oylik kesimda kirim (xarid + transfer + qaytarish), chiqim (sotuv + POS + transfer) va yig'ma qoldiqni (miqdor va qiymat) ko'rsatadi."
+msgstr "Этот отчёт показывает по каждому складу (филиалу) в разрезе месяцев приход (закупка + перемещение + возврат), расход (продажа + POS + перемещение) и накопительный остаток (количество и стоимость)."
+

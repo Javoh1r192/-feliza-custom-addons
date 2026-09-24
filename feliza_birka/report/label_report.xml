@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- =====================================================================
+         BIRKA 58 x 40 mm  —  buyurtmachi tasdiqlagan maket bo'yicha
+
+             Калта юбка 9686                        S
+             108044
+             кора                              размер
+
+                        175 000 uzs
+                   ||||||| barkod |||||||
+                       2000000145518
+             _______________________________________
+               ABCD HOLATI  HAR HAFTA BELGILANG
+                  1    2    3    4    5    6    7
+             A    o    o    o    o    o    o    o
+
+         Chegirmali birka: fon SARIQ, eski narx YANGI NARX YONIDA
+         chizilgan holda turadi (alohida qatorda emas) — shunda
+         chegirmali va oddiy birkada barkod BIR XIL o'lchamda qoladi.
+
+         MUHIM QOIDALAR (sinovda tekshirilgan):
+           * Hamma jadval/katakka `border: 0 !important` — Odoo hisobot
+             uslublari (Bootstrap) jadvalga chegara qo'shadi va chop
+             etilgan birkada yozuvlar atrofida ramka paydo bo'lardi.
+           * ABCD sarlavhasi `white-space: nowrap` — ikki qatorga sinsa
+             birka pastidan 2.5 mm chiqib ketadi.
+           * Aylanalar `display: block` — `inline-block` bo'lsa brauzer
+             ularga matn qatori balandligini qo'shadi va blok bekorga
+             ~3 mm o'sadi.
+           * Barkod `quiet: 1` — GS1 talab qiladigan bo'sh maydon
+             (chapdan 11, o'ngdan 7 modul) rasm ichida hosil bo'ladi,
+             ustiga birkaning 3 mm chetki bo'shlig'i qo'shiladi.
+
+         O'lchamlar `mm` va `pt` da: birka printeri fizik o'lchamda chop
+         etadi, DPI o'zgarsa ham yozuvlar siljimaydi.
+         ===================================================================== -->
+
+    <template id="report_feliza_label">
+        <t t-call="web.html_container">
+
+            <!-- HAMMA birka BITTA `article` ichida bo'lishi shart.
+                 Ikki sabab:
+                   1) `article` klassini Odoo to'liq HTML qolipiga (head va
+                      `<meta charset>` bilan) o'raydi — busiz kirill harflar
+                      buzilib chiqadi;
+                   2) har bir birkani alohida `article` qilsak, Odoo ularni
+                      wkhtmltopdf'ga ALOHIDA hujjat qilib beradi va u
+                      keyingi hujjatlarning kodlashini birinchisinikiga
+                      qarab noto'g'ri tanlaydi (sinovda tekshirildi).
+                 Sahifalarga bo'lish CSS'dagi `page-break-after` bilan. -->
+            <div class="article" t-att-data-oe-model="docs and docs[0]._name"
+                 t-att-data-oe-id="docs and docs[0].id">
+              <t t-set="fz_scale" t-value="docs and docs[0]._feliza_label_scale() or '1'"/>
+              <t t-call="feliza_birka.label_styles"/>
+              <t t-foreach="docs" t-as="doc">
+                <t t-foreach="doc._feliza_label_rows()" t-as="lbl">
+                    <div t-attf-class="fz-label #{'fz-sale' if lbl['discount'] else ''}"
+                         t-attf-style="zoom: {{ fz_scale }}">
+                        <div class="fz-bg" t-if="lbl['discount']"/>
+                        <div class="fz-in">
+
+                        <!-- 1-qator: tovar nomi (BOLD) | o'lcham -->
+                        <table class="fz-row">
+                            <tr>
+                                <td t-attf-class="fz-name #{'fz-name-s5' if lbl['name_len'] &gt; 44 else ('fz-name-s4' if lbl['name_len'] &gt; 36 else ('fz-name-s3' if lbl['name_len'] &gt; 28 else ('fz-name-s2' if lbl['name_len'] &gt; 20 else '')))}" t-out="lbl['name']"/>
+                                <td class="fz-rt fz-size" t-out="lbl['size']"/>
+                            </tr>
+                        </table>
+
+                        <!-- 2-qator: artikul -->
+                        <div class="fz-art" t-out="lbl['artikul']"/>
+
+                        <!-- 3-qator: rang | «размер» yozuvi -->
+                        <table class="fz-row">
+                            <tr>
+                                <td class="fz-color" t-out="lbl['color']"/>
+                                <td class="fz-rt fz-sizelab">&#1088;&#1072;&#1079;&#1084;&#1077;&#1088;</td>
+                            </tr>
+                        </table>
+
+                        <!-- Narx; chegirmada eski narx SHU YERDA, yonida.
+                             Narx qatori HECH QACHON ikki qatorga sinmasligi
+                             kerak — shuning uchun juda uzun raqamlarda
+                             shrift bir pog'ona kichrayadi. 52 mm ga
+                             sig'ishi o'lchab tekshirilgan. -->
+                        <t t-set="narx_matn"
+                           t-value="'{:,.0f}'.format(lbl['price']).replace(',', ' ')"/>
+                        <t t-set="eski_matn"
+                           t-value="'{:,.0f}'.format(lbl['old_price']).replace(',', ' ') if lbl['discount'] else ''"/>
+                        <t t-set="uzunlik" t-value="len(narx_matn) + len(eski_matn)"/>
+                        <div t-attf-class="fz-price #{'fz-p3' if uzunlik &gt; 18 else ('fz-p2' if uzunlik &gt; 14 else '')}">
+                            <span t-out="narx_matn"/><span class="fz-cur"> uzs</span><span
+                                  class="fz-old" t-if="lbl['discount']"
+                                  t-out="eski_matn"/>
+                        </div>
+
+                        <!-- barkod: eni 52 mm = 58 mm birka - 2 x 3 mm chet -->
+                        <div t-attf-class="fz-bc #{'fz-bc-qr' if lbl['barcode_is_qr'] else ''}">
+                            <img t-if="lbl['barcode_img']" t-att-src="lbl['barcode_img']"
+                                 t-att-style="'width:14mm;height:14mm' if lbl['barcode_is_qr'] else 'width:52mm;height:7.4mm'"/>
+                        </div>
+                        <div class="fz-bcnum" t-out="lbl['barcode']"/>
+
+                        <!-- ABCD holati — do'konda har hafta qo'lda belgilanadi -->
+                        <div class="fz-abcd">
+                            <div class="fz-cap">ABCD HOLATI &#8212; HAR HAFTA BELGILANG</div>
+                            <table class="fz-week">
+                                <tr class="fz-num">
+                                    <td class="fz-let"/>
+                                    <td>1</td><td>2</td><td>3</td><td>4</td>
+                                    <td>5</td><td>6</td><td>7</td>
+                                </tr>
+                                <tr>
+                                    <td class="fz-let">A</td>
+                                    <td><span class="fz-o"/></td>
+                                    <td><span class="fz-o"/></td>
+                                    <td><span class="fz-o"/></td>
+                                    <td><span class="fz-o"/></td>
+                                    <td><span class="fz-o"/></td>
+                                    <td><span class="fz-o"/></td>
+                                    <td><span class="fz-o"/></td>
+                                </tr>
+                            </table>
+                        </div>
+                        </div>
+                    </div>
+                </t>
+              </t>
+            </div>
+        </t>
+    </template>
+
+
+    <!-- Uslublar alohida shablonda: CSS hujjat boshiga bir marta qo'shiladi. -->
+    <template id="label_styles">
+            <style>
+                @page { margin: 0; }
+                /* Odoo hisobot sahifasining `body` siga Bootstrap ning
+                   `container` klassi qo'yiladi — u chapdan/o'ngdan 15 px
+                   (~3 mm) bo'shliq beradi. O'shanda butun birka o'ngga
+                   3 mm siljib, o'ng cheti sahifadan chiqib ketardi
+                   (o'lchandi: matn chap cheti 3 mm o'rniga 6.1 mm).
+                   `body` selektori `.container` dan kuchsiz, shuning
+                   uchun klass nomlari va `!important` bilan yozamiz. */
+                html, body,
+                body.container, .container, .container-fluid,
+                #wrapwrap, main, .article {
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    max-width: none !important;
+                    width: auto !important;
+                }
+                html, body { height: 100%; }
+                /* Birkalar orasidagi bo'sh satrlar (QWeb chiqaradigan
+                   yangi qator belgilari) o'zining matn qatorini hosil
+                   qiladi va hujjat oxiriga BO'SH SAHIFA qo'shadi —
+                   termoprinter esa bo'sh birkani behuda chiqarib
+                   yuboradi. Nol shrift bu satrlarni yo'q qiladi;
+                   birkaning o'z yozuvlari o'lchamini pastda beramiz. */
+                .article { font-size: 0; line-height: 0; }
+
+                /* Balandlik 40 mm EMAS, 39.5 mm: quti sahifa bilan bir xil
+                   bo'lsa `page-break-after` har bir birkadan keyin BO'SH
+                   sahifa qo'shib yuboradi (sinovda 2 birka -> 4 sahifa
+                   bo'ldi). Yarim millimetr zaxira buni yo'q qiladi,
+                   yozuvlarga esa ta'sir qilmaydi — matn 37 mm da tugaydi. */
+                /* Eni FOIZDA emas, MILLIMETRDA.
+                   `width: 100%` sahifaning kattalashtirishdan OLDINGI
+                   enini oladi, keyin `zoom` uni yana 1.3 marta kengaytirib
+                   yuboradi — natijada birka sahifadan chiqib ketadi va
+                   narx qatori noto'g'ri joyga sinadi (sinovda shunday
+                   bo'ldi). `58mm` esa `zoom` bilan birga aynan sahifa
+                   eniga teng chiqadi. */
+                .fz-label {
+                    width: 58mm;
+                    height: 39.5mm;
+                    box-sizing: border-box;
+                    padding: 2mm 3mm 1mm 3mm;
+                    font-family: Arial, Helvetica, "DejaVu Sans", sans-serif;
+                    font-size: 9pt;
+                    line-height: 1.05;
+                    color: #000;
+                    background: #fff;
+                    position: relative;
+                    /* MAJBURIY: sariq fon absolyut joylashgani uchun
+                       birkadan pastga oshib chiqsa, hujjat balandligini
+                       o'stiradi va oxirida BO'SH BIRKA chiqib ketadi
+                       (sinovda 2 birka -> 3 sahifa bo'lgan). */
+                    overflow: hidden;
+                }
+                /* Sahifaga bo'lish `page-break-after` bilan EMAS.
+                   `after` oxirgi birkadan keyin ham ishlaydi va hujjat
+                   oxirida bo'sh sahifa qoldiradi. `before` esa faqat
+                   birinchidan keyingi birkalarga tegadi — ortiqcha
+                   sahifa umuman chiqmaydi. */
+                .fz-label + .fz-label { page-break-before: always; }
+
+                /* RAMKA BO'LMASIN.
+                   Odoo hisobot uslublari (Bootstrap) jadval kataklariga
+                   chegara qo'yadi — chop etilgan birkada yozuvlar atrofida
+                   ramka chiqib qolgan edi. Shu sabab qat'iy `!important`. */
+                .fz-label table, .fz-label tr,
+                .fz-label td, .fz-label th {
+                    border: 0 !important;
+                    border-collapse: collapse;
+                    padding: 0;
+                    margin: 0;
+                    background: transparent;
+                    vertical-align: bottom;
+                }
+
+                /* Chegirmali birka — SARIQ.
+                   Fon alohida absolyut qatlam bilan chiziladi: shunda u
+                   birkaning butun yuzasini (chetki bo'shliq bilan birga)
+                   qoplaydi va matn uning ustida qoladi. */
+                .fz-bg {
+                    position: absolute;
+                    left: 0; top: 0; width: 58mm; height: 100%;
+                    background: #FFE01B;
+                }
+                /* fon absolyut bo'lgani uchun matn uning USTIDA turishi kerak */
+                .fz-label > div:not(.fz-bg) { position: relative; }
+
+                /* ---- yuqori uch qator ----
+                   Ikki katakli jadval: chapdagi matn va o'ngdagi yozuv HAR
+                   DOIM bir qatorda va bir chiziqda turadi. `float` yoki
+                   `position:absolute` bilan ular shrift o'lchami har xil
+                   bo'lganda siljib ketardi. */
+                .fz-row {
+                    width: 100%;
+                    table-layout: fixed;
+                    line-height: 1.05;
+                }
+                .fz-row td {
+                    text-align: left;
+                    white-space: nowrap;
+                    overflow: hidden;
+                }
+                .fz-row td.fz-rt {
+                    text-align: right;
+                    width: 13mm;
+                }
+
+                .fz-name    { font-size: 9pt;  font-weight: bold;
+                              white-space: normal !important;
+                              line-height: 1.0; max-height: 2.05em;
+                              overflow: hidden; }
+                /* Uzun tovar nomi kesilmasin — 2 QATORGACHA o'raladi, shrift
+                   kamroq kichrayadi (o'qishga qulay bo'lsin). */
+                .fz-name.fz-name-s2 { font-size: 8.5pt; }
+                .fz-name.fz-name-s3 { font-size: 8pt; }
+                .fz-name.fz-name-s4 { font-size: 7.5pt; }
+                .fz-name.fz-name-s5 { font-size: 7pt; }
+                .fz-size    { font-size: 14pt; font-weight: bold; line-height: 1; }
+                .fz-art     { font-size: 9pt;  line-height: 1.05; }
+                .fz-color   { font-size: 9pt; }
+                .fz-sizelab { font-size: 7pt;  color: #333; }
+
+                /* ---- narx ---- */
+                .fz-price {
+                    text-align: center;
+                    font-size: 15pt;
+                    font-weight: bold;
+                    line-height: 1;
+                    margin-top: 1mm;
+                    white-space: nowrap;
+                }
+                .fz-cur { font-size: 9pt; font-weight: bold; }
+                /* juda uzun raqamlar uchun pog'onalar */
+                .fz-price.fz-p2 { font-size: 13pt; }
+                .fz-price.fz-p2 .fz-cur,
+                .fz-price.fz-p2 .fz-old { font-size: 8pt; }
+                .fz-price.fz-p3 { font-size: 11pt; }
+                .fz-price.fz-p3 .fz-cur,
+                .fz-price.fz-p3 .fz-old { font-size: 7pt; }
+                /* eski narx — yangi narxning YONIDA, chizilgan holda.
+                   Alohida qatorda bo'lsa chegirmali birkada barkodga joy
+                   qolmay, u kichrayib ketardi. */
+                .fz-old {
+                    font-size: 9pt;
+                    font-weight: bold;
+                    text-decoration: line-through;
+                    margin-left: 2.2mm;
+                    vertical-align: 0.6mm;
+                }
+
+                /* ---- barkod ---- */
+                .fz-bc { text-align: center; line-height: 0; margin-top: 0.8mm; }
+                /* `block` — INLINE rasm eski WebKit'da o'z qatoridan
+                   oshib chiqadi va barkod raqami ustiga minib qoladi
+                   (sinovda shunday bo'ldi). */
+                .fz-bc img {
+                    display: block;
+                    margin: 0 auto;
+                    width: 52mm;
+                    height: 8.2mm;
+                    /* Odoo uslublarida `img { max-width: 100% }` bor —
+                       u barkodni quti eniga qarab KICHRAYTIRIB yuboradi
+                       va GS1 bo'sh maydoni buziladi. */
+                    max-width: none !important;
+                }
+                .fz-bcnum {
+                    text-align: center;
+                    font-size: 8pt;
+                    line-height: 1;
+                    letter-spacing: 0.3pt;
+                }
+
+                /* ---- ABCD haftalik belgilash ---- */
+                .fz-abcd {
+                    border-top: 1px solid #000;
+                    margin-top: 1mm;
+                    padding-top: 0.7mm;
+                }
+                /* nowrap — sarlavha HECH QACHON ikki qatorga sinmasin,
+                   aks holda birka pastidan chiqib ketadi. */
+                .fz-cap {
+                    text-align: center;
+                    font-size: 6pt;
+                    letter-spacing: 0.06mm;
+                    line-height: 0.95;
+                    color: #222;
+                    white-space: nowrap;
+                    overflow: hidden;
+                }
+                .fz-week {
+                    width: 100%;
+                    table-layout: fixed;
+                    margin-top: 0.8mm;
+                }
+                .fz-week td {
+                    text-align: center;
+                    line-height: 0;
+                    vertical-align: middle;
+                }
+                .fz-week tr.fz-num td {
+                    font-size: 6pt;
+                    line-height: 0.95;
+                    padding-bottom: 0.7mm !important;
+                }
+                .fz-let {
+                    width: 4.5mm;
+                    text-align: left !important;
+                    font-size: 7pt;
+                    font-weight: bold;
+                    line-height: 1;
+                }
+                /* Aylana INLINE bo'lsa, brauzer unga matn qatori
+                   balandligini qo'shadi va blok bekorga o'sadi. */
+                .fz-o {
+                    display: block;
+                    margin: 0 auto;
+                    width: 1.8mm;
+                    height: 1.8mm;
+                    border: 1px solid #000;
+                    border-radius: 50%;
+                }
+            </style>
+    </template>
+
+</odoo>

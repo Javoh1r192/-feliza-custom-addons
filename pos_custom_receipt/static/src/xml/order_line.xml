@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="pos_custom_receipt.Orderline"
+       t-inherit="point_of_sale.Orderline"
+       t-inherit-mode="extension">
+
+        <!-- Odoo 19 da chegirma qatori: <li t-if="vals.discount" class="price-per-unit"> -->
+        <xpath expr="//li[@t-if='vals.discount']" position="inside">
+            <span class="badge text-bg-danger ms-2"
+                  t-if="discountAmountStr">
+                -<t t-esc="discountAmountStr"/>
+            </span>
+        </xpath>
+
+    </t>
+
+</templates>

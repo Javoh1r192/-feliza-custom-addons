@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!--
+            ODOO 19 ESLATMASI
+            =================
+            Odoo 19 da res.groups modeli o'zgargan: 'category_id' maydoni
+            OLIB TASHLANGAN, o'rniga 'privilege_id' kelgan (yangi
+            res.groups.privilege modeliga ishora qiladi).
+
+            Shuning uchun avval privilege yaratamiz, keyin guruhlarni
+            unga bog'laymiz. ir.module.category esa privilege ichida
+            (ixtiyoriy) ishlatiladi — u hali ham mavjud.
+        -->
+
+        <record id="module_category_feliza_dashboard" model="ir.module.category">
+            <field name="name">Feliza Dashboard</field>
+            <field name="description">Savdo tarmog'i boshqaruv paneli</field>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="privilege_feliza_dashboard" model="res.groups.privilege">
+            <field name="name">Feliza Dashboard</field>
+            <field name="description">Savdo tarmog'i boshqaruv paneliga kirish darajasi</field>
+            <field name="category_id" ref="module_category_feliza_dashboard"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <!--
+            DO'KON BOSHLIG'I
+            ================
+            Faqat o'ziga biriktirilgan kassalar ma'lumotini ko'radi.
+            Tannarx, marja va foyda BUTUNLAY yopiq — bu server tomonida
+            (feliza_dashboard.py dagi _show_cost) amalga oshadi, shuning
+            uchun bu guruhdagi foydalanuvchiga tannarx umuman
+            yuborilmaydi.
+        -->
+        <record id="group_feliza_dashboard_store" model="res.groups">
+            <field name="name">Dashboard: Do'kon boshlig'i</field>
+            <field name="privilege_id" ref="privilege_feliza_dashboard"/>
+            <field name="comment">Faqat biriktirilgan do'kon ma'lumotini ko'radi.
+                Tannarx, marja va foyda ko'rinmaydi.</field>
+        </record>
+
+
+        <!--
+            OMBOR XODIMI
+            ============
+            Faqat ombor bo'limlari: qoldiq, o'tkazmalar, tugayotgan tovarlar.
+            Sotuv tushumi, chek, xodim va moliya bo'limlari ko'rinmaydi.
+            Tannarx ham ko'rinmaydi (faqat rahbar ko'radi).
+        -->
+        <record id="group_feliza_dashboard_stock" model="res.groups">
+            <field name="name">Dashboard: Ombor xodimi</field>
+            <field name="privilege_id" ref="privilege_feliza_dashboard"/>
+            <field name="comment">Faqat ombor qoldig'i va omborlar aro
+                o'tkazmalar. Sotuv va moliya ma'lumotlari ko'rinmaydi.</field>
+        </record>
+
+        <!--
+            ZAKUPCHI
+            ========
+            Faqat zakup bo'limi: yo'ldagi yuklar, ta'minotchilar,
+            tugayotgan tovarlar. Sotuv tushumi va moliya ko'rinmaydi;
+            zakup summalari esa ko'rinadi — bu uning o'z ish sohasi.
+        -->
+        <record id="group_feliza_dashboard_purchase" model="res.groups">
+            <field name="name">Dashboard: Zakupchi</field>
+            <field name="privilege_id" ref="privilege_feliza_dashboard"/>
+            <field name="comment">Faqat zakup bo'limi: yo'ldagi yuklar,
+                ta'minotchilar, tugayotgan tovarlar. Sotuv va moliya
+                ma'lumotlari ko'rinmaydi.</field>
+        </record>
+
+        <!--
+            RAHBAR
+            ======
+            Barcha do'konlar + tannarx/marja/foyda.
+            implied_ids orqali do'kon boshlig'i huquqlarini ham oladi.
+        -->
+        <record id="group_feliza_dashboard_manager" model="res.groups">
+            <field name="name">Dashboard: Rahbar</field>
+            <field name="privilege_id" ref="privilege_feliza_dashboard"/>
+            <field name="implied_ids" eval="[(4, ref('group_feliza_dashboard_store')),
+                                             (4, ref('group_feliza_dashboard_stock')),
+                                             (4, ref('group_feliza_dashboard_purchase'))]"/>
+            <field name="comment">Barcha do'konlar, tannarx, marja va foyda bilan.
+                Reja kiritish va diagnostika huquqi.</field>
+        </record>
+
+    </data>
+</odoo>

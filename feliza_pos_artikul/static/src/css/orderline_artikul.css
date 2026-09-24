@@ -1,0 +1,13 @@
+/* Savat satridagi artikul badge — mahsulotlar ro'yxatidagi .pos-pl-artikul bilan bir xil */
+.feliza-ol-artikul {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    color: #8a5a7a;
+    background: #f3eef2;
+    border-radius: 4px;
+    padding: 0 6px;
+    margin-left: 6px;
+    vertical-align: 1px;
+    white-space: nowrap;
+}

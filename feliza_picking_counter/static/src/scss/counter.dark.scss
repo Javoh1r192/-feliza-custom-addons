@@ -1,0 +1,31 @@
+// ==========================================================================
+//  Qorong'i rejim.
+//  Odoo 19 qorong'i rejimni <body> class bilan emas, alohida assets
+//  bundle ("web.assets_web_dark") yuborib bajaradi — shuning uchun bu
+//  fayl ota-selektorsiz yoziladi va faqat o'sha bundle'ga kiradi.
+// ==========================================================================
+.fpc-bar {
+    border-color: #383835;
+    background: #1f1f1d;
+
+    .fpc-chip {
+        background: #2c2c2a;
+        border-color: #45453f;
+    }
+    .fpc-k { color: #c3c2b7; }
+    .fpc-u { color: #898781; }
+    .fpc-done .fpc-v { color: #6da7ec; }
+
+    .fpc-diff {
+        background: rgba(230, 103, 103, 0.16);
+        border-color: rgba(230, 103, 103, 0.42);
+        .fpc-k, .fpc-u { color: #e9a0a0; }
+        .fpc-v { color: #e66767; }
+    }
+    .fpc-ok {
+        background: rgba(12, 163, 12, 0.20);
+        border-color: rgba(12, 163, 12, 0.45);
+        color: #0ca30c;
+    }
+    .fpc-note { color: #898781; }
+}

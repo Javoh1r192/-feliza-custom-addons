@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- MAHSULOT KESIMI: LIST -->
+    <record id="view_feliza_inventory_product_list" model="ir.ui.view">
+        <field name="name">feliza.inventory.product.list</field>
+        <field name="model">feliza.inventory.product</field>
+        <field name="arch" type="xml">
+            <list create="false" delete="false" editable="bottom"
+                  class="fz_inv_search_list"
+                  decoration-danger="status == 'shortage'"
+                  decoration-success="status == 'surplus'"
+                  default_order="last_scan_id desc">
+                <header>
+                    <button name="action_bulk_zero" type="object"
+                            string="🗑 Tanlanganni 0 qilish (o'chirish)"
+                            class="btn-danger"
+                            confirm="Tanlangan tovarlar sanog'i 0 ga tushiriladi va Skan tarixida 'o'chirildi' bo'lib SAQLANADI. Davom etamizmi?"/>
+                    <button name="action_bulk_set_location" type="object"
+                            string="📍 Tanlanganni joyga biriktirish"
+                            class="btn-primary"/>
+                </header>
+                <field name="applied" column_invisible="1"/>
+                <field name="last_scan_id" column_invisible="1"/>
+                <field name="product_id"/>
+                <field name="barcode" optional="show"/>
+                <field name="location_names" string="Javonlar" widget="inv_location" optional="show"/>
+                <field name="expected_qty" string="Kutilgan" sum="Kutilgan"/>
+                <field name="counted_edit" string="Sanalgan"
+                       widget="inv_count" class="fw-bold"/>
+                <field name="sold_qty" string="Sotilgan" sum="Sotilgan" optional="show"/>
+                <field name="diff_qty" string="Farq" sum="Farq"/>
+                <field name="status"/>
+                <field name="diff_cost" string="Farq (tannarx)" sum="Farq (tannarx)" optional="show"/>
+                <field name="diff_sale" string="Farq (sotuv)" sum="Farq (sotuv)" optional="hide"/>
+                <field name="cost_price" optional="hide"/>
+                <field name="sale_price" optional="hide"/>
+                <field name="currency_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- SEARCH -->
+    <record id="view_feliza_inventory_product_search" model="ir.ui.view">
+        <field name="name">feliza.inventory.product.search</field>
+        <field name="model">feliza.inventory.product</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_id"/>
+                <field name="barcode"/>
+                <filter name="f_diff" string="Faqat farqli" domain="[('status','!=','ok')]"/>
+                <filter name="f_surplus" string="Ortiqcha" domain="[('status','=','surplus')]"/>
+                <filter name="f_shortage" string="Kam" domain="[('status','=','shortage')]"/>
+                <separator/>
+                <filter name="g_status" string="Holat bo'yicha" context="{'group_by':'status'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- SKAN TARIXI: LIST (to'liq, filtrlanadigan) -->
+    <record id="view_feliza_inventory_scan_list" model="ir.ui.view">
+        <field name="name">feliza.inventory.scan.list</field>
+        <field name="model">feliza.inventory.scan</field>
+        <field name="arch" type="xml">
+            <list create="false" edit="false" delete="false" default_order="id desc"
+                  decoration-danger="is_delete == True"
+                  decoration-warning="is_manual == True and is_delete == False">
+                <field name="create_date" string="Vaqt" widget="datetime"/>
+                <field name="user_id" string="Kim"/>
+                <field name="location_id" string="Joy"/>
+                <field name="product_id" string="Tovar"/>
+                <field name="default_code" string="Artikul" optional="show"/>
+                <field name="barcode" string="Barkod" optional="show"/>
+                <field name="variant_info" string="Rang/O'lcham" optional="show"/>
+                <field name="qty" string="Soni" sum="Soni"/>
+                <field name="is_manual" string="Qo'lda" optional="hide"/>
+                <field name="is_delete" string="O'chirildi" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_feliza_inventory_scan_search" model="ir.ui.view">
+        <field name="name">feliza.inventory.scan.search</field>
+        <field name="model">feliza.inventory.scan</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="user_id" string="Kim"/>
+                <field name="location_id" string="Joy"/>
+                <field name="product_id" string="Tovar"/>
+                <field name="barcode"/>
+                <filter name="f_manual" string="Qo'lda tuzatilgan" domain="[('is_manual','=',True)]"/>
+                <separator/>
+                <filter name="group_user" string="Ishtirokchi (Kim)" context="{'group_by':'user_id'}"/>
+                <filter name="group_loc" string="Joy bo'yicha" context="{'group_by':'location_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_feliza_inventory_product" model="ir.actions.act_window">
+        <field name="name">Mahsulot kesimi (aniq solishtirish)</field>
+        <field name="res_model">feliza.inventory.product</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'search_default_f_diff': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Bu yerда tovarlar mahsulot kesimida solishtiriladi.</p>
+        </field>
+    </record>
+
+    <!-- Mahsulot sanog'ini qo'lda tuzatish oynasi -->
+    <record id="view_pcount_wizard_form" model="ir.ui.view">
+        <field name="name">feliza.inventory.pcount.wizard.form</field>
+        <field name="model">feliza.inventory.pcount.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Sanoqni tuzatish">
+                <group>
+                    <field name="session_id" invisible="1"/>
+                    <field name="product_id"/>
+                    <field name="current_counted"/>
+                    <field name="new_counted"/>
+                </group>
+                <footer>
+                    <button name="action_confirm" type="object" string="Saqlash"
+                            class="btn-primary"/>
+                    <button string="Bekor qilish" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tanlanganlarni bitta joyga biriktirish oynasi -->
+    <record id="view_bulkloc_wizard_form" model="ir.ui.view">
+        <field name="name">feliza.inventory.bulkloc.wizard.form</field>
+        <field name="model">feliza.inventory.bulkloc.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Joyga biriktirish">
+                <field name="session_id" invisible="1"/>
+                <field name="allowed_location_ids" invisible="1"/>
+                <group>
+                    <field name="product_count" string="Tanlangan tovarlar"/>
+                    <field name="new_location_id" options="{'no_create': True}"
+                           required="1"
+                           domain="[('id','in',allowed_location_ids)]"/>
+                </group>
+                <separator string="Ko'chiriladigan tovarlar (sonini o'zgartirsa bo'ladi)"/>
+                <field name="line_ids">
+                    <list editable="bottom" create="false" delete="true">
+                        <field name="default_code" string="Artikul" readonly="1"/>
+                        <field name="product_id" string="Tovar" readonly="1"/>
+                        <field name="barcode" string="Barkod" readonly="1"/>
+                        <field name="current_counted" string="Sanalgan (joriy)" readonly="1"/>
+                        <field name="new_qty" string="Yangi son"/>
+                    </list>
+                </field>
+                <footer>
+                    <button name="action_confirm" type="object"
+                            string="📍 Biriktirish" class="btn-primary"
+                            confirm="Tanlangan tovarlar tanlangan javonga ko'chiriladi. 'Yangi son' o'zgartirilgan bo'lsa, sanoq ham shu songa keltiriladi. Davom etamizmi?"/>
+                    <button string="Bekor qilish" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

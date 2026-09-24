@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+    <!--
+        Карточка каталога штатно показывает только цену и артикул.
+        Добавляем остаток — он выводится через тот же t-portal
+        (#product-{id}-price), то есть прямо под названием товара.
+    -->
+    <t t-name="feliza_stock_catalog.OrderLineStock"
+       t-inherit="product.ProductCatalogOrderLine"
+       t-inherit-mode="extension">
+
+        <xpath expr="//span[hasclass('o_product_catalog_price')]" position="before">
+            <span t-if="hasStock" t-att-class="stockClass" class="me-3">
+                <i class="fa fa-cube me-1"/><t t-out="stockLabel"/>
+                <span class="fsc-stock-uom"> dona</span>
+            </span>
+        </xpath>
+
+        <!-- Строки справочных складов (куда идёт заявка). -->
+        <xpath expr="//div[hasclass('d-inline-flex')]" position="after">
+            <div t-foreach="mainStocks" t-as="ms" t-key="ms_index"
+                 t-att-class="mainClass(ms.qty)">
+                <i class="fa fa-building-o me-1"/>
+                <span class="fsc-main-name" t-out="ms.name"/>
+                <span class="fsc-main-qty ms-1"><t t-out="fmtQty(ms.qty)"/> dona</span>
+            </div>
+        </xpath>
+
+    </t>
+
+</templates>

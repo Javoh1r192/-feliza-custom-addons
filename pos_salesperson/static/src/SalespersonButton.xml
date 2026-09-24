@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="pos_salesperson.SalespersonButton">
+        <button class="btn btn-secondary btn-lg lh-lg d-flex align-items-center gap-2"
+            t-att-class="{ 'btn-primary': salesperson }"
+            t-on-click="onClick">
+            <i class="fa fa-user-tie"/>
+            <span>
+                <t t-if="salesperson"><t t-esc="salesperson.name"/></t>
+                <t t-else="">Sotuvchi</t>
+            </span>
+        </button>
+    </t>
+
+    <t t-name="pos_salesperson.ControlButtonsExt"
+       t-inherit="point_of_sale.ControlButtons"
+       t-inherit-mode="extension">
+        <xpath expr="//SelectPartnerButton" position="after">
+            <SalespersonButton t-if="!props.showRemainingButtons"/>
+        </xpath>
+    </t>
+
+</templates>

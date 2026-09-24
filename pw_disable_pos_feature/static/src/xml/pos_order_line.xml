@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_orderline_seq.Orderline"
+       t-inherit="point_of_sale.Orderline"
+       t-inherit-mode="extension">
+
+        <xpath expr="//li[contains(@class, 'orderline')]" position="attributes">
+    <attribute name="t-att-class">
+        {
+            ...props.class,
+            [line.pw_disable_remove_orderline ? 'list-none-all' : '']: true
+        }
+    </attribute>
+</xpath>
+
+
+    </t>
+</templates>

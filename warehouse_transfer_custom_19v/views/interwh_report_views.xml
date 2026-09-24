@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!--
+        OMBORLAR ARO TARQATISH HISOBOTI
+        =================================
+        stock.move modeliga qo'shilgan real_source_warehouse_id /
+        real_dest_warehouse_id maydonlari asosida qurilgan hisobot.
+        Tranzit lokatsiyasi (Inter Warehouse Transfer) e'tiborga olinmaydi -
+        faqat yukning HAQIQIY qaysi ombordan qaysi omborga borganligi
+        ko'rsatiladi.
+
+        ESLATMA: maxsus "search" view'ni ataylab qo'shmadik - Odoo 19'da
+        search view RNG-sxema tekshiruvi juda qattiq, va xatoni server
+        logida aniq ko'rsatmasdan rad etadi. Shuning uchun guruhlashni
+        to'g'ridan-to'g'ri quyidagi context orqali beryapmiz - bu hech
+        qanday nomlangan filterga muhtoj emas va har doim ishlaydi.
+        Standart qidiruv panelidan foydalanuvchi baribir istalgan maydon
+        bo'yicha filtr/group by qo'sha oladi.
+    -->
+
+    <record id="view_stock_move_list_interwh" model="ir.ui.view">
+        <field name="name">stock.move.list.interwh.report</field>
+        <field name="model">stock.move</field>
+        <field name="arch" type="xml">
+            <list
+                string="Omborlar aro tarqatish hisoboti"
+                create="0"
+                edit="0"
+                decoration-info="interwh_report_status == 'in_transit'"
+            >
+                <field name="date" string="Sana" />
+                <field name="interwh_report_status" string="Holat" />
+                <field name="real_source_warehouse_id" string="Yuboruvchi ombor" />
+                <field name="interwh_report_dest_display" string="Qabul qiluvchi ombor" />
+                <field name="product_id" string="Mahsulot" />
+                <field name="interwh_report_qty" string="Miqdor" sum="Jami" />
+                <field name="product_uom" string="O'lchov birligi" />
+                <field name="interwh_report_unit_cost" string="Tannarx (dona)" optional="hide" />
+                <field name="interwh_report_total_cost" string="Tannarx (jami)" sum="Jami" />
+                <field name="picking_id" string="Hujjat" />
+            </list>
+        </field>
+    </record>
+
+    <record id="view_stock_move_pivot_interwh" model="ir.ui.view">
+        <field name="name">stock.move.pivot.interwh.report</field>
+        <field name="model">stock.move</field>
+        <field name="arch" type="xml">
+            <pivot string="Omborlar aro tarqatish hisoboti">
+                <field name="real_source_warehouse_id" type="row" string="Yuboruvchi ombor" />
+                <field name="real_dest_warehouse_id" type="col" string="Qabul qiluvchi ombor" />
+                <field name="interwh_report_qty" type="measure" string="Miqdor" />
+                <field name="interwh_report_total_cost" type="measure" string="Tannarx (jami)" />
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_stock_move_graph_interwh" model="ir.ui.view">
+        <field name="name">stock.move.graph.interwh.report</field>
+        <field name="model">stock.move</field>
+        <field name="arch" type="xml">
+            <graph string="Omborlar aro tarqatish hisoboti" type="bar">
+                <field name="real_dest_warehouse_id" type="row" string="Qabul qiluvchi ombor" />
+                <field name="interwh_report_qty" type="measure" string="Miqdor" />
+                <field name="interwh_report_total_cost" type="measure" string="Tannarx (jami)" />
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_stock_move_interwh_report" model="ir.actions.act_window">
+        <field name="name">Omborlar aro tarqatish hisoboti</field>
+        <field name="res_model">stock.move</field>
+        <field name="view_mode">pivot,list,graph</field>
+        <!--
+            Hisobot xodim KO'RA OLADIGAN hujjatlar bilan cheklanadi.
+
+            Ilgari bu yerda faqat `interwh_report_status` sharti bor edi,
+            ya'ni ro'yxatga BARCHA omborlarning omborlararo harakatlari
+            tushardi. `stock.move` da ombor bo'yicha cheklov yo'q, lekin
+            `stock.picking` da bor — natijada do'kon boshlig'i hisobotni
+            ochganda «Ошибка доступа» olardi: ro'yxatda o'zi ocholmaydigan
+            hujjatlar bor edi.
+
+            Quyidagi shartlar hujjat qoidasining aynan o'zi:
+            o'z ombori, egasiz ombor yoki o'ziga kelayotgan yuk.
+            Administrator barcha omborlarning «Ruxsat etilgan
+            foydalanuvchilar» ro'yxatida bo'lgani uchun hammasini ko'radi.
+        -->
+        <field name="domain">[('interwh_report_status', '!=', False),
+    '|', '|', '|', '|',
+        ('picking_id', '=', False),
+        ('picking_id.picking_type_id.warehouse_id', '=', False),
+        ('picking_id.picking_type_id.warehouse_id.allowed_user_ids', '=', False),
+        ('picking_id.picking_type_id.warehouse_id.allowed_user_ids', 'in', [uid]),
+        ('picking_id.destination_warehouse_id.allowed_user_ids', 'in', [uid])]</field>
+        <field name="context">{'group_by': ['real_source_warehouse_id', 'real_dest_warehouse_id']}</field>
+    </record>
+
+    <record id="action_stock_move_interwh_report_view_pivot" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1" />
+        <field name="view_mode">pivot</field>
+        <field name="view_id" ref="view_stock_move_pivot_interwh" />
+        <field name="act_window_id" ref="action_stock_move_interwh_report" />
+    </record>
+    <record id="action_stock_move_interwh_report_view_list" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2" />
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_stock_move_list_interwh" />
+        <field name="act_window_id" ref="action_stock_move_interwh_report" />
+    </record>
+    <record id="action_stock_move_interwh_report_view_graph" model="ir.actions.act_window.view">
+        <field name="sequence" eval="3" />
+        <field name="view_mode">graph</field>
+        <field name="view_id" ref="view_stock_move_graph_interwh" />
+        <field name="act_window_id" ref="action_stock_move_interwh_report" />
+    </record>
+
+    <!--
+        Xavfsizlik uchun standart Odoo "Reporting" submenu ID'siga
+        (versiyalar orasida farq qilishi mumkin) tayanmaymiz - to'g'ridan-to'g'ri
+        Inventory ilovasining asosiy (kafolatlangan) menyusiga qo'shamiz.
+        Agar sizning tizimingizda "Reporting" submenu mavjud bo'lsa, buni
+        keyinchalik parent="stock.menu_warehouse_report" ga o'zgartirsak bo'ladi.
+    -->
+    <menuitem
+        id="menu_stock_move_interwh_report"
+        name="Omborlar aro tarqatish hisoboti"
+        parent="stock.menu_stock_root"
+        action="action_stock_move_interwh_report"
+        sequence="99"
+    />
+</odoo>

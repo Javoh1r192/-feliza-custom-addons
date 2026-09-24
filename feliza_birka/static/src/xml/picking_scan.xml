@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+    <t t-name="feliza_birka.PickingScan">
+        <div class="o_feliza_pscan d-flex align-items-center gap-2 mt-1">
+            <i class="fa fa-barcode fa-2x text-primary"/>
+            <input t-ref="scanInput" type="text"
+                   class="o_input form-control"
+                   style="max-width:400px;font-size:18px;font-weight:bold"
+                   placeholder="Barkod skaner qiling — +1 qo'shiladi..."
+                   autocomplete="off"
+                   t-on-keydown="onKeydown"/>
+        </div>
+    </t>
+</templates>

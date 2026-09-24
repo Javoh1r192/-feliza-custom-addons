@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- List view ga pos_config_id ustun qo'shish -->
+    <record id="account_analytic_distribution_model_tree_view_pos" model="ir.ui.view">
+        <field name="model">account.analytic.distribution.model</field>
+        <field name="inherit_id" ref="analytic.account_analytic_distribution_model_tree_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='company_id']" position="before">
+                <field name="pos_config_id" optional="show" string="POS Config"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Form view ga pos_config_id qo'shish -->
+    <record id="account_analytic_distribution_model_form_view_pos" model="ir.ui.view">
+        <field name="model">account.analytic.distribution.model</field>
+        <field name="inherit_id" ref="analytic.account_analytic_distribution_model_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_category_id']" position="after">
+                <field name="pos_config_id" string="POS Config"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

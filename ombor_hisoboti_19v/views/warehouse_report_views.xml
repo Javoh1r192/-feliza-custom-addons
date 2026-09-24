@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!--
+        OMBOR HISOBOTI
+        ==============
+        Har bir ombor (filial) bo'yicha, oylik kesimda kirim/chiqim/qoldiq.
+        Eslatma: maxsus "search" view ataylab qo'shilmadi (Odoo 19'da
+        search view RNG-sxema tekshiruvi juda qattiq va xatoni aniq
+        ko'rsatmasdan rad etishi mumkin).
+    -->
+
+    <record id="view_warehouse_monthly_report_list" model="ir.ui.view">
+        <field name="name">stock.warehouse.monthly.report.list</field>
+        <field name="model">stock.warehouse.monthly.report</field>
+        <field name="arch" type="xml">
+            <list string="Ombor hisoboti" create="0" edit="0" default_order="date desc">
+                <field name="date" string="Oy" />
+                <field name="warehouse_id" string="Ombor" />
+                <field name="product_id" string="Mahsulot" />
+                <field name="kirim_qty" string="Kirim" sum="Jami" />
+                <field name="chiqim_qty" string="Chiqim" sum="Jami" />
+                <field name="qoldiq_qty" string="Qoldiq" sum="Jami" />
+                <field name="qoldiq_value" string="Qoldiq qiymati" sum="Jami" />
+            </list>
+        </field>
+    </record>
+
+    <record id="view_warehouse_monthly_report_pivot" model="ir.ui.view">
+        <field name="name">stock.warehouse.monthly.report.pivot</field>
+        <field name="model">stock.warehouse.monthly.report</field>
+        <field name="arch" type="xml">
+            <pivot string="Ombor hisoboti">
+                <field name="warehouse_id" type="row" string="Ombor" />
+                <field name="date" type="col" interval="month" string="Oy" />
+                <field name="kirim_qty" type="measure" string="Kirim" />
+                <field name="chiqim_qty" type="measure" string="Chiqim" />
+                <field name="qoldiq_qty" type="measure" string="Qoldiq" />
+                <field name="qoldiq_value" type="measure" string="Qoldiq qiymati" />
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_warehouse_monthly_report_graph" model="ir.ui.view">
+        <field name="name">stock.warehouse.monthly.report.graph</field>
+        <field name="model">stock.warehouse.monthly.report</field>
+        <field name="arch" type="xml">
+            <graph string="Ombor hisoboti" type="bar">
+                <field name="warehouse_id" type="row" string="Ombor" />
+                <field name="qoldiq_value" type="measure" string="Qoldiq qiymati" />
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_warehouse_monthly_report" model="ir.actions.act_window">
+        <field name="name">Ombor hisoboti</field>
+        <field name="res_model">stock.warehouse.monthly.report</field>
+        <field name="view_mode">pivot,list,graph</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Hozircha ma'lumot yo'q</p>
+            <p>
+                Bu hisobot har bir ombor (filial) bo'yicha, oylik kesimda
+                kirim (xarid + transfer + qaytarish), chiqim (sotuv + POS +
+                transfer) va yig'ma qoldiqni (miqdor va qiymat) ko'rsatadi.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_warehouse_monthly_report_view_pivot" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1" />
+        <field name="view_mode">pivot</field>
+        <field name="view_id" ref="view_warehouse_monthly_report_pivot" />
+        <field name="act_window_id" ref="action_warehouse_monthly_report" />
+    </record>
+    <record id="action_warehouse_monthly_report_view_list" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2" />
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_warehouse_monthly_report_list" />
+        <field name="act_window_id" ref="action_warehouse_monthly_report" />
+    </record>
+    <record id="action_warehouse_monthly_report_view_graph" model="ir.actions.act_window.view">
+        <field name="sequence" eval="3" />
+        <field name="view_mode">graph</field>
+        <field name="view_id" ref="view_warehouse_monthly_report_graph" />
+        <field name="act_window_id" ref="action_warehouse_monthly_report" />
+    </record>
+
+    <menuitem
+        id="menu_warehouse_monthly_report"
+        name="Ombor hisoboti"
+        parent="stock.menu_stock_root"
+        action="action_warehouse_monthly_report"
+        sequence="98"
+    />
+</odoo>

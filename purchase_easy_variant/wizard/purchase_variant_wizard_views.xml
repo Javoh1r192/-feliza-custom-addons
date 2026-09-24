@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="purchase_variant_wizard_form" model="ir.ui.view">
+        <field name="name">purchase.variant.wizard.form</field>
+        <field name="model">purchase.variant.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Mahsulot qo'shish">
+                <sheet>
+
+                    <!-- ═══════════════════════════════════════════════════
+                         1-BOSQICH: Mahsulot tanlash yoki yaratish
+                    ════════════════════════════════════════════════════════ -->
+                    <div invisible="step != 'product'">
+
+                        <!-- Mavjud mahsulot qidirish -->
+                        <group string="Mavjud mahsulotni qidiring (yoki pastda yangi yaring)">
+                            <field name="product_tmpl_id"
+                                   options="{'no_create': True}"
+                                   placeholder="Mahsulot nomini yozing..."/>
+                        </group>
+
+                        <!-- Yangi mahsulot yaratish (faqat product_tmpl_id bo'sh bo'lsa) -->
+                        <group string="YOKI: Yangi mahsulot yarating"
+                               invisible="product_tmpl_id">
+                            <field name="product_name"
+                                   required="not product_tmpl_id"
+                                   placeholder="Masalan: SHim, Ko'ylak..."/>
+                            <!-- Kategoriya MAJBURIY: artikul aynan shu
+                                 kategoriyaning seriyasidan olinadi
+                                 (kiyim 1xxxxx, sumka 6xxxxx va h.k.).
+                                 Kategoriyasiz tovarga to'g'ri artikul
+                                 berib bo'lmaydi. -->
+                            <field name="categ_id"
+                                   required="not product_tmpl_id"
+                                   options="{'no_create': True}"
+                                   placeholder="Kategoriya tanlang"/>
+                            <div class="text-muted" style="font-size:12px;">
+                                Artikul shu kategoriyaning seriyasidan
+                                beriladi — to'g'ri tanlang.
+                            </div>
+                        </group>
+
+                        <!-- Narx, miqdor va rasm — har doim ko'rinadi.
+                             Uchalasi ham HAMMA variantga birdaniga tegishli:
+                             kiyimda odatda o'lchamlar bir xil narx, bir xil
+                             miqdor va bitta surat bilan keladi. -->
+                        <group>
+                            <group>
+                                <field name="base_price"
+                                       string="Narx (hamma variantga)"
+                                       widget="monetary"/>
+                                <field name="base_qty"
+                                       string="Miqdor (hamma variantga)"/>
+                            </group>
+                            <group>
+                                <field name="product_image"
+                                       string="Rasm"
+                                       widget="image"
+                                       options="{'size': [120, 120],
+                                                 'accepted_file_extensions': 'image/*'}"/>
+                                <div class="text-muted" style="font-size:12px; margin-top:4px;">
+                                    Bitta surat yetarli — u hamma rang va
+                                    o'lcham uchun ko'rinadi.
+                                </div>
+                            </group>
+                        </group>
+
+                        <!-- Atributlar — faqat yangi mahsulot uchun.
+
+                             DIQQAT: bu blok ataylab `group` ichida EMAS.
+                             Odoo `group` ni ikki ustunga bo'ladi, jadval esa
+                             chap yarmiga tiqilib qolardi — natijada qiymatlar
+                             «Rang: d.b...» bo'lib kesilib ketardi va har biri
+                             alohida qatorga tushib oyna cho'zilib ketardi.
+                             Endi jadval butun kenglikni oladi. -->
+                        <div invisible="product_tmpl_id" class="mt-3">
+                            <separator string="Atributlar (o'lcham, rang, ...)"/>
+
+                            <div class="text-muted mb-2" style="font-size:12px;">
+                                💡 Atribut qo'shing (o'lcham, rang...) va ularning qiymatlarini kiriting.
+                                Barcha kombinatsiyalar avtomatik variant sifatida yaratiladi.
+                            </div>
+
+                            <!-- `show_attribute: False` — qiymat oldidagi
+                                 ortiqcha «Rang: » prefiksini olib tashlaydi.
+                                 Atribut nomi chap ustunda allaqachon turibdi,
+                                 uni har bir yorliqda takrorlash joyni yeydi. -->
+                            <field name="attribute_line_ids" nolabel="1"
+                                   context="{'show_attribute': False}">
+                                <list editable="bottom">
+                                    <field name="attribute_id"
+                                           width="200px"
+                                           placeholder="Masalan: O'lcham"/>
+                                    <field name="value_ids"
+                                           widget="many2many_tags"
+                                           options="{'no_create_edit': True,
+                                                     'color_field': 'color'}"
+                                           context="{'default_attribute_id': attribute_id,
+                                                     'show_attribute': False}"
+                                           placeholder="Masalan: S, M, L, XL"/>
+                                </list>
+                            </field>
+                        </div>
+
+                    </div>
+
+                    <!-- ═══════════════════════════════════════════════════
+                         2-BOSQICH: Variantlar jadvali
+                    ════════════════════════════════════════════════════════ -->
+                    <div invisible="step != 'variants'">
+
+                        <!-- Narx va miqdorni HAMMA variantga birdaniga qo'yish.
+                             Uch qator, har biri bir xil tartibda: yorliq —
+                             maydon — tugma. Odoo'ning `group` panjarasi
+                             ishlatilmadi: u ikki ustunga bo'lib, tugma bilan
+                             maydonni bir-biriga minib ketkazadi. -->
+                        <div class="mb-3" style="max-width:560px;">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="text-muted" style="width:130px;">Umumiy narx</span>
+                                <div style="width:170px;">
+                                    <field name="base_price" nolabel="1"
+                                           widget="monetary" class="oe_inline"/>
+                                </div>
+                                <button name="action_apply_base_price"
+                                        type="object"
+                                        string="Hammasiga qo'y ↓"
+                                        class="btn btn-secondary btn-sm"/>
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="text-muted" style="width:130px;">Umumiy miqdor</span>
+                                <div style="width:170px;">
+                                    <field name="base_qty" nolabel="1"
+                                           class="oe_inline"/>
+                                </div>
+                                <button name="action_apply_base_qty"
+                                        type="object"
+                                        string="Hammasiga qo'y ↓"
+                                        class="btn btn-secondary btn-sm"/>
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2">
+                                <span style="width:130px;"/>
+                                <button name="action_apply_all"
+                                        type="object"
+                                        string="⇊ Ikkalasini birdaniga"
+                                        class="btn btn-primary btn-sm"/>
+                            </div>
+
+                            <div class="text-muted mt-2" style="font-size:12px;">
+                                Alohida variantning narxi yoki miqdorini quyidagi
+                                jadvalda o'zgartirish mumkin.
+                            </div>
+                        </div>
+
+                        <separator string="Variantlar — miqdor va narx kiriting"/>
+
+                        <field name="variant_line_ids" nolabel="1">
+                            <list editable="bottom"
+                                  decoration-muted="qty == 0">
+                                <field name="product_id"
+                                       string="Variant"
+                                       readonly="1"
+                                       optional="show"/>
+                                <field name="qty"
+                                       string="Miqdor"
+                                       sum="Jami miqdor"/>
+                                <field name="price"
+                                       string="Narx"
+                                       widget="monetary"/>
+                            </list>
+                        </field>
+
+                        <div class="text-muted" style="font-size:12px; padding:4px 0;">
+                            💡 Miqdori 0 bo'lgan variantlar buyurtmaga qo'shilmaydi.
+                        </div>
+                    </div>
+
+                    <!-- Yashirin maydonlar -->
+                    <field name="step" invisible="1"/>
+                    <field name="purchase_order_id" invisible="1"/>
+
+                </sheet>
+
+                <footer>
+                    <!-- 1-bosqich tugmalar -->
+                    <button name="action_next"
+                            type="object"
+                            string="Keyingi: Variantlar →"
+                            class="btn-primary"
+                            invisible="step != 'product'"/>
+
+                    <!-- 2-bosqich tugmalar -->
+                    <button name="action_add_to_order"
+                            type="object"
+                            string="✔ Buyurtmaga qo'sh"
+                            class="btn-primary"
+                            invisible="step != 'variants'"/>
+                    <button name="action_back"
+                            type="object"
+                            string="← Orqaga"
+                            class="btn-secondary"
+                            invisible="step != 'variants'"/>
+
+                    <button string="Bekor qilish"
+                            class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

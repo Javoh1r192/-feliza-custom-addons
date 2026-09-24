@@ -1,0 +1,213 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* warehouse_transfer_custom_19v
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_picking_form_kamomat
+msgid ""
+"<b>Shortfall return.</b>\n"
+"                    The shop received less than was sent and did not create a\n"
+"                    backorder. Check the goods and validate to take them back\n"
+"                    into stock."
+msgstr ""
+"<b>Возврат по недостаче.</b>\n"
+"Магазин принял меньше, чем было отправлено, и не создал резервный\n"
+"заказ. Проверьте товар и подтвердите документ, чтобы вернуть его\n"
+"на склад."
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_picking_type_kanban_kamomat
+msgid "<span class=\"col-6\">Shortfall</span>"
+msgstr "<span class=\"col-6\">Недостача</span>"
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_picking_form_kamomat
+msgid "<span class=\"fw-bold\">Delivery:</span>"
+msgstr "<span class=\"fw-bold\">Отгрузка:</span>"
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_picking_form_kamomat
+msgid "<span class=\"fw-bold\">Shop receipt:</span>"
+msgstr "<span class=\"fw-bold\">Приёмка магазина:</span>"
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_picking_form_kamomat
+msgid "<span class=\"fw-bold\">Shop:</span>"
+msgstr "<span class=\"fw-bold\">Магазин:</span>"
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields,help:warehouse_transfer_custom_19v.field_stock_move__feliza_kamomat
+#: model:ir.model.fields,help:warehouse_transfer_custom_19v.field_stock_picking__feliza_kamomat
+msgid "Automatically created return: the shop received less than was sent and chose not to create a backorder."
+msgstr "Возврат создан автоматически: магазин принял меньше, чем было отправлено, и не создал резервный заказ."
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_kamomat_move_list
+msgid "Back to"
+msgstr "Возврат в"
+
+#. module: warehouse_transfer_custom_19v
+#. odoo-python
+#: code:addons/warehouse_transfer_custom_19v/models/kamomat.py:0
+msgid "Created automatically: shop <b>%(shop)s</b> received less than was sent and did not create a backorder.<br/>Delivery: %(delivery)s<br/>Shop receipt: %(receipt)s"
+msgstr "Создано автоматически: магазин <b>%(shop)s</b> принял меньше, чем было отправлено, и не создал резервный заказ.<br/>Отгрузка: %(delivery)s<br/>Приёмка магазина: %(receipt)s"
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_kamomat_move_list
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_kamomat_move_search
+msgid "Date"
+msgstr "Дата"
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_kamomat_move_list
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_kamomat_move_search
+msgid "Delivery"
+msgstr "Отгрузка"
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields,help:warehouse_transfer_custom_19v.field_stock_move__feliza_kamomat_qty
+msgid "How much was actually missing at the moment the shop confirmed the receipt. This number never changes, even if the warehouse later takes back only part of it."
+msgstr "Сколько на самом деле не хватило в момент подтверждения приёмки магазином. Это число не меняется, даже если склад позже примет обратно лишь часть."
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_kamomat_move_search
+msgid "Month"
+msgstr "Месяц"
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.actions.act_window,help:warehouse_transfer_custom_19v.action_kamomat
+msgid "No shortfall yet"
+msgstr "Недостач пока нет"
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_kamomat_move_search
+msgid "Not taken back yet"
+msgstr "Ещё не возвращено"
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields,field_description:warehouse_transfer_custom_19v.field_stock_move__feliza_kamomat_delivery_id
+#: model:ir.model.fields,field_description:warehouse_transfer_custom_19v.field_stock_picking__feliza_kamomat_delivery_id
+msgid "Original delivery"
+msgstr "Исходная отгрузка"
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_kamomat_move_list
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_kamomat_move_search
+msgid "Product"
+msgstr "Товар"
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_kamomat_move_list
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_kamomat_move_search
+msgid "Return document"
+msgstr "Документ возврата"
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_kamomat_move_list
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_kamomat_move_search
+msgid "Shop"
+msgstr "Магазин"
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_kamomat_move_list
+msgid "Shop receipt"
+msgstr "Приёмка магазина"
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields,field_description:warehouse_transfer_custom_19v.field_stock_move__feliza_kamomat_shop_id
+#: model:ir.model.fields,field_description:warehouse_transfer_custom_19v.field_stock_picking__feliza_kamomat_shop_id
+msgid "Shop with shortfall"
+msgstr "Магазин с недостачей"
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields,field_description:warehouse_transfer_custom_19v.field_stock_move__feliza_kamomat_receipt_id
+#: model:ir.model.fields,field_description:warehouse_transfer_custom_19v.field_stock_picking__feliza_kamomat_receipt_id
+msgid "Short receipt"
+msgstr "Приёмка с недостачей"
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.actions.act_window,name:warehouse_transfer_custom_19v.action_kamomat
+#: model:ir.model.fields,field_description:warehouse_transfer_custom_19v.field_stock_move__feliza_kamomat
+#: model:ir.ui.menu,name:warehouse_transfer_custom_19v.menu_kamomat
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_kamomat_move_graph
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_kamomat_move_list
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_kamomat_move_pivot
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_kamomat_move_search
+msgid "Shortfall"
+msgstr "Недостача"
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields,field_description:warehouse_transfer_custom_19v.field_stock_move__feliza_kamomat_qty
+msgid "Shortfall quantity"
+msgstr "Величина недостачи"
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields,field_description:warehouse_transfer_custom_19v.field_stock_picking__feliza_kamomat
+msgid "Shortfall return"
+msgstr "Возврат по недостаче"
+
+#. module: warehouse_transfer_custom_19v
+#. odoo-python
+#: code:addons/warehouse_transfer_custom_19v/models/kamomat.py:0
+#: model:ir.model.fields,field_description:warehouse_transfer_custom_19v.field_stock_picking_type__feliza_kamomat_count
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_picking_internal_search_kamomat
+msgid "Shortfall returns"
+msgstr "Возвраты по недостаче"
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_kamomat_move_list
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_kamomat_move_search
+msgid "Status"
+msgstr "Статус"
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_kamomat_move_list
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_kamomat_move_search
+msgid "Taken back"
+msgstr "Возвращено"
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields,help:warehouse_transfer_custom_19v.field_stock_move__feliza_kamomat_delivery_id
+#: model:ir.model.fields,help:warehouse_transfer_custom_19v.field_stock_picking__feliza_kamomat_delivery_id
+msgid "The delivery this shortfall belongs to."
+msgstr "Отгрузка, по которой возникла недостача."
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields,help:warehouse_transfer_custom_19v.field_stock_move__feliza_kamomat_receipt_id
+#: model:ir.model.fields,help:warehouse_transfer_custom_19v.field_stock_picking__feliza_kamomat_receipt_id
+msgid "The shop receipt where the shortfall was detected."
+msgstr "Приёмка магазина, в которой обнаружена недостача."
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_kamomat_move_list
+msgid "Total shortfall"
+msgstr "Итого недостача"
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_kamomat_move_list
+msgid "Total taken back"
+msgstr "Итого возвращено"
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.actions.act_window,help:warehouse_transfer_custom_19v.action_kamomat
+msgid ""
+"When a shop receives less than was sent and does not create a\n"
+"               backorder, the remaining goods appear here and a return\n"
+"               document to the source warehouse is created automatically."
+msgstr ""
+"Если магазин принял меньше, чем было отправлено, и не создал\n"
+"резервный заказ, остаток попадает сюда, а документ возврата на\n"
+"склад-отправитель создаётся автоматически."

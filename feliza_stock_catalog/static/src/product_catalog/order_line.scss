@@ -1,0 +1,51 @@
+// Остаток на карточке каталога.
+// Цвет — вспомогательный признак: само число и подпись «dona» стоят рядом,
+// поэтому смысл не теряется без цвета.
+.fsc-stock {
+    display: inline-flex;
+    align-items: baseline;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+    padding: 1px 8px;
+    border-radius: 20px;
+    background: #eceae4;
+    color: #35342f;
+    white-space: nowrap;
+
+    .fsc-stock-uom {
+        font-weight: 500;
+        font-size: 12px;
+        margin-left: 3px;
+        opacity: .75;
+    }
+
+}
+
+// Остаток на основном складе — вторая строка карточки.
+// Оформлен слабее первой: это справка «сколько там есть»,
+// а не количество, с которым работает документ.
+.fsc-main {
+    // ВАЖНО: flex, а не inline-flex. Соседний блок с ценой — inline,
+    // и при inline-flex остаток основного склада прилипал к артикулу
+    // в ту же строку. flex делает строку отдельной.
+    display: flex;
+    align-items: baseline;
+    margin-top: 3px;
+    font-size: 12px;
+    color: #52514e;
+    white-space: nowrap;
+
+    .fsc-main-name { opacity: .8; }
+    .fsc-main-qty {
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+    }
+
+    // Нет на основном складе — заявку оформлять бессмысленно,
+    // поэтому этот случай выделяем.
+    &.fsc-main-none {
+        color: #a33030;
+        .fsc-main-name { opacity: 1; }
+    }
+}

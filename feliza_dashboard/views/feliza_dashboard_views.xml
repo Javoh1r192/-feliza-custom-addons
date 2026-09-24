@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Panelning o'zi (OWL client action) -->
+    <record id="action_feliza_dashboard" model="ir.actions.client">
+        <field name="name">Dashboard</field>
+        <field name="tag">feliza_dashboard</field>
+    </record>
+
+    <!--
+        ASOSIY MENYU
+        ============
+        groups= tufayli ruxsati yo'q foydalanuvchi bu ilovani
+        Odoo menyusida UMUMAN ko'rmaydi.
+    -->
+    <!-- DIQQAT: bu yerga guruh qo'shilmasa, o'sha guruhdagi foydalanuvchi
+         ilova belgisini UMUMAN ko'rmaydi (2.2.0 da zakupchi shu sabab
+         Dashboard'ni topolmagan edi). -->
+    <menuitem id="menu_feliza_dashboard_root"
+              name="Dashboard"
+              web_icon="feliza_dashboard,static/description/icon.png"
+              groups="group_feliza_dashboard_store,group_feliza_dashboard_stock,group_feliza_dashboard_purchase"
+              sequence="5"/>
+
+    <menuitem id="menu_feliza_dashboard_main"
+              name="Panel"
+              parent="menu_feliza_dashboard_root"
+              action="action_feliza_dashboard"
+              groups="group_feliza_dashboard_store,group_feliza_dashboard_stock,group_feliza_dashboard_purchase"
+              sequence="1"/>
+
+    <!-- Reja — faqat rahbar -->
+    <menuitem id="menu_feliza_target"
+              name="Savdo rejasi"
+              parent="menu_feliza_dashboard_root"
+              action="action_feliza_sales_target"
+              groups="group_feliza_dashboard_manager"
+              sequence="10"/>
+
+    <!-- Sozlamalar — faqat rahbar -->
+    <menuitem id="menu_feliza_settings"
+              name="Sozlamalar"
+              parent="menu_feliza_dashboard_root"
+              groups="group_feliza_dashboard_manager"
+              sequence="90"/>
+
+    <menuitem id="menu_feliza_settings_config"
+              name="Do'konlar (kassalar)"
+              parent="menu_feliza_settings"
+              action="action_feliza_pos_config"
+              groups="group_feliza_dashboard_manager"
+              sequence="1"/>
+
+</odoo>

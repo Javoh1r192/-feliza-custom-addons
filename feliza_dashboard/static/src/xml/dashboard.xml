@@ -1,0 +1,2742 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<!-- ===================================================================
+     Sahifalash paneli — Odoo'nikiga o'xshash "1-40 / 152  ‹ ›".
+     Chaqirishdan oldin ikkita o'zgaruvchi qo'yiladi:
+        <t t-set="prows" t-value="..."/>   — TO'LIQ ro'yxat
+        <t t-set="pkey"  t-value="'nom'"/> — jadval kaliti
+     Qatorlar 40 tadan kam bo'lsa panel umuman chizilmaydi.
+     =================================================================== -->
+<t t-name="feliza_dashboard.Pager">
+  <div class="fd-pager" t-if="pgCount(prows) &gt; 1">
+    <span class="fd-pg-lbl" t-esc="pgLabel(prows, pkey)"/>
+    <button class="fd-pg-btn" t-att-disabled="pg(pkey) === 0"
+            t-on-click="() => this.pgPrev(pkey)" title="Oldingi sahifa">‹</button>
+    <button class="fd-pg-btn" t-att-disabled="pg(pkey) &gt;= pgCount(prows) - 1"
+            t-on-click="() => this.pgNext(pkey, prows)" title="Keyingi sahifa">›</button>
+  </div>
+</t>
+
+<t t-name="feliza_dashboard.Dashboard">
+  <div class="fd-root">
+
+    <!-- ================= TOP ================= -->
+    <div class="fd-top">
+      <div class="fd-logo">F</div>
+      <div class="fd-title">
+        Dashboard
+        <span t-if="!isManager and state.cfg" class="fd-sub-inline">
+          · <t t-esc="state.cfg.stores.join(', ')"/>
+        </span>
+      </div>
+
+      <!-- Zakupchi o'z tovarining tan narxini KO'RADI (bu uning ish
+           sohasi) — unga «Tannarx yopiq» belgisi chalg'ituvchi bo'ladi. -->
+      <span t-if="!showCost and !(state.cfg and state.cfg.is_purchase)"
+            class="fd-lock" title="Tannarx server tomonida yopilgan">
+        🔒 Tannarx yopiq
+      </span>
+      <span class="fd-live" t-if="state.lastUpdate">
+        <span class="fd-dot"/> <t t-esc="state.lastUpdate"/>
+      </span>
+
+      <div class="fd-spacer"/>
+
+      <!-- ============ FILTR ============
+           Do'kon · davr · aniq sana · yangilash — bitta guruh bo'lib
+           turadi, tor ekranda birgalikda pastga tushadi. -->
+      <div class="fd-filters">
+        <label t-if="isManager and state.cfg and state.cfg.stores.length > 1"
+               class="fd-field" title="Do'kon">
+          <span class="fd-field-ic">🏬</span>
+          <select class="fd-select" t-on-change="setStore" autocomplete="off">
+            <option value="">Barcha do'konlar</option>
+            <option t-foreach="state.cfg.stores" t-as="s" t-key="s"
+                    t-att-value="s" t-att-selected="state.store === s"
+                    t-esc="s"/>
+          </select>
+        </label>
+
+        <div class="fd-seg" t-if="usesPeriod">
+          <button t-foreach="periods" t-as="p" t-key="p.key"
+                  t-att-class="state.period === p.key ? 'fd-on' : ''"
+                  t-on-click="() => this.setPeriod(p.key)">
+            <t t-esc="p.label"/>
+          </button>
+        </div>
+
+        <!-- aniq sana -->
+        <div class="fd-datebox" t-if="usesPeriod">
+          <button class="fd-ib fd-daynav" t-if="isOneDay"
+                  t-on-click="() => this.shiftDay(-1)"
+                  title="Oldingi kun">‹</button>
+
+          <button class="fd-datebtn" t-att-class="isCustom ? 'fd-on' : ''"
+                  t-on-click="togglePicker"
+                  title="Aniq sanani tanlash">
+            <span class="fd-cal">📅</span>
+            <b t-if="isCustom" t-esc="rangeLabel"/>
+            <t t-else="">Sana</t>
+          </button>
+
+          <button class="fd-ib fd-daynav" t-if="isOneDay"
+                  t-att-disabled="!canNextDay"
+                  t-on-click="() => this.shiftDay(1)"
+                  title="Keyingi kun">›</button>
+
+          <!-- tanlash oynasi -->
+          <t t-if="state.picker">
+            <div class="fd-pop-back" t-on-click="() => this.state.picker = false"/>
+            <div class="fd-pop">
+              <div class="fd-pop-h">Sanani tanlash</div>
+              <div class="fd-seg fd-seg-sm">
+                <button t-att-class="state.pickMode === 'day' ? 'fd-on' : ''"
+                        t-on-click="() => this.setPickMode('day')">Bir kun</button>
+                <button t-att-class="state.pickMode === 'range' ? 'fd-on' : ''"
+                        t-on-click="() => this.setPickMode('range')">Oraliq</button>
+              </div>
+
+              <div class="fd-pop-row">
+                <span class="fd-pop-lbl"
+                      t-esc="state.pickMode === 'day' ? 'Kun' : 'Dan'"/>
+                <input type="date" class="fd-date" t-att-value="state.pickFrom"
+                       t-att-max="maxDate" t-on-change="onPickFrom"/>
+              </div>
+              <div class="fd-pop-row" t-if="state.pickMode === 'range'">
+                <span class="fd-pop-lbl">Gacha</span>
+                <input type="date" class="fd-date" t-att-value="state.pickTo"
+                       t-att-min="state.pickFrom" t-att-max="maxDate"
+                       t-on-change="onPickTo"/>
+              </div>
+
+              <div class="fd-pop-note" t-if="state.pickMode === 'day' and state.pickFrom">
+                <t t-esc="weekday(state.pickFrom)"/>,
+                <t t-esc="fmtDate(state.pickFrom)"/>
+              </div>
+              <div class="fd-pop-note"
+                   t-elif="state.pickMode === 'range' and pickValid">
+                <t t-esc="fmtDate(state.pickFrom, false)"/> —
+                <t t-esc="fmtDate(state.pickTo)"/>
+              </div>
+
+              <div class="fd-pop-btns">
+                <button class="fd-btn-flat"
+                        t-on-click="() => this.state.picker = false">Bekor</button>
+                <button class="fd-btn-main" t-att-disabled="!pickValid"
+                        t-on-click="applyPick">Ko'rsatish</button>
+              </div>
+            </div>
+          </t>
+        </div>
+
+        <button class="fd-ib" t-on-click="() => this.load()" title="Yangilash">⟳</button>
+      </div>
+    </div>
+
+    <!-- Tanlangan davr — har doim ko'rinib turadi -->
+    <div class="fd-rangebar" t-if="usesPeriod and state.range and state.range.from">
+      <span class="fd-rb-ic">📅</span>
+      <b t-esc="rangeLabel"/>
+      <span class="fd-rb-sub" t-if="rangeDays === 1"
+            t-esc="weekday(state.range.from)"/>
+      <span class="fd-rb-sub" t-elif="rangeDays > 1">
+        <t t-esc="rangeDays"/> kun
+      </span>
+      <span class="fd-rb-sub" t-if="state.store">· <t t-esc="state.store"/></span>
+      <button class="fd-rb-x" t-if="isCustom"
+              t-on-click="() => this.setPeriod('today')"
+              title="Bugunga qaytish">✕</button>
+    </div>
+
+    <!-- ================= TABS ================= -->
+    <div class="fd-tabs">
+      <button t-if="hasTab('today')" t-att-class="state.tab === 'today' ? 'fd-on' : ''"
+              t-on-click="() => this.setTab('today')">📊 Umumiy</button>
+      <button t-if="hasTab('stores')" t-att-class="state.tab === 'stores' ? 'fd-on' : ''"
+              t-on-click="() => this.setTab('stores')">🏬 Do'konlar</button>
+      <button t-if="hasTab('sales')" t-att-class="state.tab === 'sales' ? 'fd-on' : ''"
+              t-on-click="() => this.setTab('sales')">🧾 Sotuvlar</button>
+      <button t-if="hasTab('staff')" t-att-class="state.tab === 'staff' ? 'fd-on' : ''"
+              t-on-click="() => this.setTab('staff')">👤 Xodimlar</button>
+      <button t-if="hasTab('products')" t-att-class="state.tab === 'products' ? 'fd-on' : ''"
+              t-on-click="() => this.setTab('products')">👗 Mahsulot</button>
+      <button t-if="hasTab('disc')" t-att-class="state.tab === 'disc' ? 'fd-on' : ''"
+              t-on-click="() => this.setTab('disc')">🏷️ Chegirma</button>
+      <button t-if="hasTab('stock')" t-att-class="state.tab === 'stock' ? 'fd-on' : ''"
+              t-on-click="() => this.setTab('stock')">📦 Ombor</button>
+      <button t-if="hasTab('transfer')" t-att-class="state.tab === 'transfer' ? 'fd-on' : ''"
+              t-on-click="() => this.setTab('transfer')">🔄 O'tkazma</button>
+      <button t-if="hasTab('kam')" t-att-class="state.tab === 'kam' ? 'fd-on' : ''"
+              t-on-click="() => this.setTab('kam')">📉 Kamomat</button>
+      <button t-if="hasTab('zakup')" t-att-class="state.tab === 'zakup' ? 'fd-on' : ''"
+              t-on-click="() => this.setTab('zakup')">🚛 Zakup</button>
+      <button t-if="hasTab('zsales')" t-att-class="state.tab === 'zsales' ? 'fd-on' : ''"
+              t-on-click="() => this.setTab('zsales')">🛍️ Sotuvlarim</button>
+      <button t-if="hasTab('zstock')" t-att-class="state.tab === 'zstock' ? 'fd-on' : ''"
+              t-on-click="() => this.setTab('zstock')">📦 Skladim</button>
+      <button t-if="hasTab('zincome')" t-att-class="state.tab === 'zincome' ? 'fd-on' : ''"
+              t-on-click="() => this.setTab('zincome')">💰 Daromadim</button>
+      <button t-if="isManager" t-att-class="state.tab === 'fin' ? 'fd-on' : ''"
+              t-on-click="() => this.setTab('fin')">💰 Moliya</button>
+      <button t-if="isManager" t-att-class="state.tab === 'diag' ? 'fd-on' : ''"
+              t-on-click="() => this.setTab('diag')">⚙️ Diagnostika</button>
+    </div>
+
+    <!-- ================= STATES ================= -->
+    <div t-if="state.error" class="fd-err">
+      <b>Xatolik:</b> <t t-esc="state.error"/>
+    </div>
+    <div t-if="state.loading" class="fd-loading">Yuklanmoqda…</div>
+
+    <!-- ================= SOTUVLAR RO'YXATI ================= -->
+    <t t-if="!state.loading and state.tab === 'sales' and state.salesList">
+      <t t-set="sl" t-value="state.salesList"/>
+      <div class="fd-card fd-mb">
+        <div class="fd-toolbar" style="justify-content:space-between; flex-wrap:wrap;">
+          <div>
+            <h3 style="margin:0">🧾 Sotuvlar ro'yxati</h3>
+            <div class="fd-sub" style="margin:2px 0 0">
+              Jami <b><t t-esc="num(sl.count)"/></b> qator ·
+              <b><t t-esc="num(sl.qty)"/></b> dona ·
+              <b><t t-esc="money(sl.total)"/></b> so'm
+              <t t-if="sl.count &gt; sl.shown">
+                · ekranda oxirgi <t t-esc="num(sl.shown)"/> ta (to'lig'i — Excel)
+              </t>
+            </div>
+          </div>
+          <div class="fd-toolbar" style="margin:0; flex-wrap:wrap;">
+            <input class="fd-inp" type="text"
+                   placeholder="🔍 Mahsulot / chek raqami…"
+                   t-att-value="salesFilters.q" t-on-input="onSalesQuery"/>
+            <select class="fd-select" t-on-change="setSalesSeller"
+                    t-if="sl.sellers and sl.sellers.length">
+              <option value="">Barcha sotuvchilar</option>
+              <t t-foreach="sl.sellers" t-as="s" t-key="s.id">
+                <option t-att-value="s.id"
+                        t-att-selected="isSalesSeller(s.id)">
+                  <t t-esc="s.name"/>
+                </option>
+              </t>
+            </select>
+            <button class="fd-pg-btn" t-on-click="() => this.exportSales()"
+                    title="Excelга yuklab olish">⬇️ Excel</button>
+          </div>
+        </div>
+
+        <div t-if="!sl.rows.length" class="fd-note">
+          Bu davrda sotuv topilmadi.
+        </div>
+        <t t-set="prows" t-value="sl.rows"/>
+        <t t-set="pkey" t-value="'sales'"/>
+        <t t-call="feliza_dashboard.Pager"/>
+        <div class="fd-tblwrap" t-if="sl.rows.length">
+          <table class="fd-tbl fd-click">
+            <thead><tr>
+              <th class="fd-num">#</th>
+              <th>TR (chek)</th>
+              <th>Sana / vaqt</th>
+              <th>Do'kon</th>
+              <th>Mahsulot</th>
+              <th>Rang</th>
+              <th>O'lcham</th>
+              <th class="fd-num">Soni</th>
+              <th class="fd-num">Summa</th>
+              <th>Mijoz</th>
+              <th><t t-esc="sl.seller_label"/></th>
+              <th t-if="sl.show_cashier">Kassir</th>
+            </tr></thead>
+            <tbody>
+              <tr t-foreach="pgRows(sl.rows, 'sales')" t-as="r" t-key="r_index"
+                  t-on-click="() => this.open('order', r.id)">
+                <td class="fd-num fd-muted"
+                    t-esc="pg('sales') * 40 + r_index + 1"/>
+                <td><b t-esc="r.ref"/>
+                    <small class="fd-muted" t-if="r.ref2 and r.ref2 !== r.ref">
+                      <br/><t t-esc="r.ref2"/>
+                    </small>
+                </td>
+                <td t-esc="r.time"/>
+                <td t-esc="r.store"/>
+                <td>
+                  <t t-esc="r.product"/>
+                  <span t-if="r.discount" class="fd-tag">−<t t-esc="pct(r.discount, 0)"/></span>
+                </td>
+                <td class="fd-muted" t-esc="r.rang or '—'"/>
+                <td class="fd-muted" t-esc="r.olcham or '—'"/>
+                <td class="fd-num" t-esc="num(r.qty)"/>
+                <td class="fd-num" t-esc="money(r.amount)"/>
+                <td t-esc="r.customer or '—'"/>
+                <td t-esc="r.seller"/>
+                <td t-if="sl.show_cashier" t-esc="r.cashier"/>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </t>
+
+    <!-- ================= UMUMIY ================= -->
+    <t t-if="!state.loading and state.tab === 'today' and state.overview">
+      <t t-set="ov" t-value="state.overview"/>
+
+      <div class="fd-row fd-c23 fd-mb">
+        <div class="fd-card fd-hero">
+         <div class="fd-hero-l">
+          <div class="fd-kv">Tushum · <t t-esc="ov.period.from"/> — <t t-esc="ov.period.to"/></div>
+          <div class="fd-fig">
+            <t t-esc="money(ov.kpi.revenue)"/>
+            <s>so'm</s>
+          </div>
+          <div t-att-class="'fd-delta ' + deltaClass(ov.delta.revenue)"
+               t-if="ov.delta.revenue !== null">
+            <t t-esc="delta(ov.delta.revenue)"/> — oldingi davrga nisbatan
+          </div>
+
+          <div class="fd-plan" t-if="ov.target">
+            <div class="fd-plan-row">
+              <span>Reja bajarilishi</span>
+              <b t-att-class="planClass(ov.target_pct)"><t t-esc="pct(ov.target_pct, 0)"/></b>
+            </div>
+            <div class="fd-trk">
+              <i t-att-style="'width:' + barWidth(ov.target_pct, 100)"/>
+            </div>
+            <div class="fd-plan-row fd-muted">
+              <span>Reja <t t-esc="money(ov.target)"/></span>
+              <span t-if="ov.kpi.revenue &lt; ov.target">
+                Qoldi <t t-esc="money(ov.target - ov.kpi.revenue)"/>
+              </span>
+              <span t-else="">Ortiqcha +<t t-esc="money(ov.kpi.revenue - ov.target)"/></span>
+            </div>
+          </div>
+          <div class="fd-note" t-else="">
+            Reja kiritilmagan. <b>Dashboard → Savdo rejasi</b> bo'limida kiriting.
+          </div>
+
+         </div>
+
+         <div class="fd-hero-r">
+          <div class="fd-chart" t-if="chartHasData">
+            <div class="fd-chart-t">Soatlik to'planma tushum</div>
+            <svg t-att-viewBox="'0 0 ' + chartW + ' ' + chartH" class="fd-svg"
+                 preserveAspectRatio="none"
+                 t-on-pointermove="onChartMove"
+                 t-on-pointerleave="hideTip">
+              <path t-att-d="chartArea" class="fd-area"/>
+              <path t-att-d="chartPrev" class="fd-line-prev"/>
+              <path t-att-d="chartToday" class="fd-line"/>
+              <!-- crosshair: sichqoncha SOATGA qaratiladi, chiziqqa emas -->
+              <g t-if="state.tip and state.tip.i !== null">
+                <line class="fd-cross" vector-effect="non-scaling-stroke"
+                      t-att-x1="chartX(state.tip.i)" y1="0"
+                      t-att-x2="chartX(state.tip.i)" t-att-y2="chartH"/>
+                <circle t-if="tipY2 !== null" class="fd-pt fd-pt2" r="3.5"
+                        vector-effect="non-scaling-stroke"
+                        t-att-cx="chartX(state.tip.i)" t-att-cy="tipY2"/>
+                <circle class="fd-pt fd-pt1" r="4.5"
+                        vector-effect="non-scaling-stroke"
+                        t-att-cx="chartX(state.tip.i)" t-att-cy="tipY1"/>
+              </g>
+            </svg>
+            <div class="fd-legend">
+              <span><i class="fd-dot fd-dot-1"/> Joriy davr</span>
+              <span><i class="fd-dot fd-dot-2"/> Oldingi davr</span>
+            </div>
+            <div class="fd-src">
+              Manba: pos.order (paid / done / invoiced) · do'kon vaqt mintaqasi ·
+              amount_total yig'indisi
+            </div>
+          </div>
+          <div class="fd-note" t-if="!chartHasData">
+            Bu davrda sotuv bo'lmagan — grafik bo'sh.
+          </div>
+         </div>
+        </div>
+
+        <div class="fd-card">
+          <h3>Diqqat talab qiladi</h3>
+          <div class="fd-sub">Avtomatik aniqlangan · <t t-esc="ov.alerts.length"/> ta</div>
+          <div t-if="!ov.alerts.length" class="fd-note">
+            Hozircha muammo aniqlanmadi.
+          </div>
+          <div t-foreach="ov.alerts" t-as="a" t-key="a_index"
+               t-att-class="'fd-alert fd-' + a.level">
+            <div class="fd-ic"><t t-esc="a.level === 'crit' ? '!' : '▲'"/></div>
+            <div>
+              <b t-esc="a.title"/>
+              <p t-esc="a.detail"/>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI -->
+      <div class="fd-row fd-c5 fd-mb">
+        <div class="fd-card fd-tile">
+          <div class="fd-kv">🧾 Cheklar</div>
+          <div class="fd-big"><t t-esc="num(ov.kpi.orders)"/></div>
+          <div t-att-class="'fd-foot ' + deltaClass(ov.delta.orders)">
+            <t t-esc="delta(ov.delta.orders)"/>
+          </div>
+          <svg class="fd-spark" viewBox="0 0 130 30" preserveAspectRatio="none"
+               t-if="spark('orders')">
+            <path t-att-d="spark('orders')"/>
+          </svg>
+        </div>
+        <div class="fd-card fd-tile">
+          <div class="fd-kv">💳 O'rtacha chek</div>
+          <div class="fd-big"><t t-esc="money(ov.kpi.avg_check)"/></div>
+          <div t-att-class="'fd-foot ' + deltaClass(ov.delta.avg_check)">
+            <t t-esc="delta(ov.delta.avg_check)"/>
+          </div>
+          <svg class="fd-spark" viewBox="0 0 130 30" preserveAspectRatio="none"
+               t-if="spark('avg_check')">
+            <path t-att-d="spark('avg_check')"/>
+          </svg>
+        </div>
+        <div class="fd-card fd-tile">
+          <div class="fd-kv">👕 Chekdagi dona</div>
+          <div class="fd-big"><t t-esc="num(ov.kpi.upt, 2)"/></div>
+          <div t-att-class="'fd-foot ' + deltaClass(ov.delta.upt)">
+            <t t-esc="delta(ov.delta.upt)"/>
+          </div>
+          <svg class="fd-spark" viewBox="0 0 130 30" preserveAspectRatio="none"
+               t-if="spark('upt')">
+            <path t-att-d="spark('upt')"/>
+          </svg>
+        </div>
+        <div class="fd-card fd-tile">
+          <div class="fd-kv">↩️ Qaytarish</div>
+          <div class="fd-big"><t t-esc="pct(ov.kpi.return_pct)"/></div>
+          <div class="fd-foot fd-muted">tushumdan</div>
+        </div>
+        <div class="fd-card fd-tile" t-if="showCost">
+          <div class="fd-kv">📈 Marja</div>
+          <div class="fd-big"><t t-esc="pct(ov.margin)"/></div>
+          <div class="fd-foot fd-muted">foyda <t t-esc="money(ov.profit)"/></div>
+        </div>
+        <div class="fd-card fd-tile" t-else="">
+          <div class="fd-kv">🏷️ Chegirma</div>
+          <div class="fd-big"><t t-esc="pct(ov.kpi.discount_pct)"/></div>
+          <div class="fd-foot fd-muted">tushumdan</div>
+        </div>
+      </div>
+
+      <!-- Do'konlar + top mahsulot -->
+      <div class="fd-row fd-c32">
+        <div class="fd-card">
+          <h3>Do'konlar — tushum</h3>
+          <div class="fd-sub">Reja foizi o'ngda ko'rsatilgan</div>
+          <div t-foreach="ov.stores" t-as="s" t-key="s.store" class="fd-bar fd-hov"
+               t-on-pointermove="(ev) => this.showTip(ev, s.store, [
+                   {label: 'Tushum', value: money(s.revenue), cls: 'c1'},
+                   {label: 'Cheklar', value: num(s.orders), cls: 'c2'},
+                   {label: &quot;O&apos;rtacha chek&quot;, value: money(s.avg_check), cls: 'c2'},
+                   {label: 'Reja', value: s.target_pct === null ? 'kiritilmagan' : pct(s.target_pct, 0),
+                    cls: s.target_pct === null ? 'c2' : (s.target_pct >= 100 ? 'up' : 'dn')}])"
+               t-on-pointerleave="hideTip">
+            <span t-esc="s.store"/>
+            <div class="fd-bt">
+              <i t-att-style="'width:' + barWidth(s.revenue, maxStoreRevenue)"/>
+            </div>
+            <b t-esc="money(s.revenue)"/>
+            <em t-att-class="planClass(s.target_pct)"
+                t-esc="s.target_pct === null ? '—' : pct(s.target_pct, 0)"/>
+          </div>
+        </div>
+
+        <div class="fd-card">
+          <h3>Eng ko'p sotilgan</h3>
+          <div class="fd-sub">Dona bo'yicha</div>
+          <div class="fd-tblwrap"><table class="fd-tbl fd-click">
+            <thead><tr><th>Mahsulot</th><th class="fd-num">Dona</th>
+              <th class="fd-num">Summa</th></tr></thead>
+            <tbody>
+              <tr t-foreach="ov.top_products" t-as="p" t-key="p.id"
+                  t-on-click="() => this.open('product', p.id)">
+                <td t-esc="p.name"/>
+                <td class="fd-num" t-esc="num(p.qty)"/>
+                <td class="fd-num" t-esc="money(p.amount)"/>
+              </tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- to'lovlar -->
+      <div class="fd-row fd-c2" style="margin-top:14px">
+        <div class="fd-card">
+          <h3>To'lov turlari</h3>
+          <div class="fd-sub">Naqd ulushi kassa nazorati uchun muhim</div>
+          <div t-foreach="ov.payments" t-as="pm" t-key="pm.key"
+               class="fd-pay fd-pay-click"
+               t-on-click="() => this.open('payment', pm.name)"
+               t-on-pointermove="(ev) => this.showTip(ev, pm.name, [
+                   {label: 'Summa', value: money(pm.amount), cls: 'c1'},
+                   {label: 'Ulush', value: pct(pm.pct), cls: 'c2'},
+                   {label: &quot;To&apos;lov usullari&quot;, value: num(pm.methods) + ' ta', cls: 'c2'},
+                   {label: '', value: 'Batafsil uchun bosing', cls: 'c2'}])"
+               t-on-pointerleave="hideTip">
+            <div class="fd-pay-h">
+              <span>
+                <t t-esc="pm.is_cash ? '💵' : '💳'"/> <t t-esc="pm.name"/>
+                <small class="fd-muted" t-if="pm.methods &gt; 1">
+                  · <t t-esc="pm.methods"/> do'kon
+                </small>
+              </span>
+              <b><t t-esc="money(pm.amount)"/> · <t t-esc="pct(pm.pct)"/></b>
+            </div>
+            <div class="fd-mbar"><i t-att-style="'width:' + pm.pct + '%'"/></div>
+          </div>
+          <div class="fd-note" t-if="ov.payments.length">
+            Tafsilot uchun to'lov turiga bosing.
+          </div>
+        </div>
+        <div class="fd-card">
+          <h3>Soatlik savdo</h3>
+          <div class="fd-sub">Xodim jadvalini rejalashtirish uchun</div>
+          <div t-foreach="activeHours" t-as="h" t-key="h.hour" class="fd-bar fd-hov"
+               t-on-pointermove="(ev) => this.showTip(ev, h.hour + ':00 — ' + (h.hour + 1) + ':00', [
+                   {label: 'Tushum', value: money(h.revenue), cls: 'c1'},
+                   {label: 'Cheklar', value: num(h.orders), cls: 'c2'},
+                   {label: &quot;O&apos;rtacha chek&quot;, value: h.orders ? money(h.revenue / h.orders) : '—', cls: 'c2'},
+                   {label: 'Kunlik ulush', value: pct(totalHourly ? h.revenue / totalHourly * 100 : 0), cls: 'c2'}])"
+               t-on-pointerleave="hideTip">
+            <span><t t-esc="h.hour"/>:00</span>
+            <div class="fd-bt">
+              <i t-att-style="'width:' + barWidth(h.revenue, maxHourly)"/>
+            </div>
+            <b t-esc="money(h.revenue)"/>
+          </div>
+        </div>
+      </div>
+    </t>
+
+    <!-- ================= DO'KONLAR ================= -->
+    <t t-if="!state.loading and state.tab === 'stores' and state.overview">
+      <div class="fd-card">
+        <h3>Do'konlar bo'yicha to'liq kesim</h3>
+        <div class="fd-sub">
+          LFL = o'tgan yilning shu davri bilan solishtirish ·
+          UPT = bitta chekdagi dona
+        </div>
+        <div class="fd-tblwrap"><table class="fd-tbl fd-click">
+          <thead>
+            <tr>
+              <th>#</th><th>Do'kon</th><th class="fd-num">Tushum</th>
+              <th class="fd-num">Reja</th><th class="fd-num">LFL</th>
+              <th class="fd-num">Chek</th><th class="fd-num">O'rt. chek</th>
+              <th class="fd-num">UPT</th><th class="fd-num">Chegirma</th>
+              <th class="fd-num">Qaytarish</th>
+              <th t-if="showCost" class="fd-num">Marja</th>
+              <th t-if="showCost" class="fd-num">Foyda</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr t-foreach="state.overview.stores" t-as="s" t-key="s.store"
+                t-on-click="() => this.open('store', s.store)">
+              <td class="fd-muted"><t t-esc="s_index + 1"/></td>
+              <td><b t-esc="s.store"/></td>
+              <td class="fd-num" t-esc="money(s.revenue)"/>
+              <td t-att-class="'fd-num ' + planClass(s.target_pct)"
+                  t-esc="s.target_pct === null ? '—' : pct(s.target_pct, 0)"/>
+              <td t-att-class="'fd-num ' + deltaClass(s.lfl)"
+                  t-esc="s.lfl === null ? '—' : delta(s.lfl)"/>
+              <td class="fd-num" t-esc="num(s.orders)"/>
+              <td class="fd-num" t-esc="money(s.avg_check)"/>
+              <td class="fd-num" t-esc="num(s.upt, 2)"/>
+              <td class="fd-num" t-esc="pct(s.discount_pct)"/>
+              <td class="fd-num" t-esc="pct(s.return_pct)"/>
+              <td t-if="showCost" class="fd-num" t-esc="pct(s.margin)"/>
+              <td t-if="showCost" class="fd-num" t-esc="money(s.profit)"/>
+            </tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div class="fd-card fd-mt" t-if="state.sessions">
+        <h3>Kassa sessiyalari — ochilish va yopilish</h3>
+        <div class="fd-sub">
+          <t t-esc="state.sessions.period.from"/> — <t t-esc="state.sessions.period.to"/> ·
+          ochiq: <b><t t-esc="num(state.sessions.open_count)"/></b> ·
+          yopilgan: <b><t t-esc="num(state.sessions.closed_count)"/></b>
+          <t t-if="state.sessions.diff_count">
+            · <b class="fd-dn"><t t-esc="num(state.sessions.diff_count)"/> tasida kassa farqi
+              (<t t-esc="money(state.sessions.diff_total)"/>)</b>
+          </t>
+          <t t-if="state.sessions.not_counted_count">
+            <br/>
+            <b class="fd-warn">Diqqat:</b> shundan
+            <b><t t-esc="num(state.sessions.not_counted_count)"/></b> ta sessiyada
+            (<t t-esc="money(state.sessions.not_counted_total)"/>) kassir yopishda
+            <b>sanalgan naqdni umuman kiritmagan</b> — bu pul yo'qolgani emas,
+            hisob yuritilmagani. Haqiqiy farq:
+            <b t-att-class="state.sessions.real_diff_total &lt; 0 ? 'fd-dn' : 'fd-ok'"
+               t-esc="money(state.sessions.real_diff_total)"/>
+          </t>
+          · qatorga bosing — sessiya tafsiloti
+          <t t-if="state.sessions.truncated">
+            <br/>Ro'yxatda <b><t t-esc="num(state.sessions.shown)"/></b> ta
+            ko'rsatilgan (jami <t t-esc="num(state.sessions.total)"/> ta) —
+            yuqoridagi ko'rsatkichlar hammasi bo'yicha hisoblangan.
+          </t>
+        </div>
+
+        <t t-set="prows" t-value="state.sessions.rows"/>
+        <t t-set="pkey" t-value="'sess'"/>
+        <t t-call="feliza_dashboard.Pager"/>
+        <div t-if="!state.sessions.rows.length" class="fd-note">
+          Bu davrda sessiya ochilmagan.
+        </div>
+        <div class="fd-tblwrap" t-else=""><table class="fd-tbl fd-click">
+          <thead><tr>
+            <th>Sessiya</th><th>Do'kon</th>
+            <th>Ochgan</th><th>Ochilgan</th>
+            <th>Yopgan</th><th>Yopilgan</th>
+            <th class="fd-num">Soat</th>
+            <th class="fd-num">Chek</th>
+            <th class="fd-num">Tushum</th>
+            <th class="fd-num">Kassa farqi</th>
+            <th>Holat</th>
+          </tr></thead>
+          <tbody>
+            <tr t-foreach="pgRows(state.sessions.rows, 'sess')" t-as="ss" t-key="ss.id"
+                t-on-click="() => this.open('session', ss.id)">
+              <td><b t-esc="ss.name"/></td>
+              <td t-esc="ss.store"/>
+              <td t-esc="ss.opened_by or '—'"/>
+              <td class="fd-muted" t-esc="ss.opened_at"/>
+              <td t-esc="ss.closed_by or '—'"/>
+              <td class="fd-muted" t-esc="ss.closed_at or '—'"/>
+              <td class="fd-num" t-esc="num(ss.hours, 1)"/>
+              <td class="fd-num" t-esc="num(ss.orders)"/>
+              <td class="fd-num" t-esc="money(ss.revenue)"/>
+              <td t-att-class="'fd-num ' + (ss.not_counted ? 'fd-warn' : (ss.difference &lt; 0 ? 'fd-dn' : (ss.difference &gt; 0 ? 'fd-warn' : 'fd-muted')))">
+                <t t-if="ss.not_counted">
+                  <span class="fd-tag" title="Kassir yopishda sanalgan naqdni kiritmagan">
+                    kassa sanalmagan
+                  </span>
+                </t>
+                <t t-else="" t-esc="ss.difference ? money(ss.difference) : '0'"/>
+              </td>
+              <td>
+                <span t-att-class="ss.state === 'closed' ? 'fd-muted' : 'fd-up'">
+                  <t t-esc="ss.state === 'closed' ? 'yopilgan' : 'ochiq'"/>
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table></div>
+      </div>
+    </t>
+
+    <!-- ================= XODIMLAR ================= -->
+    <t t-if="!state.loading and state.tab === 'staff' and state.staff">
+      <div t-if="!state.staff.detect.salesperson" class="fd-note fd-mb">
+        <b>Sotuvchi maydoni topilmadi.</b> POS'da sotuvchi yozilmayotgan
+        bo'lishi mumkin. Diagnostika bo'limida batafsil.
+      </div>
+      <div t-elif="state.staff.detect.salesperson.is_fallback" class="fd-note fd-mb">
+        <b>Diqqat:</b> alohida sotuvchi maydoni topilmadi — pastdagi
+        reytingda <b>kassir</b> ko'rsatilyapti. Sotuvchini yozadigan modul
+        o'rnatilsa, panel avtomat o'sha maydonga o'tadi.
+      </div>
+      <div t-elif="state.staff.coverage and state.staff.coverage.empty"
+           class="fd-note fd-mb">
+        Davrdagi <b t-esc="num(state.staff.coverage.orders)"/> chekdan
+        <b t-esc="num(state.staff.coverage.empty)"/> tasida sotuvchi
+        ko'rsatilmagan (<t t-esc="money(state.staff.coverage.empty_amount)"/>).
+        Reyting qolgan <t t-esc="num(state.staff.coverage.pct, 1)"/>% chek
+        bo'yicha tuzilgan.
+      </div>
+
+      <div class="fd-mb" style="text-align:right">
+        <span class="fd-muted" style="margin-right:6px">Excelга
+          (<b t-esc="state.store or 'Barcha do\'konlar'"/>):</span>
+        <button class="fd-pg-btn" t-on-click="() => this.exportStaff('sellers')"
+                title="Faqat sotuvchilar reytingini Excelга (davr + do'kon filtri bilan)">⬇️ Sotuvchilar</button>
+        <button class="fd-pg-btn" t-on-click="() => this.exportStaff('cashiers')"
+                title="Faqat kassirlarni Excelга (davr + do'kon filtri bilan)">⬇️ Kassirlar</button>
+        <button class="fd-pg-btn" t-on-click="() => this.exportStaff('both')"
+                title="Ikkalasini (2 varaq) Excelга (davr + do'kon filtri bilan)">⬇️ Ikkalasi</button>
+      </div>
+
+      <div class="fd-row fd-c2">
+        <div class="fd-card">
+          <h3>Sotuvchilar reytingi</h3>
+          <div class="fd-sub">
+            <t t-if="state.staff.detect.salesperson">
+              <t t-esc="state.staff.detect.salesperson.label"/> ·
+              <span class="fd-muted"
+                    t-esc="state.staff.detect.salesperson.model + '.' +
+                           state.staff.detect.salesperson.field"/>
+            </t>
+            <t t-else="">Manba: —</t>
+          </div>
+          <t t-set="prows" t-value="state.staff.salespeople"/>
+          <t t-set="pkey" t-value="'sellers'"/>
+          <t t-call="feliza_dashboard.Pager"/>
+          <div class="fd-tblwrap"><table class="fd-tbl fd-click">
+            <thead><tr><th>#</th><th>Sotuvchi</th><th class="fd-num">Tushum</th>
+              <th class="fd-num">Chek</th><th class="fd-num">O'rt. chek</th>
+              <th class="fd-num">UPT</th></tr></thead>
+            <tbody>
+              <tr t-foreach="pgRows(state.staff.salespeople, 'sellers')" t-as="p" t-key="p.id"
+                  t-on-click="() => this.open('employee', p.id, p.model)">
+                <td class="fd-muted"><t t-esc="p_index + 1"/></td>
+                <td><b t-esc="p.name"/></td>
+                <td class="fd-num" t-esc="money(p.revenue)"/>
+                <td class="fd-num" t-esc="num(p.orders)"/>
+                <td class="fd-num" t-esc="money(p.avg_check)"/>
+                <td class="fd-num" t-esc="num(p.upt, 2)"/>
+              </tr>
+            </tbody>
+          </table></div>
+        </div>
+
+        <div class="fd-card">
+          <h3>Kassirlar</h3>
+          <div class="fd-sub">
+            <t t-if="state.staff.detect.cashier">
+              <t t-esc="state.staff.detect.cashier.label"/> ·
+              <span class="fd-muted"
+                    t-esc="state.staff.detect.cashier.model + '.' +
+                           state.staff.detect.cashier.field"/>
+            </t>
+            <t t-else="">Chek urgan xodim</t>
+          </div>
+          <t t-set="prows" t-value="state.staff.cashiers"/>
+          <t t-set="pkey" t-value="'cashiers'"/>
+          <t t-call="feliza_dashboard.Pager"/>
+          <div class="fd-tblwrap"><table class="fd-tbl fd-click">
+            <thead><tr><th>Kassir</th><th>Do'kon</th><th class="fd-num">Chek</th>
+              <th class="fd-num">Tushum</th><th class="fd-num">Smena</th>
+              <th class="fd-num">Kassa farqi</th></tr></thead>
+            <tbody>
+              <tr t-foreach="pgRows(state.staff.cashiers, 'cashiers')" t-as="c" t-key="c.id"
+                  t-on-click="() => this.open('employee', c.id, c.model)">
+                <td>
+                  <b t-esc="c.name"/>
+                  <span t-if="c.not_counted" class="fd-tag"
+                        title="Shuncha smenada kassir sanalgan naqdni kiritmagan — farq hisobga olinmadi">
+                    <t t-esc="c.not_counted"/> sanalmagan
+                  </span>
+                </td>
+                <td class="fd-muted" t-esc="c.store"/>
+                <td class="fd-num" t-esc="num(c.orders)"/>
+                <td class="fd-num" t-esc="money(c.revenue)"/>
+                <td class="fd-num" t-esc="num(c.sessions)"/>
+                <td t-att-class="'fd-num ' + (c.difference &lt; -1000 ? 'fd-dn' : '')"
+                    t-esc="money(c.difference)"/>
+              </tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+    </t>
+
+    <!-- ================= MAHSULOT ================= -->
+    <t t-if="!state.loading and state.tab === 'products' and state.products">
+      <div class="fd-row fd-c2">
+        <div class="fd-card">
+          <h3>Eng ko'p sotilgan</h3>
+          <div class="fd-sub">Davr bo'yicha · dona</div>
+          <t t-set="prows" t-value="state.products.top"/>
+          <t t-set="pkey" t-value="'top_prod'"/>
+          <t t-call="feliza_dashboard.Pager"/>
+          <div class="fd-tblwrap"><table class="fd-tbl fd-click">
+            <thead><tr><th>Mahsulot</th><th class="fd-num">Dona</th>
+              <th class="fd-num">Summa</th></tr></thead>
+            <tbody>
+              <tr t-foreach="pgRows(state.products.top, 'top_prod')" t-as="p" t-key="p.id"
+                  t-on-click="() => this.open('product', p.id)">
+                <td t-esc="p.name"/>
+                <td class="fd-num" t-esc="num(p.qty)"/>
+                <td class="fd-num" t-esc="money(p.amount)"/>
+              </tr>
+            </tbody>
+          </table></div>
+        </div>
+
+        <div class="fd-card">
+          <h3>O'lcham bo'yicha sotuv</h3>
+          <div class="fd-sub" t-if="state.products.sizes.length">
+            Qaysi o'lcham tugab, qaysisi qolib ketmoqda
+          </div>
+          <div t-if="!state.products.sizes.length" class="fd-note">
+            O'lcham atributi topilmadi. Diagnostika bo'limiga qarang.
+          </div>
+          <div t-foreach="state.products.sizes" t-as="s" t-key="s.id" class="fd-bar">
+            <span t-esc="s.name"/>
+            <div class="fd-bt">
+              <i t-att-style="'width:' + barWidth(s.sold,
+                 Math.max(1, ...state.products.sizes.map(x => x.sold)))"/>
+            </div>
+            <b t-esc="num(s.sold)"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="fd-card" style="margin-top:14px">
+        <h3>Zaxirada eng ko'p pul turgan tovarlar</h3>
+        <div class="fd-sub">
+          Qiymat <t t-esc="showCost ? 'tannarxda' : 'sotuv narxida'"/> hisoblangan
+        </div>
+        <t t-set="prows" t-value="state.products.slow"/>
+        <t t-set="pkey" t-value="'slow_prod'"/>
+        <t t-call="feliza_dashboard.Pager"/>
+        <div class="fd-tblwrap"><table class="fd-tbl fd-click">
+          <thead><tr><th>Mahsulot</th><th class="fd-num">Dona</th>
+            <th class="fd-num">Qiymat</th></tr></thead>
+          <tbody>
+            <tr t-foreach="pgRows(state.products.slow, 'slow_prod')" t-as="p" t-key="p.id"
+              t-on-click="() => this.open('product', p.id)">
+              <td t-esc="p.name"/>
+              <td class="fd-num" t-esc="num(p.qty)"/>
+              <td class="fd-num" t-esc="money(p.value)"/>
+            </tr>
+          </tbody>
+        </table></div>
+      </div>
+    </t>
+
+
+    <!-- ================= CHEGIRMA ================= -->
+    <t t-if="!state.loading and state.tab === 'disc' and state.discounts">
+      <t t-set="dc" t-value="state.discounts"/>
+
+      <div t-if="!dc.has_discount" class="fd-card fd-mb">
+        <div class="fd-note">
+          Bazada chegirma maydoni topilmadi — bu bo'lim bo'sh qoladi.
+        </div>
+      </div>
+
+      <!-- KPI -->
+      <div class="fd-row fd-c5 fd-mb">
+        <div class="fd-card fd-tile">
+          <div class="fd-kv">🏷️ Chegirma summasi</div>
+          <div class="fd-fig fd-dn"><t t-esc="money(dc.kpi.discount)"/></div>
+          <div class="fd-sub">Davr: <t t-esc="dc.period.from"/> — <t t-esc="dc.period.to"/></div>
+        </div>
+        <div class="fd-card fd-tile">
+          <div class="fd-kv">📉 Tushumdan ulushi</div>
+          <div class="fd-fig"><t t-esc="pct(dc.kpi.discount_pct)"/></div>
+          <div class="fd-sub">Chegirmasiz bo'lardi: <t t-esc="money(dc.kpi.gross)"/></div>
+        </div>
+        <div class="fd-card fd-tile">
+          <div class="fd-kv">🧾 Chegirmali cheklar</div>
+          <div class="fd-fig"><t t-esc="num(dc.kpi.disc_orders)"/></div>
+          <div class="fd-sub">
+            Jami <t t-esc="num(dc.kpi.orders)"/> tadan · <t t-esc="pct(dc.kpi.order_pct, 0)"/>
+          </div>
+        </div>
+        <div class="fd-card fd-tile">
+          <div class="fd-kv">👗 Chegirmali dona</div>
+          <div class="fd-fig"><t t-esc="num(dc.kpi.disc_units)"/></div>
+          <div class="fd-sub">
+            Jami <t t-esc="num(dc.kpi.units)"/> donadan · <t t-esc="pct(dc.kpi.unit_pct, 0)"/>
+          </div>
+        </div>
+        <div class="fd-card fd-tile">
+          <div class="fd-kv">⚠️ Eng katta chegirma</div>
+          <div class="fd-fig"><t t-esc="pct(dc.kpi.max_pct, 0)"/></div>
+          <div class="fd-sub">
+            Chekka o'rtacha: <t t-esc="money(dc.kpi.avg_per_order)"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- Do'kon + taqsimot -->
+      <div class="fd-row fd-c23 fd-mb">
+        <div class="fd-card">
+          <h3>Do'kon bo'yicha chegirma</h3>
+          <div class="fd-sub">Qaysi do'kon ko'proq chegirma bermoqda</div>
+          <div t-if="!dc.stores.length" class="fd-note">Ma'lumot yo'q.</div>
+          <div class="fd-tblwrap" t-else=""><table class="fd-tbl fd-click">
+            <thead><tr>
+              <th>Do'kon</th>
+              <th class="fd-num">Chegirma</th>
+              <th class="fd-num">Ulushi</th>
+              <th class="fd-num">Chekda</th>
+              <th class="fd-num">Sotildi</th>
+            </tr></thead>
+            <tbody>
+              <tr t-foreach="dc.stores" t-as="r" t-key="r.store"
+                t-on-click="() => this.open('discount_orders', r.store)">
+                <td>
+                  <b t-esc="r.store"/>
+                  <div class="fd-trk fd-trk-sm">
+                    <i t-att-style="'width:' + barWidth(r.discount, maxStoreDiscount)"/>
+                  </div>
+                </td>
+                <td class="fd-num fd-dn" t-esc="money(r.discount)"/>
+                <td t-att-class="'fd-num ' + (r.pct &gt; 15 ? 'fd-dn' : '')"
+                    t-esc="pct(r.pct)"/>
+                <td class="fd-num">
+                  <t t-esc="num(r.disc_orders)"/>
+                  <small class="fd-muted"> / <t t-esc="num(r.orders)"/></small>
+                </td>
+                <td class="fd-num" t-esc="money(r.net)"/>
+              </tr>
+            </tbody>
+          </table></div>
+        </div>
+
+        <div class="fd-card">
+          <h3>Chegirma darajasi</h3>
+          <div class="fd-sub">Qanchalik katta chegirmalar berilyapti</div>
+          <div t-if="!dc.buckets.length" class="fd-note">Chegirmali sotuv yo'q.</div>
+          <div t-foreach="dc.buckets" t-as="b" t-key="b.label" class="fd-bar">
+            <span class="fd-bar-l" t-esc="b.label"/>
+            <div class="fd-trk">
+              <i t-att-style="'width:' + barWidth(b.discount, maxBucket)"/>
+            </div>
+            <span class="fd-bar-v">
+              <t t-esc="money(b.discount)"/>
+              <small class="fd-muted"> · <t t-esc="num(b.qty)"/> dona</small>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tovarlar -->
+      <div class="fd-card fd-mb">
+        <h3>Eng ko'p chegirma berilgan tovarlar</h3>
+        <div class="fd-sub">Chegirma summasi bo'yicha, yuqori 20 ta</div>
+        <t t-set="prows" t-value="dc.products"/>
+        <t t-set="pkey" t-value="'disc_prod'"/>
+        <t t-call="feliza_dashboard.Pager"/>
+        <div t-if="!dc.products.length" class="fd-note">Chegirmali tovar yo'q.</div>
+        <div class="fd-tblwrap" t-else=""><table class="fd-tbl fd-click">
+          <thead><tr>
+            <th>Mahsulot</th>
+            <th>Artikul</th>
+            <th class="fd-num">Dona</th>
+            <th class="fd-num">Chegirmasiz</th>
+            <th class="fd-num">Chegirma</th>
+            <th class="fd-num">O'rt. %</th>
+            <th class="fd-num">Sotildi</th>
+          </tr></thead>
+          <tbody>
+            <tr t-foreach="pgRows(dc.products, 'disc_prod')" t-as="p" t-key="p.id"
+              t-on-click="() => this.open('product', p.id)">
+              <td t-esc="p.name"/>
+              <td class="fd-muted"><t t-esc="p.code"/></td>
+              <td class="fd-num" t-esc="num(p.qty)"/>
+              <td class="fd-num" t-esc="money(p.gross)"/>
+              <td class="fd-num fd-dn" t-esc="money(p.discount)"/>
+              <td t-att-class="'fd-num ' + (p.avg_pct &gt; 30 ? 'fd-dn' : '')"
+                  t-esc="pct(p.avg_pct, 0)"/>
+              <td class="fd-num" t-esc="money(p.net)"/>
+            </tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <!-- Kim berdi + cheklar -->
+      <div class="fd-row fd-c2">
+        <div class="fd-card">
+          <h3>Kim chegirma berdi</h3>
+          <div class="fd-sub">Sotuvchi/kassir kesimida</div>
+          <div t-if="!dc.people.length" class="fd-note">Ma'lumot yo'q.</div>
+          <div class="fd-tblwrap" t-else=""><table class="fd-tbl fd-click">
+            <thead><tr>
+              <th>Xodim</th>
+              <th class="fd-num">Chegirma</th>
+              <th class="fd-num">Ulushi</th>
+              <th class="fd-num">Chekda</th>
+              <th class="fd-num">Maks %</th>
+            </tr></thead>
+            <tbody>
+              <tr t-foreach="dc.people" t-as="w" t-key="w.id"
+                t-on-click="() => this.open('employee', w.id, w.model)">
+                <td t-esc="w.name"/>
+                <td class="fd-num fd-dn" t-esc="money(w.discount)"/>
+                <td t-att-class="'fd-num ' + (w.pct &gt; 15 ? 'fd-dn' : '')"
+                    t-esc="pct(w.pct)"/>
+                <td class="fd-num">
+                  <t t-esc="num(w.disc_orders)"/>
+                  <small class="fd-muted"> / <t t-esc="num(w.orders)"/></small>
+                </td>
+                <td class="fd-num" t-esc="pct(w.max_pct, 0)"/>
+              </tr>
+            </tbody>
+          </table></div>
+        </div>
+
+        <div class="fd-card">
+          <h3>Chegirmali cheklar</h3>
+          <div class="fd-sub">Oxirgi 25 ta — tekshirish uchun</div>
+          <t t-set="prows" t-value="dc.orders"/>
+          <t t-set="pkey" t-value="'disc_orders'"/>
+          <t t-call="feliza_dashboard.Pager"/>
+          <div t-if="!dc.orders.length" class="fd-note">Chegirmali chek yo'q.</div>
+          <div class="fd-tblwrap" t-else=""><table class="fd-tbl fd-click">
+            <thead><tr>
+              <th>Chek</th><th>Vaqt</th><th>Do'kon</th>
+              <th class="fd-num">Dona</th>
+              <th class="fd-num">Chegirma</th>
+              <th class="fd-num">%</th>
+              <th class="fd-num">To'landi</th>
+            </tr></thead>
+            <tbody>
+              <tr t-foreach="pgRows(dc.orders, 'disc_orders')" t-as="o" t-key="o.id"
+                t-on-click="() => this.open('order', o.id)">
+                <td t-esc="o.ref"/>
+                <td class="fd-muted" t-esc="o.date"/>
+                <td t-esc="o.store"/>
+                <td class="fd-num" t-esc="num(o.qty)"/>
+                <td class="fd-num fd-dn" t-esc="money(o.discount)"/>
+                <td class="fd-num" t-esc="pct(o.pct, 0)"/>
+                <td class="fd-num" t-esc="money(o.total)"/>
+              </tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+    </t>
+
+    <!-- ================= OMBOR ================= -->
+    <t t-if="!state.loading and state.tab === 'stock' and state.stockStores">
+      <div class="fd-card fd-mb">
+        <h3>Do'kon bo'yicha tovar qoldig'i</h3>
+        <t t-set="gtot" t-value="state.stockStores.total.grand or state.stockStores.total"/>
+        <div class="fd-sub">
+          Hozirgi holat · qo'ldagi umumiy
+          <b><t t-esc="num(gtot.units)"/></b> dona,
+          <b><t t-esc="num(gtot.skus)"/></b> nomdagi tovar,
+          sotuv narxida <b><t t-esc="money(gtot.value)"/></b>
+          <t t-if="showCost">
+            · tannarxda <b><t t-esc="money(gtot.cost)"/></b>
+          </t>
+          — do'kon nomiga bosing, tovarlar ro'yxati chiqadi
+        </div>
+
+        <div t-if="!state.stockStores.rows.length" class="fd-note">
+          Qoldiq topilmadi.
+        </div>
+        <div class="fd-tblwrap" t-else=""><table class="fd-tbl fd-click">
+          <thead><tr>
+            <th>Ombor / do'kon</th>
+            <th class="fd-num">Nomdagi tovar</th>
+            <th class="fd-num">Dona</th>
+            <th class="fd-num">Sotuv qiymati</th>
+            <th t-if="showCost" class="fd-num">Tannarxda</th>
+          </tr></thead>
+          <tbody>
+            <tr t-foreach="state.stockStores.rows" t-as="w" t-key="w.id"
+                t-on-click="() => this.openWarehouse(w)"
+                t-att-class="state.stockWh === w.id ? 'fd-sel' : ''">
+              <td>
+                <b><t t-esc="w.name"/></b>
+                <div class="fd-trk fd-trk-sm">
+                  <i t-att-style="'width:' + barWidth(w.units, maxWhUnits)"/>
+                </div>
+              </td>
+              <td class="fd-num" t-esc="num(w.skus)"/>
+              <td class="fd-num" t-esc="num(w.units)"/>
+              <td class="fd-num" t-esc="money(w.value)"/>
+              <td t-if="showCost" class="fd-num" t-esc="money(w.cost)"/>
+            </tr>
+
+            <!-- Tranzit: A dan chiqqan, B hali qabul qilmagan tovar.
+                 Bu qator bo'lmasa, kompaniyaning umumiy qoldig'i
+                 jadvaldagi yig'indidan ko'p bo'lib chiqadi. -->
+            <tr t-if="state.stockStores.total.transit
+                      and state.stockStores.total.transit.units"
+                class="fd-sum">
+              <td>
+                <b>🚚 Yo'lda (tranzit)</b>
+                <div class="fd-muted" style="font-size:11.5px">
+                  Jo'natilgan, lekin hali qabul qilinmagan — hech bir
+                  do'kon qoldig'iga kirmaydi
+                </div>
+              </td>
+              <td class="fd-num" t-esc="num(state.stockStores.total.transit.skus)"/>
+              <td class="fd-num" t-esc="num(state.stockStores.total.transit.units)"/>
+              <td class="fd-num" t-esc="money(state.stockStores.total.transit.value)"/>
+              <td t-if="showCost" class="fd-num"
+                  t-esc="money(state.stockStores.total.transit.cost)"/>
+            </tr>
+
+            <!-- JAMI — barcha do'konlar bo'yicha qo'ldagi umumiy tovar
+                 (100% aniq: do'kon omborlari + online + asosiy + tranzit).
+                 Faqat rahbar, filtrsiz holatda (grand mavjud bo'lganda). -->
+            <tr t-if="state.stockStores.total.grand" class="fd-sum fd-grand">
+              <td>
+                <b>📦 JAMI — barcha do'konlar (qo'ldagi umumiy)</b>
+                <div class="fd-muted" style="font-size:11.5px">
+                  Do'kon omborlari + online + asosiy + tranzit — hammasi, 100% aniq
+                </div>
+              </td>
+              <td class="fd-num"><b t-esc="num(state.stockStores.total.grand.skus)"/></td>
+              <td class="fd-num"><b t-esc="num(state.stockStores.total.grand.units)"/></td>
+              <td class="fd-num"><b t-esc="money(state.stockStores.total.grand.value)"/></td>
+              <td t-if="showCost" class="fd-num"><b t-esc="money(state.stockStores.total.grand.cost)"/></td>
+            </tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div class="fd-card fd-mb" t-if="state.stockWh">
+        <h3>
+          <t t-esc="state.stockWhName"/> — tovarlar
+        </h3>
+        <div class="fd-sub">
+          Qiymati bo'yicha yuqori 400 ta, 40 tadan sahifalanadi. Qidirish uchun
+          nom, artikul, barkod, <b>rang</b> yoki <b>o'lcham</b> yozing
+          (masalan «qora» yoki «XL»).
+        </div>
+        <div class="fd-toolbar">
+          <input class="fd-inp" type="text"
+                 placeholder="Nom / artikul / barkod / rang / o'lcham…"
+                 t-att-value="state.stockQuery" t-on-input="onStockQuery"/>
+          <select class="fd-select" t-on-change="setStockOrder">
+            <option value="value">Qiymati bo'yicha</option>
+            <option value="qty">Dona bo'yicha</option>
+            <option value="name">Nomi bo'yicha</option>
+          </select>
+          <span class="fd-muted" t-if="state.stockBusy">qidirilmoqda…</span>
+        </div>
+
+        <div t-if="state.stockDetail and !state.stockDetail.rows.length" class="fd-note">
+          Tovar topilmadi.
+        </div>
+        <t t-set="prows" t-value="state.stockDetail and state.stockDetail.rows"/>
+        <t t-set="pkey" t-value="'stock'"/>
+        <t t-call="feliza_dashboard.Pager"/>
+        <div class="fd-tblwrap" t-if="state.stockDetail and state.stockDetail.rows.length">
+          <table class="fd-tbl fd-click">
+            <thead><tr>
+              <th>Mahsulot</th>
+              <th>Rang</th>
+              <th>O'lcham</th>
+              <th>Artikul</th>
+              <th>Barkod</th>
+              <th class="fd-num">Dona</th>
+              <th class="fd-num">Narxi</th>
+              <th class="fd-num">Qiymati</th>
+              <th t-if="showCost" class="fd-num">Tannarxda</th>
+            </tr></thead>
+            <tbody>
+              <tr t-foreach="pgRows(state.stockDetail.rows, 'stock')" t-as="p" t-key="p.id"
+                t-on-click="() => this.open('product', p.id)">
+                <td>
+                  <t t-esc="p.name"/>
+                  <small class="fd-muted" t-if="p.attrs">
+                    <br/><t t-esc="p.attrs"/>
+                  </small>
+                </td>
+                <td>
+                  <span t-if="p.color" class="fd-tag" t-esc="p.color"/>
+                  <span t-else="" class="fd-muted">—</span>
+                </td>
+                <td>
+                  <span t-if="p.size" class="fd-tag fd-tag-sz" t-esc="p.size"/>
+                  <span t-else="" class="fd-muted">—</span>
+                </td>
+                <td class="fd-muted" t-esc="p.code"/>
+                <td class="fd-muted" t-esc="p.barcode"/>
+                <td class="fd-num" t-esc="num(p.qty)"/>
+                <td class="fd-num" t-esc="money(p.price)"/>
+                <td class="fd-num" t-esc="money(p.value)"/>
+                <td t-if="showCost" class="fd-num" t-esc="money(p.cost_value)"/>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </t>
+
+    <t t-if="!state.loading and state.tab === 'stock' and state.stock">
+      <div class="fd-row fd-c2">
+        <div class="fd-card">
+          <h3>Tugagan / tugayotgan tovarlar</h3>
+          <div class="fd-sub">
+            So'nggi 14 kunda kamida 3 dona sotilgan, lekin zaxira 3 kundan kam.
+            «Yo'qotish/kun» = kunlik o'rtacha sotuv × sotuv narxi — ya'ni tovar
+            bo'lmagani uchun kuniga qancha tushumdan quruq qolinmoqda (taxminiy)
+          </div>
+          <t t-set="prows" t-value="state.stock.stockouts"/>
+          <t t-set="pkey" t-value="'stockouts'"/>
+          <t t-call="feliza_dashboard.Pager"/>
+          <div t-if="!state.stock.stockouts.length" class="fd-note">
+            Tugayotgan tovar aniqlanmadi.
+          </div>
+          <div class="fd-tblwrap" t-else=""><table  class="fd-tbl fd-click">
+            <thead><tr><th>Mahsulot</th><th class="fd-num">Qoldiq</th>
+              <th class="fd-num">14 kunda sotilgan</th>
+              <th class="fd-num">Kunlik sotuv</th>
+              <th class="fd-num">Yo'qotish/kun</th></tr></thead>
+            <tbody>
+              <tr t-foreach="pgRows(state.stock.stockouts, 'stockouts')" t-as="p" t-key="p.id"
+                t-on-click="() => this.open('product', p.id)">
+                <td t-esc="p.name"/>
+                <td t-att-class="'fd-num ' + (p.on_hand &lt;= 0 ? 'fd-dn' : '')"
+                    t-esc="num(p.on_hand)"/>
+                <td class="fd-num" t-esc="num(p.sold)"/>
+                <td class="fd-num" t-esc="num(p.daily_rate, 2)"/>
+                <td class="fd-num fd-dn" t-esc="money(p.lost_per_day)"/>
+              </tr>
+            </tbody>
+          </table></div>
+        </div>
+
+        <div class="fd-card">
+          <h3>Yo'ldagi o'tkazmalar</h3>
+          <div class="fd-sub">Omborlar aro o'tkazma modulidan</div>
+          <div t-if="!state.stock.transit.length" class="fd-note">
+            Yo'lda o'tkazma yo'q (yoki o'tkazma moduli o'rnatilmagan).
+          </div>
+          <div class="fd-tblwrap" t-else=""><table  class="fd-tbl">
+            <thead><tr><th>Hujjat</th><th>Yo'nalish</th>
+              <th class="fd-num">Dona</th><th class="fd-num">Kun</th></tr></thead>
+            <tbody>
+              <tr t-foreach="state.stock.transit" t-as="t" t-key="t.name">
+                <td t-esc="t.name"/>
+                <td class="fd-muted"><t t-esc="t.source"/> → <t t-esc="t.dest"/></td>
+                <td class="fd-num" t-esc="num(t.qty)"/>
+                <td t-att-class="'fd-num ' + (t.days &gt; 5 ? 'fd-dn' : '')"
+                    t-esc="num(t.days)"/>
+              </tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+    </t>
+
+
+    <!-- ================= O'TKAZMA ================= -->
+    <t t-if="!state.loading and state.tab === 'transfer' and state.transfers">
+      <t t-set="tr" t-value="state.transfers"/>
+
+      <div t-if="!tr.available" class="fd-card">
+        <h3>Omborlar aro o'tkazma</h3>
+        <div class="fd-note">
+          «Inter Warehouse Transfer» moduli o'rnatilmagan — bu bo'lim bo'sh.
+        </div>
+      </div>
+
+      <t t-if="tr.available">
+        <!-- KPI -->
+        <div class="fd-row fd-c5 fd-mb">
+          <div class="fd-card fd-tile">
+            <div class="fd-kv">🚚 Hozir yo'lda</div>
+            <div class="fd-fig" t-att-class="tr.kpi.transit_qty ? 'fd-warn' : ''">
+              <t t-esc="num(tr.kpi.transit_qty)"/> <s>dona</s>
+            </div>
+            <div class="fd-sub"><t t-esc="num(tr.kpi.transit_docs)"/> ta hujjat</div>
+          </div>
+          <div class="fd-card fd-tile">
+            <div class="fd-kv">📥 Yetib bordi</div>
+            <div class="fd-fig"><t t-esc="num(tr.kpi.arrived_qty)"/> <s>dona</s></div>
+            <div class="fd-sub">
+              Davr: <t t-esc="tr.period.from"/> — <t t-esc="tr.period.to"/>
+            </div>
+          </div>
+          <div class="fd-card fd-tile">
+            <div class="fd-kv">📄 Hujjatlar</div>
+            <div class="fd-fig"><t t-esc="num(tr.kpi.arrived_docs)"/></div>
+            <div class="fd-sub">Davrda yopilgan o'tkazmalar</div>
+          </div>
+          <div class="fd-card fd-tile">
+            <div class="fd-kv">⏱️ Yo'lda o'rtacha</div>
+            <div class="fd-fig"><t t-esc="num(tr.kpi.avg_days, 1)"/> <s>kun</s></div>
+            <div class="fd-sub">Hozir yo'ldagilar bo'yicha</div>
+          </div>
+          <div class="fd-card fd-tile">
+            <div class="fd-kv">⚠️ Kechikkan</div>
+            <div t-att-class="'fd-fig ' + (tr.kpi.late_docs ? 'fd-dn' : '')">
+              <t t-esc="num(tr.kpi.late_docs)"/>
+            </div>
+            <div class="fd-sub">5 kundan ortiq yo'lda</div>
+          </div>
+        </div>
+
+        <!-- Yo'ldagilar -->
+        <div class="fd-card fd-mb">
+          <h3>Hozir yo'lda turgan o'tkazmalar</h3>
+          <div class="fd-sub">
+            Eng uzoq turganlari yuqorida · qatorga bosing — hujjat ochiladi
+          </div>
+          <div t-if="!tr.in_transit.length" class="fd-note">
+            Yo'lda turgan o'tkazma yo'q — hammasi yetib borgan.
+          </div>
+          <div class="fd-tblwrap" t-else=""><table class="fd-tbl fd-click">
+            <thead><tr>
+              <th>Hujjat</th><th>Jo'natilgan</th><th>Yo'nalish</th>
+              <th class="fd-num">Dona</th><th class="fd-num">Qator</th>
+              <th class="fd-num">Kun</th>
+              <th t-if="showCost" class="fd-num">Tannarxda</th>
+            </tr></thead>
+            <tbody>
+              <tr t-foreach="tr.in_transit" t-as="d" t-key="d.id"
+                  t-on-click="() => this.open('picking', d.id)">
+                <td><b t-esc="d.name"/></td>
+                <td class="fd-muted" t-esc="d.date"/>
+                <td><t t-esc="d.source"/> → <b t-esc="d.dest"/></td>
+                <td class="fd-num" t-esc="num(d.qty)"/>
+                <td class="fd-num" t-esc="num(d.lines)"/>
+                <td t-att-class="'fd-num ' + (d.days &gt; 5 ? 'fd-dn' : (d.days &gt; 2 ? 'fd-warn' : ''))"
+                    t-esc="num(d.days)"/>
+                <td t-if="showCost" class="fd-num" t-esc="money(d.cost)"/>
+              </tr>
+            </tbody>
+          </table></div>
+        </div>
+
+        <!-- Yo'nalishlar + omborlar -->
+        <div class="fd-row fd-c2 fd-mb">
+          <div class="fd-card">
+            <h3>Yo'nalishlar</h3>
+            <div class="fd-sub">
+              Davrda yetib borgan yuklar: kimdan kimga ·
+              <t t-esc="tr.period.from"/> — <t t-esc="tr.period.to"/>
+            </div>
+            <div t-if="!tr.flows.length" class="fd-note">
+              Bu davrda yetib borgan o'tkazma yo'q — yuqoridan <b>Hafta</b> yoki
+              <b>Oy</b> davrini tanlab ko'ring.
+            </div>
+            <div class="fd-tblwrap" t-else=""><table class="fd-tbl">
+              <thead><tr>
+                <th>Yo'nalish</th><th class="fd-num">Dona</th>
+                <th class="fd-num">Hujjat</th>
+                <th t-if="showCost" class="fd-num">Tannarxda</th>
+              </tr></thead>
+              <tbody>
+                <tr t-foreach="tr.flows" t-as="f" t-key="f_index">
+                  <td>
+                    <t t-esc="f.source"/> → <b t-esc="f.dest"/>
+                    <div class="fd-trk fd-trk-sm">
+                      <i t-att-style="'width:' + barWidth(f.qty, maxFlowQty)"/>
+                    </div>
+                  </td>
+                  <td class="fd-num" t-esc="num(f.qty)"/>
+                  <td class="fd-num" t-esc="num(f.docs)"/>
+                  <td t-if="showCost" class="fd-num" t-esc="money(f.cost)"/>
+                </tr>
+              </tbody>
+            </table></div>
+          </div>
+
+          <div class="fd-card">
+            <h3>Ombor bo'yicha</h3>
+            <div class="fd-sub">
+              Qabul qildi / jo'natdi · qatorga bosing — ombor qoldig'i ochiladi
+            </div>
+            <div t-if="!tr.warehouses.length" class="fd-note">Ma'lumot yo'q.</div>
+            <div class="fd-tblwrap" t-else=""><table class="fd-tbl fd-click">
+              <thead><tr>
+                <th>Ombor</th>
+                <th class="fd-num">Qabul qildi</th>
+                <th class="fd-num">Jo'natdi</th>
+                <th class="fd-num">Farq</th>
+                <th class="fd-num">Yo'lda</th>
+              </tr></thead>
+              <tbody>
+                <tr t-foreach="tr.warehouses" t-as="w" t-key="w.id"
+                    t-on-click="() => this.open('warehouse_stock', w.id)">
+                  <td>
+                    <b t-esc="w.name"/>
+                    <div class="fd-trk fd-trk-sm">
+                      <i t-att-style="'width:' + barWidth(w.received, maxWhMove)"/>
+                    </div>
+                  </td>
+                  <td class="fd-num" t-esc="num(w.received)"/>
+                  <td class="fd-num" t-esc="num(w.sent)"/>
+                  <td t-att-class="'fd-num ' + (w.net &gt;= 0 ? 'fd-up' : 'fd-dn')"
+                      t-esc="num(w.net)"/>
+                  <td t-att-class="'fd-num ' + (w.transit ? 'fd-warn' : '')"
+                      t-esc="num(w.transit)"/>
+                </tr>
+              </tbody>
+            </table></div>
+          </div>
+        </div>
+
+
+        <div class="fd-card fd-mt" t-if="tr.history and tr.history.length">
+          <h3>O'tkazmalar tarixi</h3>
+          <div class="fd-sub">
+            Davrda yetib borgan hujjatlar ·
+            <t t-esc="tr.period.from"/> — <t t-esc="tr.period.to"/> ·
+            qatorga bosing — to'liq detali ochiladi
+          </div>
+          <t t-set="prows" t-value="tr.history"/>
+          <t t-set="pkey" t-value="'tr_hist'"/>
+          <t t-call="feliza_dashboard.Pager"/>
+          <div class="fd-tblwrap"><table class="fd-tbl fd-click">
+            <thead><tr>
+              <th>Hujjat</th><th>Yetib borgan</th><th>Yo'nalish</th>
+              <th class="fd-num">Dona</th><th class="fd-num">Qator</th>
+              <th>Mas'ul</th>
+              <th t-if="showCost" class="fd-num">Tannarxda</th>
+            </tr></thead>
+            <tbody>
+              <t t-foreach="pgRows(tr.history, 'tr_hist')" t-as="h" t-key="h.id">
+                <tr t-on-click="() => this.toggleTransfer(h.id)"
+                    t-att-style="state.trOpenId === h.id ? 'background:var(--fd-grid);' : ''">
+                  <td>
+                    <span t-esc="state.trOpenId === h.id ? '▾ ' : '▸ '"/>
+                    <b t-esc="h.name"/>
+                  </td>
+                  <td class="fd-muted" t-esc="h.date"/>
+                  <td><t t-esc="h.source"/> → <b t-esc="h.dest"/></td>
+                  <td class="fd-num" t-esc="num(h.qty)"/>
+                  <td class="fd-num" t-esc="num(h.lines)"/>
+                  <td class="fd-muted" t-esc="h.user or '—'"/>
+                  <td t-if="showCost" class="fd-num" t-esc="money(h.cost)"/>
+                </tr>
+                <tr t-if="state.trOpenId === h.id">
+                  <td t-att-colspan="showCost ? 7 : 6"
+                      style="background:var(--fd-grid); padding:8px 10px;">
+                    <div t-if="state.trLoading" class="fd-note">Yuklanmoqda…</div>
+                    <div t-elif="state.trDetail and state.trDetail.ok">
+                      <div class="fd-mgrid">
+                        <div><span>Jo'natma hujjati</span>
+                          <b t-esc="state.trDetail.out_name or '—'"/></div>
+                        <div><span>Qabul hujjati</span>
+                          <b t-esc="state.trDetail.in_name"/></div>
+                        <div><span>Yo'nalish</span>
+                          <b><t t-esc="state.trDetail.source"/> → <t t-esc="state.trDetail.dest"/></b></div>
+                        <div><span>Yuborilgan</span>
+                          <b t-esc="state.trDetail.sent_at or '—'"/></div>
+                        <div><span>Yetib kelgan</span>
+                          <b t-esc="state.trDetail.arrived_at or '—'"/></div>
+                        <div><span>Kim yubordi</span>
+                          <b t-esc="state.trDetail.sender or '—'"/></div>
+                        <div><span>Kim qabul qildi</span>
+                          <b t-esc="state.trDetail.receiver or '—'"/></div>
+                      </div>
+                      <div class="fd-tblwrap" style="max-height:280px; overflow:auto;">
+                        <table class="fd-tbl">
+                        <thead><tr>
+                          <th>Mahsulot</th><th>Atributlar</th>
+                          <th class="fd-num">Soni</th>
+                          <th t-if="showCost" class="fd-num">Tannarxda</th>
+                        </tr></thead>
+                        <tbody>
+                          <tr t-foreach="state.trDetail.lines" t-as="l" t-key="l_index">
+                            <td t-esc="l.name"/>
+                            <td class="fd-muted" t-esc="l.attrs or '—'"/>
+                            <td class="fd-num" t-esc="num(l.qty)"/>
+                            <td t-if="showCost" class="fd-num" t-esc="money(l.cost)"/>
+                          </tr>
+                        </tbody>
+                      </table></div>
+                      <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+                        <button class="fd-pg-btn" t-on-click.stop="() => this.exportTransfer(h.id)"
+                                title="Bu o'tkazmani Excelга yuklab olish">⬇️ Excel</button>
+                        <button class="fd-pg-btn" t-on-click.stop="() => this.open('picking', h.id)"
+                                title="Hujjatni Odooда ochish">📄 Hujjatni ochish</button>
+                      </div>
+                    </div>
+                    <div t-else="" class="fd-note">Ma'lumot topilmadi.</div>
+                  </td>
+                </tr>
+              </t>
+            </tbody>
+          </table></div>
+        </div>
+        <!-- Tovarlar -->
+        <div class="fd-card">
+          <h3>Eng ko'p o'tkazilgan tovarlar</h3>
+          <div class="fd-sub">Davrda yetib borgan · qatorga bosing — mahsulot kartasi</div>
+          <t t-set="prows" t-value="tr.products"/>
+          <t t-set="pkey" t-value="'tr_prod'"/>
+          <t t-call="feliza_dashboard.Pager"/>
+          <div t-if="!tr.products.length" class="fd-note">Ma'lumot yo'q.</div>
+          <div class="fd-tblwrap" t-else=""><table class="fd-tbl fd-click">
+            <thead><tr>
+              <th>Mahsulot</th><th>Artikul</th>
+              <th class="fd-num">Dona</th><th class="fd-num">Hujjat</th>
+              <th t-if="showCost" class="fd-num">Tannarxda</th>
+            </tr></thead>
+            <tbody>
+              <tr t-foreach="pgRows(tr.products, 'tr_prod')" t-as="p" t-key="p.id"
+                  t-on-click="() => this.open('product', p.id)">
+                <td t-esc="p.name"/>
+                <td class="fd-muted" t-esc="p.code"/>
+                <td class="fd-num" t-esc="num(p.qty)"/>
+                <td class="fd-num" t-esc="num(p.docs)"/>
+                <td t-if="showCost" class="fd-num" t-esc="money(p.cost)"/>
+              </tr>
+            </tbody>
+          </table></div>
+        </div>
+      </t>
+    </t>
+
+
+    <!-- ================= KAMOMAT ================= -->
+    <t t-if="!state.loading and state.tab === 'kam' and state.kamomat">
+      <t t-set="km" t-value="state.kamomat"/>
+
+      <div t-if="!km.available" class="fd-card">
+        <h3>Kamomat</h3>
+        <div class="fd-note">
+          «Inter Warehouse Transfer» moduli 1.5 dan eski — bu bo'lim bo'sh.
+        </div>
+      </div>
+
+      <t t-if="km.available">
+        <!-- KPI -->
+        <div class="fd-row fd-c5 fd-mb">
+          <div class="fd-card fd-tile fd-clickable"
+               t-on-click="() => this.open('kamomat_open')">
+            <div class="fd-kv">📉 Qaytarilmagan</div>
+            <div class="fd-fig" t-att-class="km.kpi.open_qty ? 'fd-dn' : ''">
+              <t t-esc="num(km.kpi.open_qty)"/> <s>dona</s>
+            </div>
+            <div class="fd-sub">
+              <t t-esc="num(km.kpi.open_docs)"/> ta hujjat ·
+              <t t-esc="num(km.kpi.open_lines)"/> qator
+            </div>
+          </div>
+          <div class="fd-card fd-tile">
+            <div class="fd-kv">⏱️ O'rtacha turgan</div>
+            <div t-att-class="'fd-fig ' + (km.kpi.open_days &gt; 3 ? 'fd-warn' : '')">
+              <t t-esc="num(km.kpi.open_days, 1)"/> <s>kun</s>
+            </div>
+            <div class="fd-sub">
+              <t t-esc="num(km.kpi.old_docs)"/> tasi 3 kundan ortiq
+            </div>
+          </div>
+          <div class="fd-card fd-tile fd-clickable"
+               t-on-click="() => this.open('kamomat_moves')">
+            <div class="fd-kv">🔎 Davrda aniqlangan</div>
+            <div class="fd-fig"><t t-esc="num(km.kpi.period_qty)"/> <s>dona</s></div>
+            <div class="fd-sub">
+              <t t-esc="km.period.from"/> — <t t-esc="km.period.to"/>
+            </div>
+          </div>
+          <div class="fd-card fd-tile">
+            <div class="fd-kv">✅ Qaytarib olindi</div>
+            <div class="fd-fig fd-up"><t t-esc="num(km.kpi.done_qty)"/> <s>dona</s></div>
+            <div class="fd-sub">Shu davrdagilardan</div>
+          </div>
+          <div class="fd-card fd-tile">
+            <div class="fd-kv">🏪 Do'konlar</div>
+            <div class="fd-fig"><t t-esc="num(km.kpi.period_shops)"/></div>
+            <div class="fd-sub">
+              <t t-esc="num(km.kpi.period_docs)"/> ta hujjatda
+            </div>
+          </div>
+        </div>
+
+        <div t-if="showCost and (km.kpi.open_cost or km.kpi.period_cost)"
+             class="fd-row fd-c2 fd-mb">
+          <div class="fd-card fd-tile">
+            <div class="fd-kv">💸 Qaytarilmagan (tannarxda)</div>
+            <div class="fd-fig fd-dn"><t t-esc="money(km.kpi.open_cost)"/></div>
+            <div class="fd-sub">Hozir sklad hisobiga qaytmagan tovar qiymati</div>
+          </div>
+          <div class="fd-card fd-tile">
+            <div class="fd-kv">💸 Davrda aniqlangan (tannarxda)</div>
+            <div class="fd-fig"><t t-esc="money(km.kpi.period_cost)"/></div>
+            <div class="fd-sub">
+              <t t-esc="km.period.from"/> — <t t-esc="km.period.to"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Qaytarilmaganlar -->
+        <div class="fd-card fd-mb">
+          <h3>Skladga qaytarilmagan kamomat</h3>
+          <div class="fd-sub">
+            Eng uzoq turgani yuqorida · qatorga bosing — qaytarish hujjati ochiladi
+          </div>
+          <div t-if="!km.open_list.length" class="fd-note">
+            Qaytarilmagan kamomat yo'q — hammasi sklad hisobiga qaytgan.
+          </div>
+          <div class="fd-tblwrap" t-else=""><table class="fd-tbl fd-click">
+            <thead><tr>
+              <th>Qaytarish hujjati</th><th>Aniqlandi</th>
+              <th class="fd-num">Kun</th>
+              <th>Do'kon</th><th>Sklad</th>
+              <th>Jo'natma</th><th>Do'kon qabuli</th>
+              <th class="fd-num">Qator</th><th class="fd-num">Dona</th>
+              <th t-if="showCost" class="fd-num">Tannarxda</th>
+            </tr></thead>
+            <tbody>
+              <tr t-foreach="km.open_list" t-as="d" t-key="d.id"
+                  t-on-click="() => this.open('picking', d.id)">
+                <td><b t-esc="d.name"/></td>
+                <td class="fd-muted" t-esc="d.date"/>
+                <td t-att-class="'fd-num ' + (d.days &gt; 3 ? 'fd-dn' : (d.days &gt; 1 ? 'fd-warn' : ''))"
+                    t-esc="num(d.days)"/>
+                <td><b t-esc="d.shop"/></td>
+                <td class="fd-muted" t-esc="d.warehouse"/>
+                <td class="fd-muted" t-esc="d.delivery"/>
+                <td class="fd-muted" t-esc="d.receipt"/>
+                <td class="fd-num" t-esc="num(d.lines)"/>
+                <td class="fd-num fd-dn" t-esc="num(d.qty)"/>
+                <td t-if="showCost" class="fd-num" t-esc="money(d.cost)"/>
+              </tr>
+            </tbody>
+          </table></div>
+        </div>
+
+        <!-- Do'konlar + tovarlar -->
+        <div class="fd-row fd-c2 fd-mb">
+          <div class="fd-card">
+            <h3>Do'kon bo'yicha</h3>
+            <div class="fd-sub">
+              Davrda aniqlangan kamomat · qatorga bosing — o'sha do'kon qatorlari
+            </div>
+            <div t-if="!km.shops.length" class="fd-note">
+              Bu davrda kamomat aniqlanmagan.
+            </div>
+            <div class="fd-tblwrap" t-else=""><table class="fd-tbl fd-click">
+              <thead><tr>
+                <th>Do'kon</th>
+                <th class="fd-num">Kamomat</th>
+                <th class="fd-num">Qaytmagan</th>
+                <th class="fd-num">Qaytdi</th>
+                <th class="fd-num">Jo'natma</th>
+                <th t-if="showCost" class="fd-num">Tannarxda</th>
+              </tr></thead>
+              <tbody>
+                <tr t-foreach="km.shops" t-as="sh" t-key="sh.id"
+                    t-on-click="() => this.open('kamomat_shop', sh.id)">
+                  <td>
+                    <b t-esc="sh.name"/>
+                    <div class="fd-trk fd-trk-sm">
+                      <i t-att-style="'width:' + barWidth(sh.qty, maxKamShop)"/>
+                    </div>
+                  </td>
+                  <td class="fd-num" t-esc="num(sh.qty)"/>
+                  <td t-att-class="'fd-num ' + (sh.open ? 'fd-dn' : '')"
+                      t-esc="num(sh.open)"/>
+                  <td class="fd-num fd-up" t-esc="num(sh.done)"/>
+                  <td class="fd-num" t-esc="num(sh.deliveries)"/>
+                  <td t-if="showCost" class="fd-num" t-esc="money(sh.cost)"/>
+                </tr>
+              </tbody>
+            </table></div>
+          </div>
+
+          <div class="fd-card">
+            <h3>Eng ko'p kamomat chiqqan tovarlar</h3>
+            <div class="fd-sub">Davr bo'yicha · qatorga bosing — mahsulot kartasi</div>
+            <div t-if="!km.products.length" class="fd-note">Ma'lumot yo'q.</div>
+            <div class="fd-tblwrap" t-else=""><table class="fd-tbl fd-click">
+              <thead><tr>
+                <th>Mahsulot</th><th>Artikul</th>
+                <th class="fd-num">Dona</th>
+                <th class="fd-num">Do'kon</th>
+                <th t-if="showCost" class="fd-num">Tannarxda</th>
+              </tr></thead>
+              <tbody>
+                <tr t-foreach="km.products" t-as="p" t-key="p.id"
+                    t-on-click="() => this.open('product', p.id)">
+                  <td>
+                    <t t-esc="p.name"/>
+                    <div class="fd-trk fd-trk-sm">
+                      <i t-att-style="'width:' + barWidth(p.qty, maxKamProduct)"/>
+                    </div>
+                  </td>
+                  <td class="fd-muted" t-esc="p.code"/>
+                  <td class="fd-num" t-esc="num(p.qty)"/>
+                  <td class="fd-num" t-esc="num(p.shops)"/>
+                  <td t-if="showCost" class="fd-num" t-esc="money(p.cost)"/>
+                </tr>
+              </tbody>
+            </table></div>
+          </div>
+        </div>
+
+        <!-- Tarix -->
+        <div class="fd-card">
+          <h3>Kamomat tarixi</h3>
+          <div class="fd-sub">
+            Davrda aniqlangan barcha kamomat ·
+            <t t-esc="km.period.from"/> — <t t-esc="km.period.to"/> ·
+            qatorga bosing — hujjat ochiladi
+          </div>
+          <t t-set="prows" t-value="km.history"/>
+          <t t-set="pkey" t-value="'km_hist'"/>
+          <t t-call="feliza_dashboard.Pager"/>
+          <div t-if="!km.history.length" class="fd-note">
+            Bu davrda kamomat aniqlanmagan.
+          </div>
+          <div class="fd-tblwrap" t-else=""><table class="fd-tbl fd-click">
+            <thead><tr>
+              <th>Aniqlandi</th><th>Qaytarish hujjati</th>
+              <th>Do'kon</th><th>Sklad</th>
+              <th>Jo'natma</th><th>Do'kon qabuli</th>
+              <th class="fd-num">Qator</th><th class="fd-num">Dona</th>
+              <th>Holat</th>
+              <th t-if="showCost" class="fd-num">Tannarxda</th>
+            </tr></thead>
+            <tbody>
+              <tr t-foreach="pgRows(km.history, 'km_hist')" t-as="h" t-key="h.id"
+                  t-on-click="() => this.open('picking', h.id)">
+                <td class="fd-muted" t-esc="h.date"/>
+                <td><b t-esc="h.name"/></td>
+                <td><b t-esc="h.shop"/></td>
+                <td class="fd-muted" t-esc="h.warehouse"/>
+                <td class="fd-muted" t-esc="h.delivery"/>
+                <td class="fd-muted" t-esc="h.receipt"/>
+                <td class="fd-num" t-esc="num(h.lines)"/>
+                <td t-att-class="'fd-num ' + (h.done ? '' : 'fd-dn')"
+                    t-esc="num(h.qty)"/>
+                <td>
+                  <span t-if="h.done" class="fd-tag fd-tag-up">
+                    Qaytdi · <t t-esc="h.done_date"/>
+                  </span>
+                  <span t-else="" class="fd-tag fd-tag-dn">Kutilmoqda</span>
+                </td>
+                <td t-if="showCost" class="fd-num" t-esc="money(h.cost)"/>
+              </tr>
+            </tbody>
+          </table></div>
+        </div>
+      </t>
+    </t>
+
+
+    <!-- ================= ZAKUP ================= -->
+    <t t-if="!state.loading and state.tab === 'zakup' and state.zakup">
+      <t t-set="zk" t-value="state.zakup"/>
+
+      <!-- KPI -->
+      <div class="fd-row fd-c5 fd-mb">
+        <div class="fd-card fd-tile">
+          <div class="fd-kv">🚛 Yo'ldagi yuklar</div>
+          <div class="fd-fig" t-att-class="zk.kpi.transit_qty ? 'fd-warn' : ''">
+            <t t-esc="num(zk.kpi.transit_qty)"/> <s>dona</s>
+          </div>
+          <div class="fd-sub"><t t-esc="num(zk.kpi.transit_docs)"/> ta kirim kutilmoqda</div>
+        </div>
+        <div class="fd-card fd-tile">
+          <div class="fd-kv">💵 Yo'ldagi qiymat</div>
+          <div t-if="!zk.kpi.transit_money.length" class="fd-big">—</div>
+          <div t-foreach="zk.kpi.transit_money" t-as="mn" t-key="mn.cur" class="fd-big">
+            <t t-esc="num(mn.amount)"/> <t t-esc="mn.cur"/>
+          </div>
+          <div class="fd-sub">Zakup narxlarida</div>
+        </div>
+        <div class="fd-card fd-tile">
+          <div class="fd-kv">⚠️ Kechikkan</div>
+          <div t-att-class="'fd-fig ' + (zk.kpi.transit_late ? 'fd-dn' : '')">
+            <t t-esc="num(zk.kpi.transit_late)"/>
+          </div>
+          <div class="fd-sub">Kutilgan sanadan o'tgan</div>
+        </div>
+        <div class="fd-card fd-tile">
+          <div class="fd-kv">🧾 Davrda buyurtma</div>
+          <div class="fd-fig"><t t-esc="num(zk.kpi.ordered_qty)"/> <s>dona</s></div>
+          <div class="fd-sub">
+            <t t-esc="num(zk.kpi.ordered_docs)"/> ta zakup<t t-if="zk.kpi.ordered_money.length"> · </t>
+            <t t-foreach="zk.kpi.ordered_money" t-as="mn" t-key="mn.cur">
+              <t t-esc="num(mn.amount)"/> <t t-esc="mn.cur"/><t t-if="!mn_last"> · </t>
+            </t>
+          </div>
+        </div>
+        <div class="fd-card fd-tile">
+          <div class="fd-kv">📥 Davrda keldi</div>
+          <div class="fd-fig"><t t-esc="num(zk.kpi.arrived_qty)"/> <s>dona</s></div>
+          <div class="fd-sub">
+            <t t-esc="num(zk.kpi.arrived_docs)"/> ta kirim ·
+            qoralama so'rov: <t t-esc="num(zk.kpi.draft_count)"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- Yo'ldagi yuklar -->
+      <div class="fd-card fd-mb">
+        <h3>Yo'ldagi yuklar — kutilayotgan kirimlar</h3>
+        <div class="fd-sub">
+          Kutilgan sanasi eng yaqinlari yuqorida · qatorga bosing — kirim hujjati ochiladi
+        </div>
+        <t t-set="prows" t-value="zk.transit"/>
+        <t t-set="pkey" t-value="'ztransit'"/>
+        <t t-call="feliza_dashboard.Pager"/>
+        <div t-if="!zk.transit.length" class="fd-note">
+          Kutilayotgan yuk yo'q — barcha zakuplar qabul qilingan.
+        </div>
+        <div class="fd-tblwrap" t-else=""><table class="fd-tbl fd-click">
+          <thead><tr>
+            <th>Kirim</th><th>Zakup</th><th>Ta'minotchi</th>
+            <th>Buyurtma</th><th>Kutilgan</th>
+            <th class="fd-num">Dona</th><th class="fd-num">Qator</th>
+            <th class="fd-num">Summa</th><th class="fd-num">Kechikish</th>
+          </tr></thead>
+          <tbody>
+            <tr t-foreach="pgRows(zk.transit, 'ztransit')" t-as="d" t-key="d.id"
+                t-on-click="() => this.open('picking', d.id)">
+              <td><b t-esc="d.name"/></td>
+              <td><code t-esc="d.po_name"/></td>
+              <td t-esc="d.supplier"/>
+              <td class="fd-muted" t-esc="d.date"/>
+              <td class="fd-muted" t-esc="d.expected"/>
+              <td class="fd-num" t-esc="num(d.qty)"/>
+              <td class="fd-num" t-esc="num(d.lines)"/>
+              <td class="fd-num"><t t-esc="num(d.amount)"/> <t t-esc="d.cur"/></td>
+              <td t-att-class="'fd-num ' + (d.late_days &gt; 3 ? 'fd-dn' : (d.late_days ? 'fd-warn' : ''))">
+                <t t-if="d.late_days"><t t-esc="num(d.late_days)"/> kun</t>
+                <t t-else="">—</t>
+              </td>
+            </tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <!-- Kutilayotgan tovarlar + so'nggi kelganlar -->
+      <div class="fd-row fd-c2 fd-mb">
+        <div class="fd-card">
+          <h3>Yo'lda kutilayotgan tovarlar</h3>
+          <div class="fd-sub">Dona bo'yicha eng kattalari</div>
+          <div t-if="!zk.transit_products.length" class="fd-note">Yo'lda tovar yo'q.</div>
+          <div class="fd-tblwrap" t-else=""><table class="fd-tbl">
+            <thead><tr>
+              <th>Tovar</th><th>Artikul</th>
+              <th class="fd-num">Dona</th><th class="fd-num">Hujjat</th>
+            </tr></thead>
+            <tbody>
+              <tr t-foreach="zk.transit_products" t-as="tp" t-key="tp_index">
+                <td t-esc="tp.name"/>
+                <td><code t-if="tp.code" t-esc="tp.code"/></td>
+                <td class="fd-num"><b t-esc="num(tp.qty)"/></td>
+                <td class="fd-num" t-esc="num(tp.docs)"/>
+              </tr>
+            </tbody>
+          </table></div>
+        </div>
+        <div class="fd-card">
+          <h3>So'nggi kelgan yuklar</h3>
+          <div class="fd-sub">Oxirgi qabul qilingan kirimlar · qatorga bosing</div>
+          <div t-if="!zk.recent.length" class="fd-note">Hali qabul qilingan yuk yo'q.</div>
+          <div class="fd-tblwrap" t-else=""><table class="fd-tbl fd-click">
+            <thead><tr>
+              <th>Kirim</th><th>Zakup</th><th>Ta'minotchi</th>
+              <th>Qachon</th><th class="fd-num">Dona</th>
+            </tr></thead>
+            <tbody>
+              <tr t-foreach="zk.recent" t-as="r" t-key="r.id"
+                  t-on-click="() => this.open('picking', r.id)">
+                <td><b t-esc="r.name"/></td>
+                <td><code t-esc="r.po_name"/></td>
+                <td t-esc="r.supplier"/>
+                <td class="fd-muted" t-esc="r.date"/>
+                <td class="fd-num" t-esc="num(r.qty)"/>
+              </tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- Ta'minotchilar + tugayotganlar -->
+      <div class="fd-row fd-c2 fd-mb">
+        <div class="fd-card">
+          <h3>Ta'minotchilar — davr bo'yicha</h3>
+          <div class="fd-sub">
+            <t t-esc="zk.period.from"/> — <t t-esc="zk.period.to"/> ·
+            summa bo'yicha eng kattalari
+          </div>
+          <div t-if="!zk.suppliers.length" class="fd-note">
+            Bu davrda zakup yo'q — yuqoridan <b>Oy</b> davrini tanlab ko'ring.
+          </div>
+          <div class="fd-tblwrap" t-else=""><table class="fd-tbl">
+            <thead><tr>
+              <th>Ta'minotchi</th><th class="fd-num">Zakup</th>
+              <th class="fd-num">Dona</th><th class="fd-num">Summa</th>
+            </tr></thead>
+            <tbody>
+              <tr t-foreach="zk.suppliers" t-as="sup" t-key="sup_index">
+                <td><b t-esc="sup.supplier"/></td>
+                <td class="fd-num" t-esc="num(sup.orders)"/>
+                <td class="fd-num" t-esc="num(sup.qty)"/>
+                <td class="fd-num"><t t-esc="num(sup.amount)"/> <t t-esc="sup.cur"/></td>
+              </tr>
+            </tbody>
+          </table></div>
+        </div>
+        <div class="fd-card">
+          <h3>Tugab borayotgan tovarlar</h3>
+          <div class="fd-sub">
+            So'nggi 14 kun sotuvi bo'yicha · zaxirasi eng kam yetadiganlari yuqorida
+          </div>
+          <div t-if="!zk.low_stock.length" class="fd-note">
+            Tugab borayotgan tovar yo'q — zaxira yetarli.
+          </div>
+          <div class="fd-tblwrap" t-else=""><table class="fd-tbl">
+            <thead><tr>
+              <th>Tovar</th><th>Artikul</th>
+              <th class="fd-num">Sotildi (14k)</th>
+              <th class="fd-num">Qoldiq</th>
+              <th class="fd-num">Yo'lda</th>
+              <th class="fd-num">Yetadi</th>
+            </tr></thead>
+            <tbody>
+              <tr t-foreach="zk.low_stock" t-as="ls" t-key="ls_index">
+                <td t-esc="ls.name"/>
+                <td><code t-if="ls.code" t-esc="ls.code"/></td>
+                <td class="fd-num" t-esc="num(ls.sold)"/>
+                <td t-att-class="'fd-num ' + (ls.stock ? '' : 'fd-dn')">
+                  <b t-esc="num(ls.stock)"/>
+                </td>
+                <td class="fd-num">
+                  <t t-if="ls.incoming"><t t-esc="num(ls.incoming)"/></t>
+                  <t t-else="">—</t>
+                </td>
+                <td t-att-class="'fd-num ' + (ls.cover_days &lt; 4 ? 'fd-dn' : 'fd-warn')">
+                  <t t-esc="num(ls.cover_days, 1)"/> kun
+                </td>
+              </tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+    </t>
+
+    <!-- ================= MOLIYA ================= -->
+
+    <!-- ================= SOTUVLARIM (zakupchi) ================= -->
+    <t t-if="!state.loading and state.tab === 'zsales' and state.zsales">
+      <t t-set="zs" t-value="state.zsales"/>
+      <div class="fd-card fd-mb">
+        <h3>Sotuvlarim — o'zim zakup qilgan tovarlar</h3>
+        <div class="fd-sub">
+          Davr: <t t-esc="zs.period.from"/> — <t t-esc="zs.period.to"/> ·
+          davrni yuqoridagi panel orqali tanlang
+        </div>
+        <div class="fd-toolbar">
+          <select t-if="isManager and state.cfg.zakupchi_list.length"
+                  class="fd-select"
+                  t-on-change="(e) => this.zSetWho(e.target.value)">
+            <option value="">Zakupchi: hammasi</option>
+            <option t-foreach="state.cfg.zakupchi_list" t-as="zu" t-key="zu.id"
+                    t-att-value="zu.id"
+                    t-att-selected="zFilters.who == zu.id ? 'selected' : undefined">
+              <t t-esc="zu.name"/>
+            </option>
+          </select>
+          <select class="fd-select"
+                  t-on-change="(e) => this.zSet('sStatus', e.target.value, 'sales')">
+            <option value="top">Status: eng ko'p sotilgan</option>
+            <option value="profit" t-att-selected="zFilters.sStatus === 'profit' ? 'selected' : undefined">Eng daromadli tovarlar</option>
+            <option value="loss" t-att-selected="zFilters.sStatus === 'loss' ? 'selected' : undefined">Minus foyda / o'z narxida</option>
+            <option value="slow" t-att-selected="zFilters.sStatus === 'slow' ? 'selected' : undefined">Savdosi past tovarlar</option>
+          </select>
+          <input class="fd-inp" placeholder="Qidiruv: nomi, artikul yoki barkod"
+                 t-att-value="zFilters.sQ"
+                 t-on-input="(e) => this.zSet('sQ', e.target.value, 'sales')"/>
+          <select class="fd-select"
+                  t-on-change="(e) => this.zSet('sCat', e.target.value, 'sales')">
+            <option value="">Kategoriya: barchasi</option>
+            <option t-foreach="zs.filters.cats" t-as="c" t-key="c" t-att-value="c"
+                    t-att-selected="zFilters.sCat === c ? 'selected' : undefined">
+              <t t-esc="c.split('/').pop()"/>
+            </option>
+          </select>
+          <select class="fd-select"
+                  t-on-change="(e) => this.zSet('sColor', e.target.value, 'sales')">
+            <option value="">Rang: barchasi</option>
+            <option t-foreach="zs.filters.colors" t-as="c" t-key="c" t-att-value="c"
+                    t-att-selected="zFilters.sColor === c ? 'selected' : undefined">
+              <t t-esc="c"/>
+            </option>
+          </select>
+          <select class="fd-select"
+                  t-on-change="(e) => this.zSet('sSize', e.target.value, 'sales')">
+            <option value="">O'lcham: barchasi</option>
+            <option t-foreach="zs.filters.sizes" t-as="c" t-key="c" t-att-value="c"
+                    t-att-selected="zFilters.sSize === c ? 'selected' : undefined">
+              <t t-esc="c"/>
+            </option>
+          </select>
+        </div>
+        <t t-set="prows" t-value="zs.rows"/>
+        <t t-set="pkey" t-value="'zsales'"/>
+        <t t-call="feliza_dashboard.Pager"/>
+        <div t-if="!zs.rows.length" class="fd-note">Mos tovar topilmadi.</div>
+        <div class="fd-tblwrap" t-else=""><table class="fd-tbl fd-click">
+          <thead><tr>
+            <th>Mahsulot / artikul</th><th>Kategoriya</th>
+            <th class="fd-num">Sotuvda</th>
+            <th class="fd-num">Kuniga o'rt.</th>
+            <th class="fd-num">Jami dona</th>
+            <th class="fd-num">Tan narx</th>
+            <th class="fd-num">Sotuv narx</th>
+            <th class="fd-num">Marja</th>
+          </tr></thead>
+          <tbody>
+            <tr t-foreach="pgRows(zs.rows, 'zsales')" t-as="r" t-key="r.id"
+                t-on-click="() => this.open('product', r.id)">
+              <td>
+                <b t-esc="r.name"/><br/>
+                <span class="fd-muted" style="font-size:11.5px">
+                  <t t-esc="r.code"/>
+                  <t t-if="r.color"> · <t t-esc="r.color"/></t>
+                  <t t-if="r.size"> · <t t-esc="r.size"/></t>
+                </span>
+              </td>
+              <td class="fd-muted" t-esc="r.categ"/>
+              <td class="fd-num"><t t-esc="num(r.days_selling)"/> kun</td>
+              <td class="fd-num" t-esc="num(r.per_day, 1)"/>
+              <td class="fd-num"><b t-esc="num(r.qty)"/></td>
+              <td class="fd-num" t-esc="money(r.cost)"/>
+              <td class="fd-num" t-esc="money(r.price)"/>
+              <td t-att-class="'fd-num ' + (r.margin_sum &lt;= 0 ? 'fd-dn' : 'fd-up')">
+                <t t-esc="num(r.margin_pct, 1)"/>%<br/>
+                <span style="font-size:11.5px"><t t-esc="money(r.margin_sum)"/></span>
+              </td>
+            </tr>
+          </tbody>
+        </table></div>
+      </div>
+    </t>
+
+    <!-- ================= SKLADIM (zakupchi) ================= -->
+    <t t-if="!state.loading and state.tab === 'zstock' and state.zstock">
+      <t t-set="zw" t-value="state.zstock"/>
+      <div class="fd-card fd-mb">
+        <h3>Skladim — o'zim zakup qilgan tovarlar qoldig'i</h3>
+        <div class="fd-sub">Barcha omborlar bo'yicha jami qoldiq</div>
+        <div class="fd-toolbar">
+          <select t-if="isManager and state.cfg.zakupchi_list.length"
+                  class="fd-select"
+                  t-on-change="(e) => this.zSetWho(e.target.value)">
+            <option value="">Zakupchi: hammasi</option>
+            <option t-foreach="state.cfg.zakupchi_list" t-as="zu" t-key="zu.id"
+                    t-att-value="zu.id"
+                    t-att-selected="zFilters.who == zu.id ? 'selected' : undefined">
+              <t t-esc="zu.name"/>
+            </option>
+          </select>
+          <select class="fd-select"
+                  t-on-change="(e) => this.zSet('wStatus', e.target.value, 'stock')">
+            <option value="low">Status: kam qolgan (1–10)</option>
+            <option value="high" t-att-selected="zFilters.wStatus === 'high' ? 'selected' : undefined">Ko'p sonli (10+)</option>
+            <option value="zero" t-att-selected="zFilters.wStatus === 'zero' ? 'selected' : undefined">Qolmagan (0)</option>
+          </select>
+          <input class="fd-inp" placeholder="Qidiruv: nomi, artikul yoki barkod"
+                 t-att-value="zFilters.wQ"
+                 t-on-input="(e) => this.zSet('wQ', e.target.value, 'stock')"/>
+        </div>
+        <t t-set="prows" t-value="zw.rows"/>
+        <t t-set="pkey" t-value="'zstock'"/>
+        <t t-call="feliza_dashboard.Pager"/>
+        <div t-if="!zw.rows.length" class="fd-note">Mos tovar topilmadi.</div>
+        <div class="fd-tblwrap" t-else=""><table class="fd-tbl fd-click">
+          <thead><tr>
+            <th>Mahsulot / artikul</th>
+            <th class="fd-num">Qoldiq</th>
+            <th class="fd-num">Rezerv</th>
+            <th>Holat</th>
+            <th class="fd-num">Keltirgan marjasi</th>
+          </tr></thead>
+          <tbody>
+            <tr t-foreach="pgRows(zw.rows, 'zstock')" t-as="r" t-key="r.id"
+                t-on-click="() => this.open('product', r.id)">
+              <td>
+                <b t-esc="r.name"/><br/>
+                <span class="fd-muted" style="font-size:11.5px">
+                  <t t-esc="r.code"/>
+                  <t t-if="r.color"> · <t t-esc="r.color"/></t>
+                  <t t-if="r.size"> · <t t-esc="r.size"/></t>
+                </span>
+              </td>
+              <td class="fd-num"><b t-esc="num(r.stock)"/> dona</td>
+              <td class="fd-num" t-esc="num(r.reserved)"/>
+              <td>
+                <span t-if="r.stock &lt;= 0" class="fd-tag fd-tag-dn">Qolmagan</span>
+                <span t-elif="r.stock &lt;= 10" class="fd-tag" style="color:#7a5200;border-color:currentColor;font-weight:600">Kam qolgan</span>
+                <span t-else="" class="fd-tag fd-tag-up">Ko'p sonli</span>
+              </td>
+              <td t-att-class="'fd-num ' + (r.margin_sum &lt; 0 ? 'fd-dn' : '')">
+                <b t-esc="money(r.margin_sum)"/>
+              </td>
+            </tr>
+          </tbody>
+        </table></div>
+      </div>
+    </t>
+
+    <!-- ================= DAROMADIM (zakupchi) ================= -->
+    <t t-if="!state.loading and state.tab === 'zincome' and state.zincome">
+      <t t-set="zi" t-value="state.zincome"/>
+
+      <div class="fd-toolbar fd-mb" style="margin-top:0">
+        <select t-if="isManager and state.cfg.zakupchi_list.length"
+                class="fd-select"
+                t-on-change="(e) => this.zSetWho(e.target.value)">
+          <option value="">Zakupchi: hammasi</option>
+          <option t-foreach="state.cfg.zakupchi_list" t-as="zu" t-key="zu.id"
+                  t-att-value="zu.id"
+                  t-att-selected="zFilters.who == zu.id ? 'selected' : undefined">
+            <t t-esc="zu.name"/>
+          </option>
+        </select>
+        <input class="fd-inp" placeholder="Tovar qidiruvi: shu tovardan qancha daromad olganim"
+               t-att-value="zFilters.iQ"
+               t-on-input="(e) => this.zSet('iQ', e.target.value, 'income')"/>
+      </div>
+
+      <div t-if="zi.product" class="fd-card fd-mb" style="border-color: var(--fd-s1)">
+        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:center">
+          <div>
+            <b style="font-size:15px"><t t-esc="zi.product.name"/></b>
+            <div class="fd-muted" style="font-size:12px">
+              <t t-esc="zi.product.code"/> · <t t-esc="zi.product.country"/> ·
+              komissiya <t t-esc="num(zi.product.pct, 1)"/>%
+            </div>
+          </div>
+          <div style="text-align:right">
+            <div class="fd-kv">Bu tovardan olgan daromadim</div>
+            <div class="fd-big fd-up"><t t-esc="money(zi.product.income)"/></div>
+          </div>
+        </div>
+        <div class="fd-src">
+          Davrda <t t-esc="num(zi.product.qty)"/> dona sotilgan ·
+          savdo <t t-esc="money(zi.product.revenue)"/> ·
+          undan <t t-esc="num(zi.product.pct, 1)"/>% =
+          <t t-esc="money(zi.product.income)"/>
+        </div>
+      </div>
+      <div t-if="zi.product_not_found" class="fd-note fd-mb">
+        Bu davr sotuvlarida mos tovar topilmadi.
+      </div>
+
+      <div class="fd-row fd-c5 fd-mb" style="grid-template-columns: repeat(4, 1fr)">
+        <div class="fd-card fd-tile">
+          <div class="fd-kv">📅 Bugungi daromadim</div>
+          <div class="fd-big"><t t-esc="money(zi.kpi.today)"/></div>
+        </div>
+        <div class="fd-card fd-tile">
+          <div class="fd-kv">💰 Tanlangan davr jami</div>
+          <div class="fd-big"><t t-esc="money(zi.kpi.total)"/></div>
+          <div class="fd-sub" style="margin-bottom:0">
+            <t t-esc="zi.period.from"/> — <t t-esc="zi.period.to"/>
+          </div>
+        </div>
+        <div class="fd-card fd-tile">
+          <div class="fd-kv">🇺🇿 O'zbekiston tovari (1.5%)</div>
+          <div class="fd-big"><t t-esc="money(zi.kpi.uzb)"/></div>
+        </div>
+        <div class="fd-card fd-tile">
+          <div class="fd-kv">🌍 Import tovari (1%)</div>
+          <div class="fd-big"><t t-esc="money(zi.kpi.imp)"/></div>
+        </div>
+      </div>
+
+      <div class="fd-card fd-mb">
+        <h3>Kunlik daromadim</h3>
+        <div class="fd-sub">
+          <t t-esc="zi.period.from"/> — <t t-esc="zi.period.to"/> ·
+          eng baland kun: <t t-esc="money(ziMax)"/>
+        </div>
+        <svg t-if="ziDaily.length &gt; 1" viewBox="0 0 640 170" class="fd-svg"
+             preserveAspectRatio="none" style="cursor:default">
+          <path t-att-d="ziArea" class="fd-area"/>
+          <path t-att-d="ziPath" class="fd-line"/>
+        </svg>
+        <div t-else="" class="fd-note">Bitta kunlik davr — grafik uchun uzunroq davr tanlang.</div>
+        <div class="fd-legend" t-if="ziDaily.length &gt; 1">
+          <span><t t-esc="ziDaily[0].date"/></span>
+          <span class="fd-spacer"/>
+          <span><t t-esc="ziDaily[ziDaily.length - 1].date"/></span>
+        </div>
+      </div>
+
+      <div class="fd-row fd-c2 fd-mb">
+        <div class="fd-card">
+          <h3>Davlat bo'yicha</h3>
+          <div class="fd-sub">Qaysi davlat tovaridan qancha daromad</div>
+          <div t-if="!zi.by_country.length" class="fd-note">Bu davrda sotuv yo'q.</div>
+          <div class="fd-tblwrap" t-else=""><table class="fd-tbl">
+            <thead><tr>
+              <th>Davlat</th><th class="fd-num">Foiz</th>
+              <th class="fd-num">Daromad</th>
+            </tr></thead>
+            <tbody>
+              <tr t-foreach="zi.by_country" t-as="c" t-key="c.country">
+                <td><b t-esc="c.country"/></td>
+                <td class="fd-num"><t t-esc="num(c.pct, 1)"/>%</td>
+                <td class="fd-num"><b t-esc="money(c.amount)"/></td>
+              </tr>
+            </tbody>
+          </table></div>
+        </div>
+        <div class="fd-card">
+          <h3>Filial bo'yicha</h3>
+          <div class="fd-sub">Qaysi do'kondan qancha daromad tushgan</div>
+          <div t-if="!zi.by_store.length" class="fd-note">Bu davrda sotuv yo'q.</div>
+          <div class="fd-tblwrap" t-else=""><table class="fd-tbl">
+            <thead><tr>
+              <th>Do'kon</th><th class="fd-num">Daromad</th>
+            </tr></thead>
+            <tbody>
+              <tr t-foreach="zi.by_store" t-as="st" t-key="st.store">
+                <td><b t-esc="st.store"/></td>
+                <td class="fd-num"><b t-esc="money(st.amount)"/></td>
+              </tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+      <div class="fd-src fd-mb">
+        Daromad hech qayerda saqlanmaydi — har safar sotuvlardan jonli
+        hisoblanadi: O'zbekiston tovari uchun sotuv summasining 1.5%,
+        boshqa davlat tovari uchun 1%. Davlat — tovar kartochkasidagi
+        «Ishlab chiqarilgan davlat» maydonidan olinadi.
+      </div>
+    </t>
+
+    <t t-if="!state.loading and state.tab === 'fin' and state.finance">
+      <t t-set="fn" t-value="state.finance"/>
+
+      <div class="fd-row fd-c5 fd-mb">
+        <div class="fd-card fd-tile">
+          <div class="fd-kv">💵 Kassa va bank</div>
+          <div class="fd-fig"><t t-esc="money(fn.kpi.cash)"/></div>
+          <div class="fd-sub">Hozirgi qoldiq</div>
+        </div>
+        <div class="fd-card fd-tile">
+          <div class="fd-kv">📥 Debitorlik</div>
+          <div class="fd-fig"><t t-esc="money(fn.kpi.receivable)"/></div>
+          <div class="fd-sub">Bizdan qarzdorlar</div>
+        </div>
+        <div class="fd-card fd-tile">
+          <div class="fd-kv">📤 Kreditorlik</div>
+          <div class="fd-fig fd-dn"><t t-esc="money(fn.kpi.payable)"/></div>
+          <div class="fd-sub">Biz qarzdormiz</div>
+        </div>
+        <div class="fd-card fd-tile">
+          <div class="fd-kv">🏦 Sof aktiv</div>
+          <div class="fd-fig"><t t-esc="money(fn.kpi.net_assets)"/></div>
+          <div class="fd-sub">Aktiv − majburiyat</div>
+        </div>
+        <div class="fd-card fd-tile">
+          <div class="fd-kv">📈 Davr foydasi</div>
+          <div t-att-class="'fd-fig ' + (fn.pnl.net &gt;= 0 ? 'fd-up' : 'fd-dn')">
+            <t t-esc="money(fn.pnl.net)"/>
+          </div>
+          <div class="fd-sub"><t t-esc="fn.period.from"/> — <t t-esc="fn.period.to"/></div>
+        </div>
+      </div>
+
+      <div class="fd-row fd-c2 fd-mb">
+        <div class="fd-card">
+          <h3>Foyda va zarar (P&amp;L)</h3>
+          <div class="fd-sub">
+            Davr: <t t-esc="fn.period.from"/> — <t t-esc="fn.period.to"/> ·
+            qatorga bosing — provodkalar ochiladi
+          </div>
+          <div class="fd-tblwrap"><table class="fd-tbl fd-click">
+            <tbody>
+              <tr t-foreach="fn.pnl.rows" t-as="r" t-key="r.key"
+                  t-on-click="() => this.openFinance('pnl', r.key)">
+                <td><t t-esc="r.label"/></td>
+                <td class="fd-num fd-muted"><t t-esc="num(r.lines)"/> qator</td>
+                <td t-att-class="'fd-num ' + (!r.amount ? 'fd-muted' : (r.sign &gt; 0 ? 'fd-up' : 'fd-dn'))">
+                  <t t-if="r.amount">
+                    <t t-esc="r.sign &gt; 0 ? '' : '−'"/><t t-esc="money(r.amount)"/>
+                  </t>
+                  <t t-else="">—</t>
+                </td>
+              </tr>
+              <tr class="fd-sum">
+                <td><b>Yalpi foyda</b></td>
+                <td class="fd-num fd-muted"><t t-esc="pct(fn.pnl.gross_pct, 1)"/></td>
+                <td class="fd-num"><b t-esc="money(fn.pnl.gross)"/></td>
+              </tr>
+              <tr class="fd-sum fd-sum-x">
+                <td><b>Sof foyda</b></td>
+                <td class="fd-num fd-muted"><t t-esc="pct(fn.pnl.net_pct, 1)"/></td>
+                <td t-att-class="'fd-num ' + (fn.pnl.net &gt;= 0 ? 'fd-up' : 'fd-dn')">
+                  <b t-esc="money(fn.pnl.net)"/>
+                </td>
+              </tr>
+            </tbody>
+          </table></div>
+          <div class="fd-src">
+            Manba: account.move.line · faqat tasdiqlangan (posted) provodkalar
+          </div>
+        </div>
+
+        <div class="fd-card">
+          <h3>Balans</h3>
+          <div class="fd-sub">
+            <t t-esc="fn.period.to"/> holatiga · qatorga bosing — provodkalar
+          </div>
+          <div class="fd-tblwrap"><table class="fd-tbl fd-click">
+            <tbody>
+              <tr t-foreach="fn.balance.groups" t-as="g" t-key="g.key"
+                  t-on-click="() => this.openFinance('balance', g.key)">
+                <td>
+                  <t t-esc="g.label"/>
+                  <small class="fd-muted"> · <t t-esc="g.side_label"/></small>
+                </td>
+                <td class="fd-num fd-muted"><t t-esc="num(g.lines)"/> qator</td>
+                <td t-att-class="'fd-num ' + (g.amount ? '' : 'fd-muted')">
+                  <t t-esc="g.amount ? money(g.amount) : '—'"/>
+                </td>
+              </tr>
+              <tr class="fd-sum">
+                <td><b>Jami aktiv</b></td><td/>
+                <td class="fd-num"><b t-esc="money(fn.balance.assets)"/></td>
+              </tr>
+              <tr class="fd-sum">
+                <td><b>Majburiyat + kapital + foyda</b></td><td/>
+                <td class="fd-num"><b t-esc="money(fn.balance.passive_total)"/></td>
+              </tr>
+            </tbody>
+          </table></div>
+          <div t-if="fn.balance.is_balanced" class="fd-note">
+            ✓ Balans teng — aktiv = majburiyat + kapital + foyda
+          </div>
+          <div t-else="" class="fd-alert fd-serious">
+            <div class="fd-ic">▲</div>
+            <div>
+              <b>Balans teng emas</b>
+              <p>Farq: <t t-esc="money(fn.balance.check_diff)"/> — buxgalter tekshirsin.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fd-card fd-mb" t-if="fn.cash_flow.length">
+        <h3>Kassa va bank harakati</h3>
+        <div class="fd-sub">Davr ichida · qatorga bosing — provodkalar</div>
+        <div class="fd-tblwrap"><table class="fd-tbl fd-click">
+          <thead><tr>
+            <th>Hisob</th><th class="fd-num">Boshida</th>
+            <th class="fd-num">Kirim</th><th class="fd-num">Chiqim</th>
+            <th class="fd-num">Oxirida</th>
+          </tr></thead>
+          <tbody>
+            <tr t-foreach="fn.cash_flow" t-as="c" t-key="c.id"
+                t-on-click="() => this.openFinance('cash', c.id)">
+              <td t-esc="c.name"/>
+              <td class="fd-num fd-muted" t-esc="money(c.opening)"/>
+              <td class="fd-num fd-up" t-esc="money(c.in)"/>
+              <td class="fd-num fd-dn" t-esc="money(c.out)"/>
+              <td class="fd-num"><b t-esc="money(c.closing)"/></td>
+            </tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div class="fd-card">
+        <h3>Hisoblar bo'yicha qoldiq</h3>
+        <div class="fd-sub">
+          Eng katta 25 ta · qatorga bosing — o'sha hisobning provodkalari
+          <t t-if="fn.unposted">
+            · <b class="fd-warn"><t t-esc="num(fn.unposted)"/> ta tasdiqlanmagan hujjat</b>
+          </t>
+        </div>
+        <div t-if="!fn.accounts.length" class="fd-note">
+          Provodkalar yo'q — buxgalteriya hali boshlanmagan.
+        </div>
+        <div class="fd-tblwrap" t-else=""><table class="fd-tbl fd-click">
+          <thead><tr>
+            <th>Kod</th><th>Hisob</th><th>Turi</th>
+            <th class="fd-num">Qator</th><th class="fd-num">Qoldiq</th>
+          </tr></thead>
+          <tbody>
+            <tr t-foreach="fn.accounts" t-as="a" t-key="a.id"
+                t-on-click="() => this.openFinance('account', a.id)">
+              <td class="fd-muted" t-esc="a.code"/>
+              <td>
+                <t t-esc="a.name"/>
+                <div class="fd-trk fd-trk-sm">
+                  <i t-att-style="'width:' + barWidth(a.abs_balance, maxAccount)"/>
+                </div>
+              </td>
+              <td class="fd-muted" t-esc="a.type_label"/>
+              <td class="fd-num" t-esc="num(a.lines)"/>
+              <td t-att-class="'fd-num ' + (a.balance &gt;= 0 ? '' : 'fd-dn')"
+                  t-esc="money(a.balance)"/>
+            </tr>
+          </tbody>
+        </table></div>
+      </div>
+    </t>
+
+    <!-- ================= DIAGNOSTIKA ================= -->
+    <t t-if="!state.loading and state.tab === 'diag' and state.diagnostics">
+      <div class="fd-card">
+        <h3>Diagnostika — modul bazangizda nimani topdi</h3>
+        <div class="fd-sub">
+          Panel har bir ko'rsatkichni qaysi maydondan olayotgani.
+          Biror qator qizil bo'lsa — o'sha bo'lim bo'sh qoladi.
+        </div>
+        <div class="fd-tblwrap"><table class="fd-tbl">
+          <thead><tr><th></th><th>Nima</th><th>Topilgan</th><th>Izoh</th></tr></thead>
+          <tbody>
+            <tr t-foreach="state.diagnostics" t-as="d" t-key="d.key">
+              <td><t t-esc="d.ok ? '✅' : '⚠️'"/></td>
+              <td><b t-esc="d.key"/></td>
+              <td t-att-class="d.ok ? '' : 'fd-dn'"><code t-esc="d.value"/></td>
+              <td class="fd-muted" t-esc="d.note"/>
+            </tr>
+          </tbody>
+        </table></div>
+      </div>
+    </t>
+
+  
+    <!-- ================= OYNA (chek / to'lov) ================= -->
+    <div class="fd-modal" t-if="state.modal" t-on-click="() => this.closeModal()">
+      <div class="fd-modal-box" t-on-click.stop="() => {}">
+
+        <div class="fd-modal-h">
+          <b>
+            <t t-if="state.modal.kind === 'order'">🧾 Chek</t>
+            <t t-elif="state.modal.kind === 'store'">🏬 Do'kon</t>
+            <t t-elif="state.modal.kind === 'session'">🗓️ Kassa sessiyasi</t>
+            <t t-else="">💳 To'lov turi</t>
+          </b>
+          <button class="fd-x" t-on-click="() => this.closeModal()">✕</button>
+        </div>
+
+        <div class="fd-modal-b">
+          <div t-if="state.modalLoading or !state.modal.data" class="fd-loading">
+            Yuklanmoqda…
+          </div>
+
+          <!-- chek -->
+          <t t-if="state.modal.kind === 'order' and state.modal.data">
+            <t t-set="o" t-value="state.modal.data"/>
+            <div class="fd-mgrid">
+              <div><span>Chek</span><b t-esc="o.ref"/></div>
+              <div><span>Sana</span><b t-esc="o.date"/></div>
+              <div><span>Do'kon</span><b t-esc="o.store"/></div>
+              <div><span>Kassir</span><b t-esc="o.cashier or '—'"/></div>
+              <div t-if="o.seller"><span>Sotuvchi</span><b t-esc="o.seller"/></div>
+              <div t-if="o.partner"><span>Mijoz</span><b t-esc="o.partner"/></div>
+            </div>
+
+            <table class="fd-tbl fd-mtbl">
+              <thead><tr>
+                <th>Mahsulot</th><th>Artikul</th>
+                <th class="fd-num">Dona</th><th class="fd-num">Narx</th>
+                <th class="fd-num">Chegirma</th><th class="fd-num">Summa</th>
+                <th t-if="showCost" class="fd-num">Marja</th>
+              </tr></thead>
+              <tbody>
+                <tr t-foreach="o.lines" t-as="l" t-key="l_index">
+                  <td t-esc="l.name"/>
+                  <td class="fd-muted" t-esc="l.code"/>
+                  <td class="fd-num" t-esc="num(l.qty)"/>
+                  <td class="fd-num" t-esc="money(l.price)"/>
+                  <td t-att-class="'fd-num ' + (l.discount ? 'fd-dn' : 'fd-muted')">
+                    <t t-if="l.discount">
+                      −<t t-esc="money(l.discount_amount)"/>
+                      <small> (<t t-esc="pct(l.discount, 0)"/>)</small>
+                    </t>
+                    <t t-else="">—</t>
+                  </td>
+                  <td class="fd-num" t-esc="money(l.subtotal)"/>
+                  <td t-if="showCost" class="fd-num" t-esc="pct(l.margin, 0)"/>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="fd-mtot">
+              <div><span>Chegirmasiz</span><b t-esc="money(o.gross)"/></div>
+              <div t-if="o.discount"><span>Chegirma</span>
+                   <b class="fd-dn">−<t t-esc="money(o.discount)"/></b></div>
+              <div><span>Dona</span><b t-esc="num(o.units)"/></div>
+              <div t-if="showCost"><span>Tannarx</span><b t-esc="money(o.cost)"/></div>
+              <div t-if="showCost"><span>Foyda</span>
+                   <b class="fd-up"><t t-esc="money(o.profit)"/>
+                     <small> (<t t-esc="pct(o.margin, 0)"/>)</small></b></div>
+              <div class="fd-mtot-x"><span>To'landi</span><b t-esc="money(o.total)"/></div>
+            </div>
+
+            <div class="fd-mpay">
+              <div t-foreach="o.payments" t-as="p" t-key="p_index" class="fd-chip">
+                <t t-esc="p.is_cash ? '💵' : '💳'"/>
+                <t t-esc="p.name"/> · <b t-esc="money(p.amount)"/>
+              </div>
+            </div>
+
+            <div class="fd-modal-f">
+              <button class="fd-btn" t-on-click="() => this.openOrderInOdoo(o.id)">
+                Odoo'da ochish
+              </button>
+            </div>
+          </t>
+
+
+          <!-- do'kon -->
+          <t t-if="state.modal.kind === 'store' and state.modal.data">
+            <t t-set="st" t-value="state.modal.data"/>
+
+            <div class="fd-mhead">
+              <div>
+                <div class="fd-mtitle" t-esc="st.store"/>
+                <div class="fd-muted">
+                  <t t-esc="st.period.from"/> — <t t-esc="st.period.to"/> ·
+                  kassa: <t t-esc="st.registers.join(', ')"/>
+                </div>
+              </div>
+              <div class="fd-mbig">
+                <t t-esc="money(st.kpi.revenue)"/>
+                <div t-att-class="'fd-foot ' + deltaClass(st.delta.revenue)">
+                  <t t-esc="delta(st.delta.revenue)"/> oldingi davrga
+                </div>
+              </div>
+            </div>
+
+            <div class="fd-mgrid">
+              <div><span>Cheklar</span><b t-esc="num(st.kpi.orders)"/></div>
+              <div><span>O'rtacha chek</span><b t-esc="money(st.kpi.avg_check)"/></div>
+              <div><span>Chekdagi dona (UPT)</span><b t-esc="num(st.kpi.upt, 2)"/></div>
+              <div><span>Sotilgan dona</span><b t-esc="num(st.units)"/></div>
+              <div><span>Chegirma</span>
+                   <b><t t-esc="money(st.discount)"/>
+                      <small> (<t t-esc="pct(st.kpi.discount_pct)"/>)</small></b></div>
+              <div><span>Qaytarish</span>
+                   <b><t t-esc="money(st.returns)"/>
+                      <small> (<t t-esc="num(st.return_orders)"/> chek)</small></b></div>
+              <div t-if="st.target"><span>Reja</span>
+                   <b><t t-esc="money(st.target)"/>
+                      <small t-att-class="planClass(st.target_pct)">
+                        · <t t-esc="pct(st.target_pct, 0)"/></small></b></div>
+              <div t-if="st.lfl !== null"><span>LFL (o'tgan yil)</span>
+                   <b t-att-class="deltaClass(st.lfl)" t-esc="delta(st.lfl)"/></div>
+              <div t-if="showCost"><span>Tannarx</span><b t-esc="money(st.cost)"/></div>
+              <div t-if="showCost"><span>Foyda</span>
+                   <b class="fd-up"><t t-esc="money(st.profit)"/>
+                     <small> (<t t-esc="pct(st.margin, 1)"/>)</small></b></div>
+            </div>
+
+            <h4 class="fd-mh" t-if="st.payments.length">To'lov turlari</h4>
+            <table class="fd-tbl fd-mtbl" t-if="st.payments.length">
+              <thead><tr><th>Turi</th><th class="fd-num">Summa</th>
+                <th class="fd-num">Ulushi</th></tr></thead>
+              <tbody>
+                <tr t-foreach="st.payments" t-as="pm" t-key="pm.key">
+                  <td><t t-esc="pm.is_cash ? '💵' : '💳'"/> <t t-esc="pm.name"/></td>
+                  <td class="fd-num" t-esc="money(pm.amount)"/>
+                  <td class="fd-num" t-esc="pct(pm.pct)"/>
+                </tr>
+              </tbody>
+            </table>
+
+            <h4 class="fd-mh" t-if="st.sellers.length">Sotuvchilar</h4>
+            <table class="fd-tbl fd-mtbl" t-if="st.sellers.length">
+              <thead><tr><th>Xodim</th><th class="fd-num">Tushum</th>
+                <th class="fd-num">Chek</th><th class="fd-num">O'rt. chek</th>
+                <th class="fd-num">UPT</th></tr></thead>
+              <tbody>
+                <tr t-foreach="st.sellers" t-as="w" t-key="w.id">
+                  <td t-esc="w.name"/>
+                  <td class="fd-num" t-esc="money(w.revenue)"/>
+                  <td class="fd-num" t-esc="num(w.orders)"/>
+                  <td class="fd-num" t-esc="money(w.avg_check)"/>
+                  <td class="fd-num" t-esc="num(w.upt, 2)"/>
+                </tr>
+              </tbody>
+            </table>
+
+            <h4 class="fd-mh" t-if="st.cashiers.length">Kassirlar — kassa farqi</h4>
+            <table class="fd-tbl fd-mtbl" t-if="st.cashiers.length">
+              <thead><tr><th>Kassir</th><th class="fd-num">Sessiya</th>
+                <th class="fd-num">Farq</th></tr></thead>
+              <tbody>
+                <tr t-foreach="st.cashiers" t-as="c" t-key="c.id">
+                  <td t-esc="c.name"/>
+                  <td class="fd-num" t-esc="num(c.sessions)"/>
+                  <td t-att-class="'fd-num ' + (c.difference &lt; 0 ? 'fd-dn' : (c.difference &gt; 0 ? 'fd-warn' : 'fd-muted'))"
+                      t-esc="c.difference ? money(c.difference) : '0'"/>
+                </tr>
+              </tbody>
+            </table>
+
+            <h4 class="fd-mh" t-if="st.top_products.length">Eng ko'p sotilgan</h4>
+            <table class="fd-tbl fd-mtbl fd-click" t-if="st.top_products.length">
+              <thead><tr><th>Mahsulot</th><th class="fd-num">Dona</th>
+                <th class="fd-num">Summa</th></tr></thead>
+              <tbody>
+                <tr t-foreach="st.top_products" t-as="pr" t-key="pr.id"
+                    t-on-click="() => this.open('product', pr.id)">
+                  <td t-esc="pr.name"/>
+                  <td class="fd-num" t-esc="num(pr.qty)"/>
+                  <td class="fd-num" t-esc="money(pr.amount)"/>
+                </tr>
+              </tbody>
+            </table>
+
+            <h4 class="fd-mh" t-if="st.hourly.length">Soatlik savdo</h4>
+            <div t-if="st.hourly.length">
+              <div t-foreach="st.hourly" t-as="h" t-key="h.hour" class="fd-bar">
+                <span class="fd-bar-l"><t t-esc="h.hour"/>:00</span>
+                <div class="fd-trk">
+                  <i t-att-style="'width:' + barWidth(h.revenue, modalMaxHour)"/>
+                </div>
+                <span class="fd-bar-v">
+                  <t t-esc="money(h.revenue)"/>
+                  <small class="fd-muted"> · <t t-esc="num(h.orders)"/> chek</small>
+                </span>
+              </div>
+            </div>
+
+            <div class="fd-modal-f">
+              <button class="fd-btn" t-on-click="() => this.openStoreOrders(st.store)">
+                Cheklar ro'yxatini ochish
+              </button>
+            </div>
+          </t>
+
+          <!-- sessiya -->
+          <t t-if="state.modal.kind === 'session' and state.modal.data">
+            <t t-set="sd" t-value="state.modal.data"/>
+            <div class="fd-mhead">
+              <div>
+                <div class="fd-mtitle" t-esc="sd.name"/>
+                <div class="fd-muted">
+                  <t t-esc="sd.store"/> · kassa: <t t-esc="sd.register"/> ·
+                  <t t-esc="sd.state === 'closed' ? 'yopilgan' : 'ochiq'"/>
+                </div>
+              </div>
+              <div class="fd-mbig">
+                <t t-esc="money(sd.revenue)"/>
+                <div class="fd-foot fd-muted">
+                  <t t-esc="num(sd.orders)"/> chek · <t t-esc="num(sd.units)"/> dona
+                </div>
+              </div>
+            </div>
+
+            <div class="fd-mgrid">
+              <div><span>Ochgan</span><b t-esc="sd.opened_by or '—'"/></div>
+              <div><span>Ochilgan vaqt</span><b t-esc="sd.opened_at or '—'"/></div>
+              <div><span>Yopgan</span><b t-esc="sd.closed_by or '—'"/></div>
+              <div><span>Yopilgan vaqt</span><b t-esc="sd.closed_at or '—'"/></div>
+              <div><span>Davomiyligi</span><b><t t-esc="num(sd.hours, 1)"/> soat</b></div>
+              <div><span>O'rtacha chek</span><b t-esc="money(sd.avg_check)"/></div>
+              <div t-if="showCost"><span>Foyda</span>
+                   <b class="fd-up"><t t-esc="money(sd.profit)"/>
+                     <small> (<t t-esc="pct(sd.margin, 1)"/>)</small></b></div>
+            </div>
+
+            <h4 class="fd-mh">Kassa nazorati</h4>
+            <div class="fd-mgrid">
+              <div><span>Boshida naqd</span><b t-esc="money(sd.cash_start)"/></div>
+              <div><span>Kutilgan</span><b t-esc="money(sd.cash_expected)"/></div>
+              <div><span>Sanab topilgan</span><b t-esc="money(sd.cash_end)"/></div>
+              <div><span>Farq</span>
+                <b t-att-class="sd.difference &lt; 0 ? 'fd-dn' : (sd.difference &gt; 0 ? 'fd-warn' : '')">
+                  <t t-esc="sd.difference ? money(sd.difference) : '0'"/>
+                </b>
+              </div>
+            </div>
+            <div class="fd-note" t-if="sd.opening_notes">
+              Ochish izohi: <t t-esc="sd.opening_notes"/>
+            </div>
+            <div class="fd-note" t-if="sd.closing_notes">
+              Yopish izohi: <t t-esc="sd.closing_notes"/>
+            </div>
+
+            <h4 class="fd-mh" t-if="sd.payments.length">To'lov turlari</h4>
+            <table class="fd-tbl fd-mtbl" t-if="sd.payments.length">
+              <thead><tr><th>Turi</th><th class="fd-num">Summa</th>
+                <th class="fd-num">To'lov soni</th></tr></thead>
+              <tbody>
+                <tr t-foreach="sd.payments" t-as="pm" t-key="pm_index">
+                  <td><t t-esc="pm.is_cash ? '💵' : '💳'"/> <t t-esc="pm.name"/></td>
+                  <td class="fd-num" t-esc="money(pm.amount)"/>
+                  <td class="fd-num" t-esc="num(pm.count)"/>
+                </tr>
+              </tbody>
+            </table>
+
+            <h4 class="fd-mh" t-if="sd.order_list.length">Cheklar (oxirgi 25 ta)</h4>
+            <table class="fd-tbl fd-mtbl fd-click" t-if="sd.order_list.length">
+              <thead><tr><th>Chek</th><th>Vaqt</th><th>Kassir</th>
+                <th class="fd-num">Dona</th><th class="fd-num">Summa</th></tr></thead>
+              <tbody>
+                <tr t-foreach="sd.order_list" t-as="o" t-key="o.id"
+                    t-on-click="() => this.open('order', o.id)">
+                  <td t-esc="o.ref"/>
+                  <td class="fd-muted" t-esc="o.time"/>
+                  <td t-esc="o.cashier"/>
+                  <td class="fd-num" t-esc="num(o.qty)"/>
+                  <td class="fd-num" t-esc="money(o.total)"/>
+                </tr>
+              </tbody>
+            </table>
+          </t>
+          <!-- to'lov turi -->
+          <t t-if="state.modal.kind === 'payment' and state.modal.data">
+            <t t-set="pd" t-value="state.modal.data"/>
+            <div class="fd-mgrid">
+              <div><span>To'lov turi</span>
+                   <b><t t-esc="pd.is_cash ? '💵' : '💳'"/> <t t-esc="pd.name"/></b></div>
+              <div t-if="pd.methods &gt; 1"><span>Birlashtirildi</span>
+                   <b><t t-esc="pd.methods"/> ta do'kon yozuvi</b></div>
+              <div><span>Davr</span>
+                   <b><t t-esc="pd.period.from"/> — <t t-esc="pd.period.to"/></b></div>
+              <div><span>Jami summa</span><b t-esc="money(pd.total)"/></div>
+              <div><span>To'lovlar soni</span><b t-esc="num(pd.count)"/></div>
+              <div><span>Cheklar</span><b t-esc="num(pd.orders)"/></div>
+              <div><span>O'rtacha to'lov</span><b t-esc="money(pd.avg)"/></div>
+              <div><span>Eng kichik</span><b t-esc="money(pd.min)"/></div>
+              <div><span>Eng katta</span><b t-esc="money(pd.max)"/></div>
+            </div>
+
+            <h4 class="fd-mh">Do'kon bo'yicha</h4>
+            <table class="fd-tbl fd-mtbl">
+              <thead><tr><th>Do'kon</th><th class="fd-num">Summa</th>
+                <th class="fd-num">To'lov</th><th class="fd-num">Ulushi</th></tr></thead>
+              <tbody>
+                <tr t-foreach="pd.stores" t-as="r" t-key="r.store">
+                  <td t-esc="r.store"/>
+                  <td class="fd-num" t-esc="money(r.amount)"/>
+                  <td class="fd-num" t-esc="num(r.count)"/>
+                  <td class="fd-num"
+                      t-esc="pct(pd.total ? r.amount / pd.total * 100 : 0, 0)"/>
+                </tr>
+              </tbody>
+            </table>
+
+            <h4 class="fd-mh" t-if="pd.cashiers.length">Kassir bo'yicha</h4>
+            <table class="fd-tbl fd-mtbl" t-if="pd.cashiers.length">
+              <thead><tr><th>Kassir</th><th class="fd-num">Summa</th>
+                <th class="fd-num">To'lov</th></tr></thead>
+              <tbody>
+                <tr t-foreach="pd.cashiers" t-as="c" t-key="c.id">
+                  <td t-esc="c.name"/>
+                  <td class="fd-num" t-esc="money(c.amount)"/>
+                  <td class="fd-num" t-esc="num(c.count)"/>
+                </tr>
+              </tbody>
+            </table>
+
+            <h4 class="fd-mh" t-if="pd.daily.length &gt; 1">Kunlar bo'yicha</h4>
+            <div t-if="pd.daily.length &gt; 1">
+              <div t-foreach="pd.daily" t-as="d" t-key="d.date" class="fd-bar">
+                <span class="fd-bar-l" t-esc="d.date"/>
+                <div class="fd-trk">
+                  <i t-att-style="'width:' + barWidth(d.amount, pd.max_daily || pd.total)"/>
+                </div>
+                <span class="fd-bar-v" t-esc="money(d.amount)"/>
+              </div>
+            </div>
+          </t>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= TOOLTIP ================= -->
+    <!-- Matn faqat t-esc orqali qo'yiladi — do'kon/mahsulot nomlari
+         bazadan keladi, shuning uchun innerHTML ishlatilmaydi. -->
+    <div class="fd-tip" t-if="state.tip" t-ref="tip"
+         t-att-style="'left:' + state.tip.x + 'px; top:' + state.tip.y + 'px'">
+      <div class="fd-tip-t" t-esc="state.tip.title"/>
+      <div class="fd-tip-r" t-foreach="state.tip.rows" t-as="tr" t-key="tr_index">
+        <i t-att-class="'fd-tip-k fd-tip-' + (tr.cls || 'c1')"/>
+        <span t-esc="tr.label"/>
+        <b t-att-class="tr.cls === 'up' ? 'fd-up' : (tr.cls === 'dn' ? 'fd-dn' : '')"
+           t-esc="tr.value"/>
+      </div>
+    </div>
+</div>
+</t>
+
+</templates>

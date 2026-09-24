@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- FORM -->
+    <record id="view_feliza_inventory_session_form" model="ir.ui.view">
+        <field name="name">feliza.inventory.session.form</field>
+        <field name="model">feliza.inventory.session</field>
+        <field name="arch" type="xml">
+            <form class="fz_inv_session">
+                <header>
+                    <button name="action_start" type="object" string="Boshlash"
+                            class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_finish" type="object" string="Yakunlash"
+                            class="btn-primary" invisible="state != 'in_progress'"
+                            confirm="Inventarizatsiyani yakunlaysizmi? Sanalmagan tovarlar 'kam' deb hisoblanadi. (Astatka hali o'zgarmaydi.)"/>
+                    <button name="action_apply" type="object"
+                            string="Qo'llash (astatkani to'g'rilash)"
+                            class="btn-primary" invisible="state != 'done' or applied"
+                            confirm="DIQQAT: sanalgan sonlar Odoo astatkasiga yoziladi (tizim = fizik holat). Sanalmagan tovarlar 0 ga tushadi. Bu qaytarib bo'lmaydi. Davom etamizmi?"/>
+                    <button name="action_cancel" type="object" string="Bekor qilish"
+                            invisible="state in ('done','cancel')"/>
+                    <button name="action_reset" type="object" string="Qayta boshlash"
+                            invisible="state == 'draft' or applied"
+                            confirm="Barcha sanalgan ma'lumot o'chadi. Davom etamizmi?"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,in_progress,done"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Astatkaga qo'llangan"
+                            invisible="not applied"/>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="warehouse_id"
+                                   readonly="state != 'draft'"
+                                   options="{'no_create': True}"/>
+                            <field name="user_id"/>
+                            <field name="note"/>
+                        </group>
+                        <group>
+                            <field name="start_at"/>
+                            <field name="end_at"/>
+                            <field name="duration_label"/>
+                            <field name="current_location_id" readonly="1"
+                                   invisible="state != 'in_progress'"/>
+                            <field name="applied" invisible="not applied"/>
+                            <field name="applied_at" invisible="not applied"/>
+                            <field name="applied_by" invisible="not applied"/>
+                        </group>
+                    </group>
+
+                    <!-- SKANER -->
+                    <div invisible="state != 'in_progress'" class="alert alert-info" role="status">
+                        <b>Skaner:</b> avval LOKATSIYA barkodini, keyin tovar barkodlarini ketma-ket skanerlang (har skan +1).
+                        <field name="scan_input" widget="inventory_scan" nolabel="1"/>
+                        <div class="mt-2">
+                            <b>📍 Mening joyim:</b>
+                            <field name="my_location_id" readonly="1" nolabel="1"
+                                   class="d-inline-block"/>
+                            <span class="mx-2">|</span>
+                            <b>👥 Ishtirokchilar:</b>
+                            <field name="participants_label" readonly="1" nolabel="1"
+                                   class="d-inline-block"/>
+                        </div>
+                    </div>
+
+                    <!-- Qo'lda tovar qo'shish (artikul bo'yicha) — alohida, yig'indi ustida -->
+                    <div class="mt-2 mb-2" invisible="state != 'in_progress'">
+                        <button name="action_open_additem" type="object"
+                                string="➕ Qo'lda qo'shish (artikul bo'yicha)"
+                                class="btn-secondary"/>
+                    </div>
+
+                    <notebook>
+                        <page string="Mahsulot kesimi (ANIQ)" name="products">
+                            <div class="alert alert-success" role="status" invisible="state != 'done'">
+                                Bu — <b>aniq solishtirish</b>: har tovar bo'yicha butun ombor kutilgani vs barcha javondа sanalgani. Javonlar birlashtirilgan.
+                            </div>
+                            <div class="mb-2 d-flex flex-wrap gap-1 align-items-center">
+                                <button name="action_view_products" type="object"
+                                        string="🔍 To'liq qidiruv / tuzatish oynasi"
+                                        class="btn-primary btn-sm"
+                                        invisible="state == 'draft'"
+                                        help="Mahsulot, javon, holat bo'yicha qidirish/filtrlash va sonini tuzatish (to'liq oyna)."/>
+                                <button name="action_export_shortage" type="object"
+                                        string="⬇ Kam (Excel)" class="btn-danger btn-sm"
+                                        invisible="state != 'done'"/>
+                                <button name="action_export_surplus" type="object"
+                                        string="⬇ Ko'p (Excel)" class="btn-success btn-sm"
+                                        invisible="state != 'done'"/>
+                                <button name="action_export_all" type="object"
+                                        string="⬇ Barchasi (Excel)" class="btn-secondary btn-sm"
+                                        invisible="state != 'done'"/>
+                            </div>
+                            <div class="alert alert-info" role="status" invisible="applied">
+                                💡 <b>Sanalgan</b> ustunidagi songa bosib, yangi son yozib <b>Enter</b> bosing — <b>darhol saqlanadi</b> (kim tuzatgani Skan tarixiga yoziladi). Ko'p tovar orasidan qidirish uchun <b>🔍 To'liq qidiruv</b> oynasidan foydalaning.
+                            </div>
+                            <field name="product_ids" class="fz_scan_panel">
+                                <list create="false" delete="false" editable="bottom"
+                                      decoration-danger="status == 'shortage'"
+                                      decoration-success="status == 'surplus'"
+                                      default_order="last_scan_id desc">
+                                    <field name="applied" column_invisible="1"/>
+                                    <field name="last_scan_id" column_invisible="1"/>
+                                    <field name="product_id" readonly="1"/>
+                                    <field name="barcode" optional="show" readonly="1"/>
+                                    <field name="location_names" string="Javonlar" widget="inv_location" optional="show"/>
+                                    <field name="expected_qty" string="Kutilgan" sum="Kutilgan" readonly="1"/>
+                                    <field name="counted_edit" string="Sanalgan"
+                                           widget="inv_count" class="fw-bold"/>
+                                    <field name="sold_qty" string="Sotilgan" sum="Sotilgan" optional="show" readonly="1"/>
+                                    <field name="diff_qty" string="Farq" sum="Farq" readonly="1"/>
+                                    <field name="status" readonly="1"/>
+                                    <field name="diff_cost" string="Farq (tannarx)" sum="Farq (tannarx)" optional="show" readonly="1"/>
+                                    <field name="diff_sale" string="Farq (sotuv)" sum="Farq (sotuv)" optional="hide" readonly="1"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Skan tarixi" name="scans">
+                            <div class="mb-2">
+                                <button name="action_view_scans" type="object"
+                                        string="🔎 Ishtirokchi (Kim) bo'yicha filtrlash / guruhlash"
+                                        class="btn-primary btn-sm"/>
+                            </div>
+                            <group>
+                                <field name="scan_count" readonly="1"/>
+                                <field name="participants_label" readonly="1"/>
+                            </group>
+                            <field name="scan_ids" readonly="1" class="fz_scan_panel">
+                                <list create="false" edit="false" limit="40"
+                                      decoration-warning="is_manual == True">
+                                    <field name="create_date" string="Vaqt" widget="datetime"/>
+                                    <field name="user_id" string="Kim"/>
+                                    <field name="location_id" string="Joy"/>
+                                    <field name="product_id" string="Tovar"/>
+                                    <field name="default_code" string="Artikul"/>
+                                    <field name="barcode" string="Barkod"/>
+                                    <field name="variant_info" string="Rang/O'lcham"/>
+                                    <field name="qty" string="Soni"/>
+                                    <field name="is_manual" string="Qo'lda"/>
+                                    <button name="unlink" type="object"
+                                            string="O'chirish" icon="fa-trash"
+                                            groups="feliza_inventory.group_feliza_inventory_manager"
+                                            invisible="parent.applied"
+                                            confirm="Bu skan yozuvini o'chirasizmi?"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+
+                    <!-- YIG'INDILAR — jadvallardan keyin (pastda) -->
+                    <group string="Yig'indi (dona)" col="4">
+                        <field name="expected_total_types" string="Kutilgan tovar turi"/>
+                        <field name="product_count" string="Sanalgan tovar turi"/>
+                        <field name="expected_total_qty" string="Kutilgan (dona)"/>
+                        <field name="counted_qty" string="Sanalgan (dona)"/>
+                        <field name="sold_qty" string="Sotilgan (davomida)"/>
+                        <field name="surplus_qty" string="Ortiqcha (dona)"/>
+                        <field name="shortage_qty" string="Kam (dona)"/>
+                        <field name="diff_qty" string="Farq (dona)"/>
+                        <field name="currency_id" invisible="1"/>
+                    </group>
+                    <group string="Summa" col="4">
+                        <field name="expected_total_cost" string="Kutilgan (tannarx)"/>
+                        <field name="expected_total_sale" string="Kutilgan (sotuv)"/>
+                        <field name="surplus_cost" string="Ortiqcha (tannarx)"/>
+                        <field name="surplus_sale" string="Ortiqcha (sotuv)"/>
+                        <field name="shortage_cost" string="Kam (tannarx)"/>
+                        <field name="shortage_sale" string="Kam (sotuv)"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- LIST -->
+    <record id="view_feliza_inventory_session_list" model="ir.ui.view">
+        <field name="name">feliza.inventory.session.list</field>
+        <field name="model">feliza.inventory.session</field>
+        <field name="arch" type="xml">
+            <list decoration-info="state == 'in_progress'"
+                  decoration-muted="state == 'cancel'">
+                <field name="name"/>
+                <field name="warehouse_id"/>
+                <field name="state"/>
+                <field name="start_at"/>
+                <field name="end_at"/>
+                <field name="duration_label"/>
+                <field name="counted_qty" string="Sanalgan"/>
+                <field name="surplus_qty" string="Ortiqcha"/>
+                <field name="shortage_qty" string="Kam"/>
+                <field name="user_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_feliza_inventory_session_search" model="ir.ui.view">
+        <field name="name">feliza.inventory.session.search</field>
+        <field name="model">feliza.inventory.session</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="warehouse_id"/>
+                <field name="user_id"/>
+                <filter name="in_progress" string="Sanalyapti" domain="[('state','=','in_progress')]"/>
+                <filter name="done" string="Yakunlangan" domain="[('state','=','done')]"/>
+                <separator/>
+                <filter name="g_wh" string="Do'kon bo'yicha" context="{'group_by':'warehouse_id'}"/>
+                <filter name="g_state" string="Holat bo'yicha" context="{'group_by':'state'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_feliza_inventory_session" model="ir.actions.act_window">
+        <field name="name">Inventarizatsiya</field>
+        <field name="res_model">feliza.inventory.session</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- QO'LDA SANOQNI TUZATISH WIZARD (Task 3) -->
+    <record id="view_feliza_inventory_count_wizard_form" model="ir.ui.view">
+        <field name="name">feliza.inventory.count.wizard.form</field>
+        <field name="model">feliza.inventory.count.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Sanoqni tuzatish">
+                <group>
+                    <field name="line_id" invisible="1"/>
+                    <field name="product_id"/>
+                    <field name="location_id"/>
+                    <field name="current_counted"/>
+                    <field name="new_counted"/>
+                    <field name="reason"/>
+                </group>
+                <footer>
+                    <button name="action_confirm" type="object" string="Saqlash"
+                            class="btn-primary"/>
+                    <button string="Bekor" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- MAHSULOT SANOG'INI TUZATISH WIZARD (Mahsulot kesimidan) -->
+    <record id="view_feliza_inventory_pcount_wizard_form" model="ir.ui.view">
+        <field name="name">feliza.inventory.pcount.wizard.form</field>
+        <field name="model">feliza.inventory.pcount.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Sanoqni tuzatish">
+                <group>
+                    <field name="session_id" invisible="1"/>
+                    <field name="product_id"/>
+                    <field name="current_counted"/>
+                    <field name="new_counted"/>
+                </group>
+                <footer>
+                    <button name="action_confirm" type="object" string="Saqlash"
+                            class="btn-primary"/>
+                    <button string="Bekor" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- QO'LDA TOVAR QO'SHISH WIZARD (Task 8) -->
+    <record id="view_feliza_inventory_additem_wizard_form" model="ir.ui.view">
+        <field name="name">feliza.inventory.additem.wizard.form</field>
+        <field name="model">feliza.inventory.additem.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Qo'lda tovar qo'shish">
+                <field name="session_id" invisible="1"/>
+                <field name="allowed_location_ids" invisible="1"/>
+                <group>
+                    <field name="location_id"
+                           options="{'no_create': True}"
+                           domain="[('id','in',allowed_location_ids)]"/>
+                    <field name="query" placeholder="Artikul, nom yoki barkod yozing…"/>
+                </group>
+                <field name="line_ids" nolabel="1">
+                    <list editable="bottom" create="false" delete="false"
+                          decoration-success="current_counted &gt; 0">
+                        <field name="selected" string="✓" widget="boolean_toggle"/>
+                        <field name="product_id" force_save="1" readonly="1"/>
+                        <field name="default_code" string="Artikul" readonly="1"/>
+                        <field name="variant_info" string="Rang/O'lcham" readonly="1"/>
+                        <field name="barcode" string="Barkod" readonly="1" optional="show"/>
+                        <field name="current_counted" string="Sanalgan (joriy)"
+                               class="fw-bold" readonly="1"/>
+                        <field name="qty" string="Qo'shish (soni)"/>
+                    </list>
+                </field>
+                <footer>
+                    <button name="action_add" type="object"
+                            string="Qo'shish" class="btn-primary"/>
+                    <button string="Bekor" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- JOYNI O'ZGARTIRISH (ko'chirish) WIZARD -->
+    <record id="view_feliza_inventory_locmove_wizard_form" model="ir.ui.view">
+        <field name="name">feliza.inventory.locmove.wizard.form</field>
+        <field name="model">feliza.inventory.locmove.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Joyni o'zgartirish (ko'chirish)">
+                <field name="allowed_location_ids" invisible="1"/>
+                <group>
+                    <field name="session_id" invisible="1"/>
+                    <field name="product_id"/>
+                    <field name="current_location"/>
+                    <field name="counted_qty"/>
+                    <field name="new_location_id"
+                           options="{'no_create': True}"
+                           domain="[('id','in',allowed_location_ids)]"
+                           placeholder="Javonni yozib qidiring…"/>
+                </group>
+                <footer>
+                    <button name="action_confirm" type="object"
+                            string="Ko'chirish" class="btn-primary"/>
+                    <button string="Bekor" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <menuitem id="menu_feliza_inventory_root" name="Inventarizatsiya"
+              web_icon="feliza_inventory,static/description/icon.png"
+              sequence="55"
+              groups="group_feliza_inventory_user"/>
+    <menuitem id="menu_feliza_inventory_sessions" name="Sessiyalar"
+              parent="menu_feliza_inventory_root"
+              action="action_feliza_inventory_session"
+              sequence="10"/>
+</odoo>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- POS Order form view: Sotuvchi maydoni -->
+    <record id="view_pos_order_form_salesperson" model="ir.ui.view">
+        <field name="name">pos.order.form.salesperson</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="salesperson_emp_id"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- POS Order list view: Sotuvchi ustuni -->
+    <record id="view_pos_order_list_salesperson" model="ir.ui.view">
+        <field name="name">pos.order.list.salesperson</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_order_tree"/>
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="salesperson_emp_id" optional="show"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>

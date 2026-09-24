@@ -1,0 +1,708 @@
+// ==========================================================================
+//  FELIZA DASHBOARD — Uslub A (Studio)
+//  Ranglar rang-korlik (CVD) uchun tekshirilgan palitradan olingan.
+// ==========================================================================
+.fd-root {
+    color-scheme: light;
+    --fd-bg: #f2f2ef;
+    --fd-card: #ffffff;
+    --fd-ink: #0b0b0b;
+    --fd-ink2: #52514e;
+    // Neytral kulrangning quyuqroq qadami: oq kartada 5.17, sahifada 4.61
+    // (avvalgi #898781 atigi 3.59 edi — 12px matn uchun yetarli emas).
+    --fd-mut: #6f6d68;
+    --fd-line: #e3e2dc;
+    --fd-grid: #eceae4;
+    --fd-s1: #2a78d6;
+    --fd-s3: #1baf7a;
+    --fd-s4: #eda100;
+    --fd-s8: #e34948;
+    --fd-good: #0ca30c;
+    --fd-gtext: #006300;
+    --fd-crit: #d03b3b;
+    --fd-dtext: #d03b3b;   // manfiy delta MATNI (fonda emas)
+    --fd-serious: #ec835a;
+    --fd-q100: #cde2fb;
+
+    background: var(--fd-bg);
+    color: var(--fd-ink);
+    font-size: 14px;
+    line-height: 1.45;
+    padding: 16px;
+
+    // SCROLL
+    // Odoo'ning `.o_action_manager` konteyneri `overflow: hidden` bilan
+    // keladi va o'zi scroll qilmaydi — scroll qilish client action'ning
+    // vazifasi. `min-height: 100%` ishlatilsa, bu element kontent
+    // balandligicha cho'zilib ketadi va o'zida scroll paydo bo'lmaydi
+    // (scrollHeight == clientHeight), natijada kontent shunchaki
+    // kesilib qoladi. Shuning uchun ANIQ `height: 100%` kerak —
+    // shunda ortiqcha kontent uchun `overflow-y: auto` ishga tushadi.
+    height: 100%;
+    max-height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    &::-webkit-scrollbar { width: 9px; }
+    &::-webkit-scrollbar-thumb {
+        background: var(--fd-line); border-radius: 5px;
+        &:hover { background: var(--fd-mut); }
+    }
+
+    * { box-sizing: border-box; }
+
+    // Odoo'ning global uslubi h1..h6 ga QATTIQ rang beradi (qorong'i
+    // bundle'da ham qora bo'lib qoladi — sarlavhalar o'qilmaydi).
+    // Shuning uchun sarlavha va havola rangini o'zimiz belgilaymiz.
+    h1, h2, h3, h4, h5, h6 { color: var(--fd-ink); }
+    a { color: var(--fd-s1); }
+    small { color: inherit; }
+
+    // ---------- top bar ----------
+    .fd-top {
+        display: flex; align-items: center; gap: 12px;
+        flex-wrap: wrap; margin-bottom: 14px;
+    }
+    .fd-logo {
+        width: 30px; height: 30px; border-radius: 8px;
+        background: linear-gradient(135deg, #2a78d6, #4a3aa7);
+        display: grid; place-items: center;
+        color: #fff; font-weight: 800; font-size: 14px; flex: none;
+    }
+    .fd-title { font-weight: 700; font-size: 18px; letter-spacing: -0.3px; }
+    .fd-sub-inline { color: var(--fd-ink2); font-weight: 500; font-size: 14px; }
+    .fd-spacer { flex: 1; }
+
+    .fd-lock {
+        background: rgba(208, 59, 59, 0.10);
+        border: 1px solid rgba(208, 59, 59, 0.35);
+        color: var(--fd-crit);
+        border-radius: 99px; padding: 3px 10px;
+        font-size: 12px; font-weight: 600; white-space: nowrap;
+    }
+    .fd-live {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-size: 12px; font-weight: 600; color: var(--fd-gtext);
+        background: rgba(12, 163, 12, 0.12);
+        padding: 3px 10px; border-radius: 99px;
+    }
+    .fd-dot {
+        width: 7px; height: 7px; border-radius: 50%;
+        background: var(--fd-good); display: inline-block;
+    }
+
+    // ---------- filtr paneli ----------
+    //  Do'kon · davr · sana · yangilash — bir butun guruh. Tor ekranda
+    //  guruh bo'lib pastga tushadi, ichidagilar bir-biridan ajralmaydi.
+    .fd-filters {
+        display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+        margin-left: auto;
+    }
+    .fd-field {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: var(--fd-card); border: 1px solid var(--fd-line);
+        border-radius: 9px; padding: 0 4px 0 9px; height: 34px;
+        .fd-field-ic { font-size: 13px; opacity: .75; line-height: 1; }
+    }
+    .fd-field .fd-select {
+        border: 0; background: transparent; height: 32px; padding: 0 6px 0 0;
+        border-radius: 0;
+        &:focus { outline: none; }
+    }
+
+    .fd-seg {
+        display: flex; background: var(--fd-card);
+        border: 1px solid var(--fd-line); border-radius: 9px; overflow: hidden;
+        height: 34px;
+        button {
+            border: 0; background: transparent; color: var(--fd-ink2);
+            padding: 0 13px; font: inherit; font-size: 13px; cursor: pointer;
+            transition: background .12s, color .12s;
+            &+ button { border-left: 1px solid var(--fd-line); }
+            &:hover:not(.fd-on) { background: var(--fd-grid); color: var(--fd-ink); }
+            &.fd-on { background: var(--fd-s1); color: #fff; font-weight: 600; }
+        }
+        &.fd-seg-sm {
+            height: 30px; width: 100%;
+            button { flex: 1; font-size: 12.5px; }
+        }
+    }
+    .fd-ib, .fd-select {
+        border: 1px solid var(--fd-line); background: var(--fd-card);
+        color: var(--fd-ink2); border-radius: 9px; padding: 0 11px; height: 34px;
+        cursor: pointer; font: inherit; font-size: 13px;
+        // Odoo'ning global input uslubi select'ni cho'zib yuboradi —
+        // shuning uchun kenglikni aniq cheklaymiz.
+        width: auto; max-width: 240px; flex: none; display: inline-block;
+    }
+    .fd-ib:hover { background: var(--fd-grid); color: var(--fd-ink); }
+    .fd-ib:focus-visible, .fd-select:focus-visible, .fd-seg button:focus-visible,
+    .fd-tabs button:focus-visible {
+        outline: 2px solid var(--fd-s1); outline-offset: 1px;
+    }
+
+    // ---------- aniq sana ----------
+    .fd-datebox { position: relative; display: inline-flex; gap: 4px; align-items: center; }
+    .fd-daynav {
+        padding: 0; width: 30px; text-align: center; font-size: 16px; line-height: 1;
+        &[disabled] { opacity: .4; cursor: default; }
+    }
+    .fd-datebtn {
+        display: inline-flex; align-items: center; gap: 7px; height: 34px;
+        padding: 0 12px; border-radius: 9px; cursor: pointer; font: inherit;
+        font-size: 13px; white-space: nowrap;
+        border: 1px solid var(--fd-line); background: var(--fd-card);
+        color: var(--fd-ink2);
+        &:hover { background: var(--fd-grid); color: var(--fd-ink); }
+        .fd-cal { font-size: 13px; line-height: 1; }
+        .fd-wd { color: var(--fd-mut); font-size: 12px; }
+        b { color: var(--fd-ink); font-weight: 650; }
+        &.fd-on {
+            border-color: var(--fd-s1);
+            background: rgba(42, 120, 214, 0.08);
+            b { color: var(--fd-s1); }
+            .fd-wd { color: var(--fd-s1); opacity: .75; }
+        }
+    }
+
+    .fd-pop-back { position: fixed; inset: 0; z-index: 40; }
+    .fd-pop {
+        position: absolute; top: calc(100% + 6px); right: 0; z-index: 41;
+        width: 260px; padding: 13px;
+        background: var(--fd-card); border: 1px solid var(--fd-line);
+        border-radius: 12px; box-shadow: 0 12px 32px rgba(0, 0, 0, .16);
+        display: flex; flex-direction: column; gap: 9px;
+    }
+    .fd-pop-h { font-weight: 650; font-size: 13px; color: var(--fd-ink); }
+    .fd-pop-row { display: flex; align-items: center; gap: 8px; }
+    .fd-pop-lbl {
+        width: 46px; flex: none; font-size: 12.5px; color: var(--fd-mut);
+    }
+    .fd-date {
+        flex: 1; height: 32px; padding: 0 8px; font: inherit; font-size: 13px;
+        border: 1px solid var(--fd-line); border-radius: 8px;
+        background: var(--fd-bg); color: var(--fd-ink);
+        &:focus { outline: none; border-color: var(--fd-s1); }
+    }
+    .fd-pop-note {
+        font-size: 12.5px; color: var(--fd-ink2);
+        background: var(--fd-bg); border-radius: 7px; padding: 6px 9px;
+    }
+    .fd-pop-btns { display: flex; gap: 8px; justify-content: flex-end; }
+    .fd-btn-flat, .fd-btn-main {
+        height: 31px; padding: 0 13px; border-radius: 8px; cursor: pointer;
+        font: inherit; font-size: 13px;
+    }
+    .fd-btn-flat {
+        border: 1px solid var(--fd-line); background: transparent;
+        color: var(--fd-ink2);
+        &:hover { background: var(--fd-grid); }
+    }
+    .fd-btn-main {
+        border: 1px solid var(--fd-s1); background: var(--fd-s1);
+        color: #fff; font-weight: 600;
+        &[disabled] { opacity: .5; cursor: default; }
+    }
+
+    // ---------- tanlangan davr yozuvi ----------
+    .fd-rangebar {
+        display: flex; align-items: center; gap: 8px;
+        margin: -4px 0 14px; font-size: 13px; color: var(--fd-ink2);
+        .fd-rb-ic { opacity: .7; }
+        b { color: var(--fd-ink); font-weight: 650; }
+        .fd-rb-sub { color: var(--fd-mut); font-size: 12.5px; }
+        .fd-rb-x {
+            border: 0; background: transparent; color: var(--fd-mut);
+            cursor: pointer; font: inherit; font-size: 12px; padding: 2px 5px;
+            border-radius: 6px;
+            &:hover { background: var(--fd-grid); color: var(--fd-ink); }
+        }
+    }
+
+    // ---------- tabs ----------
+    .fd-tabs {
+        display: flex; gap: 2px; flex-wrap: wrap;
+        border-bottom: 1px solid var(--fd-line); margin-bottom: 16px;
+        button {
+            border: 0; background: transparent; color: var(--fd-ink2);
+            font: inherit; font-size: 13.5px; padding: 10px 14px; cursor: pointer;
+            border-bottom: 2px solid transparent; margin-bottom: -1px;
+            white-space: nowrap;
+            border-radius: 9px 9px 0 0;
+            transition: background .12s ease, color .12s ease;
+            &:hover:not(.fd-on) {
+                background: var(--fd-grid); color: var(--fd-ink);
+            }
+            &.fd-on {
+                color: var(--fd-ink); font-weight: 650;
+                border-bottom-color: var(--fd-s1);
+                background: linear-gradient(
+                    to bottom, transparent 55%,
+                    rgba(42, 120, 214, 0.07));
+            }
+        }
+    }
+
+    // ---------- layout ----------
+    .fd-row { display: grid; gap: 14px; }
+    .fd-c2 { grid-template-columns: repeat(2, 1fr); }
+    .fd-c5 { grid-template-columns: repeat(5, 1fr); }
+    .fd-c23 { grid-template-columns: 2fr 1fr; }
+    .fd-c32 { grid-template-columns: 1.4fr 1fr; }
+    @media (max-width: 1150px) {
+        .fd-c2, .fd-c5, .fd-c23, .fd-c32 { grid-template-columns: 1fr; }
+    }
+    .fd-mb { margin-bottom: 14px; }
+
+    .fd-card {
+        background: var(--fd-card); border: 1px solid var(--fd-line);
+        border-radius: 14px; padding: 17px;
+        box-shadow: var(--fd-shadow, 0 1px 2px rgba(15, 15, 14, .04),
+                                     0 4px 14px rgba(15, 15, 14, .05));
+        h3 { margin: 0 0 3px; font-size: 14px; font-weight: 650;
+             letter-spacing: -0.1px; }
+    }
+    .fd-sub { color: var(--fd-mut); font-size: 12px; margin-bottom: 13px; }
+    .fd-kv { color: var(--fd-ink2); font-size: 12.5px; }
+    .fd-muted { color: var(--fd-mut); }
+
+    // ---------- figures ----------
+    .fd-fig {
+        font-size: 44px; font-weight: 750; letter-spacing: -1.6px;
+        line-height: 1.05; margin-top: 4px;
+        font-variant-numeric: tabular-nums;
+        s {
+            font-size: 18px; font-weight: 600; color: var(--fd-ink2);
+            text-decoration: none; margin-left: 6px; letter-spacing: 0;
+        }
+    }
+    .fd-big {
+        font-size: 25px; font-weight: 700; letter-spacing: -0.7px; margin-top: 4px;
+    }
+    .fd-foot { font-size: 12px; margin-top: 4px; }
+    .fd-delta { font-size: 13px; font-weight: 600; margin-top: 8px; }
+
+    .fd-up, .fd-ok { color: var(--fd-gtext); font-weight: 600; }
+    .fd-dn, .fd-bad { color: var(--fd-dtext); font-weight: 600; }
+    .fd-warn { color: #7a5200; font-weight: 600; }
+
+    // ---------- plan ----------
+    .fd-plan { margin-top: 16px; }
+    .fd-plan-row {
+        display: flex; justify-content: space-between;
+        font-size: 12.5px; color: var(--fd-ink2); margin-bottom: 5px;
+        &.fd-muted { font-size: 12px; margin: 5px 0 0; }
+    }
+    .fd-trk {
+        height: 9px; background: var(--fd-grid);
+        border-radius: 5px; overflow: hidden;
+        i { display: block; height: 100%; background: var(--fd-s1); border-radius: 5px; }
+    }
+
+    // ---------- alerts ----------
+    .fd-alert {
+        display: flex; gap: 10px; padding: 11px;
+        border: 1px solid var(--fd-line); border-radius: 9px;
+        background: var(--fd-bg); align-items: flex-start;
+        & + .fd-alert { margin-top: 8px; }
+        b { font-size: 13px; display: block; }
+        p { margin: 2px 0 0; color: var(--fd-ink2); font-size: 12.5px; }
+        .fd-ic {
+            width: 23px; height: 23px; border-radius: 6px;
+            display: grid; place-items: center; color: #fff;
+            font-size: 11px; font-weight: 800; flex: none;
+            background: var(--fd-serious);
+        }
+        &.fd-crit .fd-ic { background: var(--fd-crit); }
+    }
+
+    // ---------- bars ----------
+    .fd-bar {
+        display: flex; align-items: center; gap: 10px; margin-bottom: 7px;
+        > span { width: 92px; font-size: 12.5px; color: var(--fd-ink2); flex: none; }
+        > b {
+            width: 74px; text-align: right; font-size: 12.5px;
+            font-variant-numeric: tabular-nums; flex: none; white-space: nowrap;
+        }
+        > em {
+            width: 46px; text-align: right; font-size: 12.5px; font-style: normal;
+            font-variant-numeric: tabular-nums; flex: none;
+        }
+    }
+    .fd-bt {
+        flex: 1; height: 16px; background: var(--fd-grid);
+        border-radius: 4px; position: relative; overflow: hidden;
+        i {
+            position: absolute; left: 0; top: 0; bottom: 0;
+            border-radius: 4px; background: var(--fd-s1);
+        }
+    }
+    .fd-mbar {
+        height: 9px; background: var(--fd-grid); border-radius: 4px; overflow: hidden;
+        i { display: block; height: 100%; background: var(--fd-s1); border-radius: 4px; }
+    }
+    .fd-pay {
+        margin-bottom: 13px;
+        .fd-pay-h {
+            display: flex; justify-content: space-between;
+            font-size: 13px; margin-bottom: 5px;
+            b { font-variant-numeric: tabular-nums; }
+        }
+    }
+
+    // ---------- chegirma / ombor qo'shimchalari ----------
+    .fd-bar .fd-bar-l { width: 92px; }
+    .fd-bar .fd-bar-v {
+        width: auto; min-width: 130px; text-align: right; flex: none;
+        font-size: 12.5px; font-variant-numeric: tabular-nums; white-space: nowrap;
+        color: var(--fd-ink);
+    }
+    .fd-trk-sm { height: 5px; margin-top: 5px; max-width: 220px; }
+
+    .fd-tbl.fd-click tbody tr { cursor: pointer; }
+    .fd-tbl.fd-click tbody tr:hover { background: var(--fd-grid); }
+    .fd-tbl tbody tr.fd-sel { background: var(--fd-grid); }
+    .fd-tbl tbody tr.fd-sel td:first-child { box-shadow: inset 3px 0 0 var(--fd-s1); }
+
+    .fd-toolbar {
+        display: flex; align-items: center; gap: 9px;
+        margin: 10px 0 4px; flex-wrap: wrap;
+    }
+    .fd-inp {
+        flex: 1; min-width: 190px; max-width: 340px;
+        padding: 7px 11px; font-size: 13px;
+        border: 1px solid var(--fd-line); border-radius: 7px;
+        background: var(--fd-card); color: var(--fd-ink);
+        &:focus { outline: none; border-color: var(--fd-s1); }
+    }
+
+    // ---------- moliya jamlanma qatorlari ----------
+    .fd-tbl tbody tr.fd-sum {
+        background: var(--fd-grid);
+        td { border-top: 1px solid var(--fd-line); }
+        b { font-variant-numeric: tabular-nums; }
+    }
+    .fd-tbl tbody tr.fd-sum-x td { font-size: 14.5px; }
+    .fd-tbl.fd-click tbody tr.fd-sum { cursor: default; }
+    .fd-tbl.fd-click tbody tr.fd-sum:hover { background: var(--fd-grid); }
+
+    // ---------- hero ----------
+    .fd-hero {
+        display: grid; grid-template-columns: minmax(250px, 330px) 1fr;
+        gap: 8px 26px; align-items: start;
+    }
+    .fd-hero-r .fd-chart { margin-top: 0; padding-top: 0; border-top: none; }
+    @media (max-width: 1100px) {
+        .fd-hero { grid-template-columns: 1fr; }
+        .fd-hero-r .fd-chart {
+            margin-top: 14px; padding-top: 12px;
+            border-top: 1px solid var(--fd-line);
+        }
+    }
+    .fd-src {
+        font-size: 11px; color: var(--fd-mut); margin-top: 10px;
+        padding-top: 8px; border-top: 1px dashed var(--fd-line);
+    }
+
+    // ---------- grafik ----------
+    .fd-chart {
+        margin-top: 16px; padding-top: 14px;
+        border-top: 1px solid var(--fd-line);
+    }
+    .fd-chart-t {
+        font-size: 12px; color: var(--fd-mut); margin-bottom: 6px;
+        text-transform: none; letter-spacing: .2px;
+    }
+    .fd-svg {
+        width: 100%; height: 170px; display: block;
+        .fd-area { fill: var(--fd-q100); opacity: .55; stroke: none; }
+        .fd-line { fill: none; stroke: var(--fd-s1); stroke-width: 2.2;
+                   stroke-linejoin: round; stroke-linecap: round; }
+        .fd-line-prev { fill: none; stroke: var(--fd-mut); stroke-width: 1.6;
+                        stroke-dasharray: 4 3; opacity: .8; }
+    }
+    .fd-legend {
+        display: flex; gap: 16px; font-size: 12px;
+        color: var(--fd-ink2); margin-top: 6px;
+        // Yorliq belgisi belgining o'ziga o'xshashi kerak:
+        // joriy davr — to'ldirilgan maydon (kvadrat), oldingi davr —
+        // punktir chiziq (chiziqcha).
+        .fd-dot { width: 9px; height: 9px; border-radius: 2px;
+                  display: inline-block; margin-right: 5px; }
+        .fd-dot-1 { background: var(--fd-s1); }
+        .fd-dot-2 {
+            width: 14px; height: 0; border-radius: 0;
+            border-top: 2px dashed var(--fd-mut);
+            background: none; vertical-align: middle;
+        }
+    }
+    .fd-spark {
+        width: 100%; height: 30px; margin-top: 8px; display: block;
+        path { fill: none; stroke: var(--fd-s1); stroke-width: 1.6;
+               stroke-linejoin: round; opacity: .75; }
+    }
+
+    // ---------- to'lov qatori ----------
+    .fd-pay-click {
+        cursor: pointer; border-radius: 7px; padding: 6px 8px; margin: 0 -8px 8px;
+        &:hover { background: var(--fd-grid); }
+    }
+
+    .fd-mt { margin-top: 14px; }
+
+    // ---------- oyna sarlavhasi (do'kon kartasi) ----------
+    .fd-mhead {
+        display: flex; justify-content: space-between; align-items: flex-start;
+        gap: 18px; padding-bottom: 12px; margin-bottom: 12px;
+        border-bottom: 1px solid var(--fd-line); flex-wrap: wrap;
+    }
+    .fd-mtitle { font-size: 17px; font-weight: 800; }
+    .fd-mbig {
+        text-align: right; font-size: 26px; font-weight: 800;
+        font-variant-numeric: tabular-nums; line-height: 1.15;
+        .fd-foot { font-size: 12px; font-weight: 600; }
+    }
+
+    // ---------- oyna ----------
+    .fd-modal {
+        position: fixed; inset: 0; z-index: 1100;
+        background: rgba(11, 11, 11, .45);
+        display: flex; align-items: flex-start; justify-content: center;
+        padding: 40px 16px; overflow-y: auto;
+    }
+    .fd-modal-box {
+        background: var(--fd-card); color: var(--fd-ink);
+        width: 100%; max-width: 960px; border-radius: 14px;
+        box-shadow: 0 18px 50px rgba(0, 0, 0, .28);
+        overflow: hidden;
+    }
+    .fd-modal-h {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 14px 18px; border-bottom: 1px solid var(--fd-line);
+        font-size: 15px;
+    }
+    .fd-x {
+        border: none; background: transparent; font-size: 17px; cursor: pointer;
+        color: var(--fd-mut); line-height: 1; padding: 4px 8px; border-radius: 6px;
+        &:hover { background: var(--fd-grid); color: var(--fd-ink); }
+    }
+    .fd-modal-b { padding: 16px 18px 20px; }
+    .fd-modal-f {
+        margin-top: 14px; display: flex; justify-content: flex-end;
+    }
+    .fd-btn {
+        border: 1px solid var(--fd-line); background: var(--fd-card);
+        color: var(--fd-ink); padding: 7px 14px; border-radius: 8px;
+        font-size: 13px; cursor: pointer;
+        &:hover { background: var(--fd-grid); }
+    }
+    .fd-mgrid {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px 18px; margin-bottom: 14px;
+        > div { display: flex; flex-direction: column; }
+        span { font-size: 11.5px; color: var(--fd-mut); }
+        b { font-size: 14px; font-variant-numeric: tabular-nums; }
+    }
+    .fd-mtbl { margin-bottom: 12px; }
+    .fd-mh {
+        font-size: 13px; margin: 16px 0 6px; color: var(--fd-ink2);
+        font-weight: 700;
+    }
+    .fd-mtot {
+        display: flex; flex-wrap: wrap; gap: 10px 22px;
+        padding: 12px 0 4px; border-top: 1px solid var(--fd-line);
+        > div { display: flex; flex-direction: column; }
+        span { font-size: 11.5px; color: var(--fd-mut); }
+        b { font-size: 14.5px; font-variant-numeric: tabular-nums; }
+        .fd-mtot-x b { font-size: 18px; font-weight: 800; }
+    }
+    .fd-mpay { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .fd-chip {
+        background: var(--fd-grid); border-radius: 20px;
+        padding: 5px 12px; font-size: 12.5px;
+        b { font-variant-numeric: tabular-nums; }
+    }
+
+    // ---------- table ----------
+    // Keng jadvallar (masalan 12 ustunli «Do'konlar») tor ekranda
+    // kesilib qolmasligi uchun gorizontal scroll o'rami.
+    .fd-tblwrap {
+        overflow-x: auto;
+        overflow-y: hidden;
+        max-width: 100%;
+        // yupqa scroll chizig'i
+        scrollbar-width: thin;
+        &::-webkit-scrollbar { height: 8px; }
+        &::-webkit-scrollbar-thumb {
+            background: var(--fd-line); border-radius: 4px;
+        }
+    }
+    .fd-tblwrap .fd-tbl { min-width: 100%; }
+
+    .fd-tbl {
+        width: 100%; border-collapse: collapse;
+        font-variant-numeric: tabular-nums;
+        th {
+            text-align: left; font-size: 11px; font-weight: 650;
+            color: var(--fd-mut); text-transform: uppercase; letter-spacing: 0.5px;
+            padding: 0 9px 8px; border-bottom: 1px solid var(--fd-line);
+            white-space: nowrap;
+        }
+        td {
+            padding: 8px 9px; border-bottom: 1px solid var(--fd-grid);
+            font-size: 13.5px;
+        }
+        tr:last-child td { border-bottom: 0; }
+        tbody tr { transition: background .1s ease; }
+        tbody tr:hover { background: rgba(42, 120, 214, 0.05); }
+        .fd-num { text-align: right; }
+        code {
+            font-size: 12px; background: var(--fd-grid);
+            padding: 1px 6px; border-radius: 4px; color: var(--fd-ink2);
+        }
+    }
+
+    // ---------- misc ----------
+    .fd-note {
+        background: rgba(42, 120, 214, 0.07);
+        border: 1px solid rgba(42, 120, 214, 0.22);
+        border-radius: 9px; padding: 11px 13px;
+        font-size: 12.5px; color: var(--fd-ink2);
+        b { color: var(--fd-ink); }
+    }
+    .fd-err {
+        background: rgba(208, 59, 59, 0.08);
+        border: 1px solid rgba(208, 59, 59, 0.3);
+        border-radius: 9px; padding: 12px 14px;
+        margin-bottom: 14px; font-size: 13px;
+    }
+    .fd-loading {
+        padding: 40px; text-align: center; color: var(--fd-mut); font-size: 14px;
+    }
+
+    // ---------- sahifalash ----------
+    .fd-pager {
+        display: flex; align-items: center; justify-content: flex-end;
+        gap: 4px; margin: 6px 0 4px;
+        .fd-pg-lbl {
+            font-size: 12px; color: var(--fd-mut);
+            font-variant-numeric: tabular-nums; margin-right: 6px;
+        }
+        .fd-pg-btn {
+            border: 1px solid var(--fd-line); background: var(--fd-card);
+            color: var(--fd-ink2); border-radius: 7px;
+            width: 28px; height: 26px; line-height: 1;
+            font-size: 15px; cursor: pointer; padding: 0;
+            &:hover:not(:disabled) { background: var(--fd-grid); color: var(--fd-ink); }
+            &:disabled { opacity: .38; cursor: default; }
+        }
+    }
+
+    // ---------- variant belgisi (rang / o'lcham) ----------
+    // Rang nomi MATN bilan yoziladi — faqat rangli nuqta bilan emas,
+    // aks holda rang ko'rmaydiganlar uchun ma'lumot yo'qoladi.
+    .fd-tag {
+        display: inline-block; padding: 1px 8px; border-radius: 20px;
+        background: var(--fd-grid); border: 1px solid var(--fd-line);
+        font-size: 12px; white-space: nowrap; color: var(--fd-ink2);
+    }
+    .fd-tag-sz {
+        font-variant-numeric: tabular-nums; font-weight: 600;
+        min-width: 34px; text-align: center; color: var(--fd-ink);
+    }
+    // holat belgisi: qaytdi / kutilmoqda. Rang YOLG'IZ ma'no tashimaydi —
+    // matn ham o'zi aytib turadi, shuning uchun rang ko'rmaydiganlar uchun
+    // ham tushunarli.
+    .fd-tag-up {
+        color: var(--fd-gtext); border-color: currentColor; font-weight: 600;
+    }
+    .fd-tag-dn {
+        color: var(--fd-dtext); border-color: currentColor; font-weight: 600;
+    }
+
+    // bosiladigan KPI kartochkasi
+    .fd-clickable {
+        cursor: pointer;
+        transition: border-color .12s ease, transform .12s ease,
+                    box-shadow .12s ease;
+        &:hover {
+            border-color: var(--fd-mut); transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(15, 15, 14, .09);
+        }
+    }
+
+    // ---------- crosshair (asosiy grafik) ----------
+    .fd-svg { cursor: crosshair; }
+    .fd-cross {
+        stroke: var(--fd-mut); stroke-width: 1; stroke-dasharray: 3 3;
+        opacity: .85;
+    }
+    .fd-pt {
+        stroke: var(--fd-card); stroke-width: 2;
+    }
+    .fd-pt1 { fill: var(--fd-s1); }
+    .fd-pt2 { fill: var(--fd-mut); }
+
+    // ---------- ustun ustiga kelganda ----------
+    // Belgi javob berishi kerak: qator biroz yorishadi, ustun to'qlashadi.
+    .fd-hov {
+        cursor: default; border-radius: 7px;
+        padding: 3px 6px; margin-left: -6px; margin-right: -6px;
+        &:hover {
+            background: var(--fd-grid);
+            .fd-bt i { filter: brightness(1.12); }
+        }
+    }
+}
+
+// ==========================================================================
+//  Qalqib chiquvchi izoh (tooltip)
+//  `.fd-root` ICHIDA emas — position: fixed bo'lgani uchun karta
+//  overflow'iga bog'lanib qolmasligi kerak.
+// ==========================================================================
+.fd-tip {
+    position: fixed; z-index: 1200; pointer-events: none;
+    min-width: 190px; max-width: 260px;
+    background: var(--fd-card, #fff); color: var(--fd-ink, #0b0b0b);
+    border: 1px solid var(--fd-line, #e3e2dc); border-radius: 9px;
+    box-shadow: 0 8px 26px rgba(0, 0, 0, .18);
+    padding: 9px 11px; font-size: 12.5px; line-height: 1.4;
+
+    .fd-tip-t {
+        font-weight: 700; font-size: 12.5px; margin-bottom: 6px;
+        padding-bottom: 5px; border-bottom: 1px solid var(--fd-grid, #eceae4);
+    }
+    // qator: [kalit chizig'i] yorliq .......... QIYMAT
+    // Qiymat kuchli, yorliq ikkilamchi — o'quvchi raqamni izlaydi.
+    .fd-tip-r {
+        display: flex; align-items: center; gap: 7px;
+        & + .fd-tip-r { margin-top: 3px; }
+        span { color: var(--fd-ink2, #52514e); flex: 1; }
+        b {
+            font-variant-numeric: tabular-nums; white-space: nowrap;
+            font-weight: 700;
+        }
+    }
+    // "quti" emas, qisqa CHIZIQ — tooltip zichligida to'ldirilgan kvadrat
+    // yorliq vazifasini bajaruvchi ortiqcha bo'yoq bo'lib qoladi.
+    .fd-tip-k {
+        width: 12px; height: 2px; border-radius: 1px; flex: none;
+        display: inline-block; background: var(--fd-mut, #898781);
+    }
+    .fd-tip-c1 { background: var(--fd-s1, #2a78d6); }
+    .fd-tip-c2 { background: var(--fd-mut, #898781); }
+    .fd-tip-up { background: var(--fd-gtext, #006300); }
+    .fd-tip-dn { background: var(--fd-dtext, #d03b3b); }
+    .fd-up { color: var(--fd-gtext, #006300); }
+    .fd-dn { color: var(--fd-dtext, #d03b3b); }
+}
+
+// ==========================================================================
+//  Qorong'i rejim -> static/src/scss/dashboard.dark.scss
+//
+//  Odoo 19 qorong'i rejimni <body> class bilan emas, boshqa assets bundle
+//  ("web.assets_web_dark") yuborib bajaradi. Shuning uchun bu yerda
+//  `.o_dark_mode` selektori YOZILMAYDI — u hech qachon mos kelmaydi.
+//  Qorong'i qadamlar alohida faylda, manifestdagi "web.assets_web_dark"
+//  bundle orqali ulanadi.
+// ==========================================================================

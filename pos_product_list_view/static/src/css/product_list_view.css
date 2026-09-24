@@ -1,0 +1,142 @@
+/* =====================================================
+   POS Product List/Card View Toggle
+   ===================================================== */
+
+/* Toggle tugmalar container */
+.product-view-toggle {
+    flex-shrink: 0;
+    z-index: 1;
+}
+
+/* Toggle tugmalar */
+.view-toggle-btn {
+    width: 36px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    background-color: #ffffff;
+    color: #6c757d;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    padding: 0;
+}
+
+.view-toggle-btn:hover {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+.view-toggle-btn.active {
+    background-color: #714B67;
+    border-color: #714B67;
+    color: #ffffff;
+}
+
+/* =====================================================
+   LIST KO'RINISHI - product-list.d-flex.flex-column
+   ===================================================== */
+
+/* Har bir product-card gorizontal satr bo'ladi */
+.product-list.d-flex .product {
+    min-height: 64px !important;
+    max-height: 72px !important;
+    border-radius: 6px !important;
+    padding: 6px 8px !important;
+    width: 100%;
+}
+
+/* Rasm - kichik kvadrat, o'ng tomonda */
+.product-list.d-flex .product-img {
+    width: 52px !important;
+    min-width: 52px !important;
+    flex-shrink: 0 !important;
+    border-radius: 4px !important;
+    /* ratio-4x3 ni square qilish */
+    --bs-aspect-ratio: 100% !important;
+}
+
+.product-list.d-flex .product-img img {
+    border-radius: 4px !important;
+    object-fit: cover !important;
+}
+
+/* Kontent - chap tomonda, markazlashgan */
+.product-list.d-flex .product-content {
+    justify-content: center !important;
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    padding-right: 8px !important;
+}
+
+/* Mahsulot nomi */
+.product-list.d-flex .product-name {
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    -webkit-line-clamp: 2 !important;
+    white-space: normal !important;
+}
+
+/* Savat miqdori badge */
+.product-list.d-flex .product-cart-qty {
+    bottom: 4px !important;
+    right: 4px !important;
+}
+
+
+
+/* ===== Nom davomida artikul, tagida shtrix-kod ===== */
+.product-list.d-flex .product-content{ display:block !important; }
+.product-list.d-flex .product-name{
+    display:inline !important; -webkit-line-clamp:unset !important; white-space:normal !important;
+}
+.pos-pl-artikul{
+    display:inline-block; font-weight:700; font-size:12px; color:#714B67;
+    background:#f3eef2; border-radius:4px; padding:0 6px; margin-left:8px; vertical-align:1px;
+}
+.pos-pl-barcode{
+    display:block; font-family:'Courier New',monospace; font-size:11.5px;
+    color:#6c757d; letter-spacing:1px; margin-top:2px;
+}
+
+/* ===== UMUMIY astatka badge — rasm oldida (o'ng tomonda) ===== */
+.pos-pl-total{
+    display:inline-block; font-weight:800; font-size:13px; border-radius:6px;
+    padding:0 9px; margin-left:8px; vertical-align:1px; min-width:26px; text-align:center;
+}
+.pos-pl-total.pos-pl-ok{ color:#0f7b3f; background:#e6f6ec; border:1px solid #b7e4c7; }
+.pos-pl-total.pos-pl-zero{ color:#ffffff; background:#dc3545; border:1px solid #dc3545; }
+
+
+/* Astatka badge — LIST ko'rinishida rasm oldida (o'ng chekkada) */
+.product-list.d-flex .product{ position:relative; }
+.product-list.d-flex .pos-pl-total{
+    position:absolute; top:50%; right:74px; transform:translateY(-50%); margin:0; z-index:2;
+}
+
+/* ===== Jilo: kattaroq/to'qroq yozuv, aniq barcode, narx badge ===== */
+.product-list.d-flex .product-name{ font-size:16px !important; color:#111 !important; font-weight:700 !important; }
+.pos-pl-artikul{ font-size:13px !important; }
+.pos-pl-barcode{ font-size:13px !important; color:#222 !important; font-weight:600 !important; letter-spacing:1.5px !important; }
+.pos-pl-total{ font-size:15px !important; padding:2px 10px !important; }
+
+/* Narx badge — astatkadan oldin (chapda) */
+.pos-pl-price{
+    display:inline-block; font-weight:800; font-size:15px; color:#0b3d91;
+    background:#eef3ff; border:1px solid #cdd9f5; border-radius:6px;
+    padding:2px 10px; text-align:center; white-space:nowrap;
+}
+.product-list.d-flex .pos-pl-price{
+    position:absolute; top:50%; right:132px; transform:translateY(-50%); margin:0; z-index:2;
+}
+
+/* ===== POS umumiy yozuv hajmi — ozroq kattaroq (faqat font-size, xavfsiz) ===== */
+/* Grid kartalaridagi nom */
+.product .product-name{ font-size:15px !important; }
+/* Buyurtma (savat) satrlari */
+.orderline, .orderline .product-name, .orderline .info-list{ font-size:15px !important; }
+/* Narxlar */
+.product-price, .orderline .price{ font-size:15px !important; }

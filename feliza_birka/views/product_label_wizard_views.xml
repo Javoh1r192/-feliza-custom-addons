@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Wizard formasi -->
+    <record id="view_product_label_wizard_form" model="ir.ui.view">
+        <field name="name">feliza.product.label.wizard.form</field>
+        <field name="model">feliza.product.label.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Birka chop etish">
+                <field name="product_tmpl_id" invisible="1"/>
+                <div class="alert alert-info" role="status">
+                    Har variantga <b>birka sonini</b> kiriting (kerak bo'lmaganini 0 qiling yoki o'chiring), keyin <b>Chop etish</b>.
+                </div>
+                <field name="line_ids">
+                    <list editable="bottom" create="false" delete="true">
+                        <!-- product_id readonly EMAS: readonly bo'lsa brauzer
+                             uni saqlashda serverga qaytarmaydi -> variant
+                             yo'qoladi -> bo'sh birka chiqadi. -->
+                        <field name="product_id"/>
+                        <field name="barcode" readonly="1"/>
+                        <field name="qty"/>
+                        <field name="price"/>
+                        <field name="old_price"/>
+                    </list>
+                </field>
+                <footer>
+                    <button name="action_print" type="object" string="Chop etish"
+                            class="btn-primary" icon="fa-print"/>
+                    <button string="Bekor qilish" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tovar (template) "Действия" menyusiga -->
+    <record id="action_product_label_wizard" model="ir.actions.act_window">
+        <field name="name">Birka chop etish</field>
+        <field name="res_model">feliza.product.label.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="product.model_product_template"/>
+        <field name="binding_view_types">form,list</field>
+    </record>
+
+    <!-- Variant (product.product) "Действия" menyusiga -->
+    <record id="action_product_label_wizard_variant" model="ir.actions.act_window">
+        <field name="name">Birka chop etish</field>
+        <field name="res_model">feliza.product.label.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="product.model_product_product"/>
+        <field name="binding_view_types">form,list</field>
+    </record>
+</odoo>

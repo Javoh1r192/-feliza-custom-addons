@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!--
+        Add an "Almashtirish" (Exchange) button right next to the native
+        "Refund" button on the TicketScreen. We only ADD a sibling
+        component via xpath "after" - the original ActionpadWidget/Refund
+        button and its bound method are left completely untouched.
+    -->
+    <t t-name="pos_product_exchange.TicketScreenExchangeButton"
+       t-inherit="point_of_sale.TicketScreen"
+       t-inherit-mode="extension">
+        <xpath expr="//ActionpadWidget" position="after">
+            <ActionpadWidget
+                partner="getSelectedOrder()?.getPartner()"
+                actionName.translate="Almashtirish"
+                actionToTrigger.bind="onDoExchange"
+            />
+        </xpath>
+    </t>
+
+</templates>

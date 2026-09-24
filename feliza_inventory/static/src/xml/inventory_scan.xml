@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+    <t t-name="feliza_inventory.InventoryScan">
+        <div class="o_inventory_scan d-flex align-items-center gap-2 mt-2">
+            <i class="fa fa-barcode fa-2x text-primary"/>
+            <input t-ref="scanInput" type="text"
+                   class="o_input form-control"
+                   style="max-width:380px;font-size:18px;font-weight:bold"
+                   placeholder="Barkodni skanerlang..."
+                   autocomplete="off"
+                   t-on-keydown="onKeydown"/>
+        </div>
+    </t>
+
+    <t t-name="feliza_inventory.InvCountField">
+        <t t-if="readonly">
+            <span class="fz_count_pill fz_count_ro" t-esc="displayValue"/>
+        </t>
+        <input t-else="" t-ref="countInput" type="text" inputmode="decimal"
+               class="fz_count_pill fz_count_edit"
+               autocomplete="off"
+               t-att-value="displayValue"
+               t-on-change="_onChangeEvt"
+               t-on-keydown="_onKeydown"
+               t-on-click="_onClick"
+               t-on-focus="_onFocus"/>
+    </t>
+
+    <t t-name="feliza_inventory.InvLocationField">
+        <span t-att-class="editable ? 'fz_loc_pill fz_loc_edit' : 'fz_loc_pill'"
+              t-att-title="editable ? 'Bosing — javonni o\'zgartirish' : ''"
+              t-on-click="onClick" t-esc="displayValue"/>
+    </t>
+</templates>

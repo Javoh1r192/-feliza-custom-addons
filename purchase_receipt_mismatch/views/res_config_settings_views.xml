@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_mismatch" model="ir.ui.view">
+        <field name="name">res.config.settings.view.mismatch</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="purchase.res_config_settings_view_form_purchase"/>
+        <field name="arch" type="xml">
+            <xpath expr="//app[@name='purchase']" position="inside">
+                <block title="Miqdor farqi" name="mismatch_notify_container">
+                    <setting string="Xabar oluvchi foydalanuvchi"
+                             help="Qabul miqdori buyurtmadan farq qilsa, shu foydalanuvchiga xabar boradi">
+                        <field name="mismatch_notify_user_id"/>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

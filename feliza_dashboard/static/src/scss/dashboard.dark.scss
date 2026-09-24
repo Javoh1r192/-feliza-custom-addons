@@ -1,0 +1,113 @@
+// ==========================================================================
+//  FELIZA DASHBOARD — QORONG'I REJIM
+//
+//  MUHIM: Odoo 19 qorong'i rejimni <body> ga class qo'shib emas, BOSHQA
+//  assets bundle ("web.assets_web_dark") yuborib amalga oshiradi
+//  (web/views/webclient_templates.xml, 300-qator:
+//      <t t-if="color_scheme == 'dark'">
+//          <t t-call-assets="web.assets_web_dark" .../>
+//  ).
+//  Shuning uchun bu fayl `.o_dark_mode` kabi ota-selektorsiz yoziladi —
+//  u faqat qorong'i bundle'ga kiradi va yorug' rejimda umuman yuklanmaydi.
+//  Manifestda ro'yxatdan o'tishi shart:
+//      "web.assets_web_dark": ["feliza_dashboard/static/src/**/*.dark.scss"]
+//
+//  Ranglar avtomatik ag'darilmagan — qorong'i sirt (#1a1a19) uchun alohida
+//  tanlangan va tekshirilgan qadamlar (CVD-xavfsiz palitra).
+// ==========================================================================
+
+.fd-root {
+    // brauzerga aytamiz: scrollbar, input, select — qorong'i variantda
+    color-scheme: dark;
+
+    // ---------- sirtlar va siyoh ----------
+    --fd-bg: #0d0d0d;      // sahifa foni
+    --fd-card: #1a1a19;    // karta sirti (grafiklar shu ustida chiziladi)
+    --fd-ink: #ffffff;     // asosiy matn
+    --fd-ink2: #c3c2b7;    // ikkilamchi matn
+    --fd-mut: #898781;     // o'q/yorliq (ikkala rejimda bir xil)
+    --fd-line: #383835;    // karta chegarasi / bazis chizig'i
+    --fd-grid: #2c2c2a;    // ingichka to'r, jadval qatori ajratgichi
+    --fd-shadow: none;     // qorong'i sirtda soya shovqin bo'ladi
+
+    // ---------- seriya ranglari (qorong'i qadamlar) ----------
+    --fd-s1: #3987e5;      // ko'k    — asosiy seriya
+    --fd-s3: #199e70;      // akva
+    --fd-s4: #c98500;      // sariq
+    --fd-s8: #e66767;      // qizil
+    --fd-q100: #104281;    // grafik ostidagi maydon (ko'k 650)
+
+    // ---------- holat ranglari ----------
+    // Status palitrasi mavzuga bog'liq emas — to'rttasi ham qorong'i
+    // sirtda 3:1 dan yuqori kontrastga ega.
+    --fd-good: #0ca30c;
+    --fd-gtext: #0ca30c;   // yorug'da #006300 edi — qorong'ida yorqinroq qadam
+    --fd-crit: #d03b3b;    // ikonka/chip foni uchun (oq matn 4.80)
+    --fd-dtext: #e66767;   // manfiy delta MATNI — qorong'ida 5.39 (AA)
+    --fd-serious: #ec835a;
+
+    .fd-warn { color: #fab219; }   // yorug'dagi #7a5200 qorong'ida o'qilmaydi
+
+    // ---------- qattiq yozilgan rgba'larni moslash ----------
+    // Bular yorug' fon uchun hisoblangan edi; qorong'ida ko'rinmay qoladi.
+
+    .fd-tbl tbody tr:hover { background: rgba(57, 135, 229, 0.16); }
+    .fd-tbl.fd-click tbody tr:hover { background: var(--fd-grid); }
+
+    .fd-note {
+        background: rgba(57, 135, 229, 0.14);
+        border-color: rgba(57, 135, 229, 0.34);
+    }
+    .fd-err {
+        background: rgba(230, 103, 103, 0.14);
+        border-color: rgba(230, 103, 103, 0.40);
+    }
+    .fd-lock {
+        background: rgba(230, 103, 103, 0.14);
+        border-color: rgba(230, 103, 103, 0.40);
+        color: #e66767;
+    }
+    .fd-live { background: rgba(12, 163, 12, 0.18); }
+
+    // oyna orqa fonini quyuqroq qilamiz, aks holda karta bilan qo'shilib ketadi
+    .fd-modal { background: rgba(0, 0, 0, 0.66); }
+    .fd-modal-box { box-shadow: 0 18px 50px rgba(0, 0, 0, 0.60); }
+
+    // Maydon to'ldirmasi orqa fon vazifasini bajaradi — chiziqni bosib
+    // ketmasligi kerak, shuning uchun quyuq sirtda ham past shaffoflik.
+    .fd-svg .fd-area { opacity: .50; }
+
+    // logotip gradienti qorong'i fonda bir oz yorqinroq
+    .fd-logo { background: linear-gradient(135deg, #3987e5, #6a5ae0); }
+
+    // tooltip: qorong'ida yumshoq soya ko'rinmaydi — kuchaytiramiz va
+    // kartadan bir pog'ona yorug'roq sirtga qo'yamiz
+    .fd-tip {
+        background: #23231f;
+        border-color: #4a4a45;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.62);
+        .fd-tip-t { border-bottom-color: #383835; }
+    }
+    // crosshair nuqtalari sirt rangi bilan halqalanadi
+    .fd-pt { stroke: #1a1a19; }
+
+    // ---------- filtr / sana tanlash ----------
+    // Tanlangan sana tugmasi: yorug'da ochiq ko'k fon edi — qorong'ida
+    // u ko'rinmay ketadi, shuning uchun quyuqroq to'ldirma.
+    .fd-datebtn.fd-on {
+        background: rgba(57, 135, 229, 0.18);
+        border-color: #3987e5;
+        b { color: #7fb2f0; }
+        .fd-wd { color: #7fb2f0; }
+    }
+    .fd-pop {
+        // kartadan bir pog'ona yorug'roq — ostidagi jadval bilan qo'shilib
+        // ketmasligi uchun (tooltip bilan bir xil sirt)
+        background: #23231f;
+        border-color: #4a4a45;
+        box-shadow: 0 14px 38px rgba(0, 0, 0, 0.62);
+    }
+    .fd-date, .fd-pop-note { background: #161615; }
+    // brauzerning o'z kalendar ikonkasi qora fonda qora chiqadi
+    .fd-date::-webkit-calendar-picker-indicator { filter: invert(1) opacity(.7); }
+}

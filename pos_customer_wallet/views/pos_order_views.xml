@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_pos_pos_form_wallet" model="ir.ui.view">
+        <field name="name">pos.order.form.wallet</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
+        <field name="arch" type="xml">
+            <field name="amount_total" position="after">
+                <field name="wallet_used_amount"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>

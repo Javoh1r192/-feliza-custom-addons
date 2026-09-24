@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        POS kartochkasiga «Chekdagi manzil» maydonini qo'shamiz —
+        do'kon nomining tagida turadi, admin shu yerga yozadi.
+    -->
+    <record id="pos_config_view_form_feliza_manzil" model="ir.ui.view">
+        <field name="name">pos.config.form.feliza.manzil</field>
+        <field name="model">pos.config</field>
+        <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@id='title']" position="after">
+                <group>
+                    <field name="feliza_manzil_matn"
+                           placeholder="masalan: Yangiyo'l sh., Samarqand darvoza ko'chasi 12"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

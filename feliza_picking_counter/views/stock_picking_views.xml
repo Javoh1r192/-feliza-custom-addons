@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_picking_form_feliza_counter" model="ir.ui.view">
+        <field name="name">stock.picking.form.feliza.counter</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Hisoblagich tovarlar ro'yxatining ustida turadi:
+                 xodim tovar kiritayotganda ko'zdan qochmasin. -->
+            <!-- Anchor ataylab sodda: `move_ids` maydoni Odoo 19 ning
+                 asosiy hujjat formasida ATIGI BIR MARTA uchraydi, shuning
+                 uchun boshqa modullar (warehouse_transfer_custom_19v,
+                 feliza_size_split, Studio) formani o'zgartirsa ham bu
+                 xpath ishlayveradi. -->
+            <xpath expr="//field[@name='move_ids']" position="before">
+                <div class="fpc-bar">
+                    <span class="fpc-chip">
+                        <span class="fpc-k">Qatorlar</span>
+                        <field name="feliza_line_count" nolabel="1"
+                               class="fpc-v" readonly="1"/>
+                    </span>
+
+                    <span class="fpc-chip">
+                        <span class="fpc-k">Talab</span>
+                        <field name="feliza_demand_qty" nolabel="1"
+                               class="fpc-v" digits="[16,0]" readonly="1"/>
+                        <span class="fpc-u">dona</span>
+                    </span>
+
+                    <span class="fpc-chip fpc-done">
+                        <span class="fpc-k">Kiritilgan</span>
+                        <field name="feliza_done_qty" nolabel="1"
+                               class="fpc-v" digits="[16,0]" readonly="1"/>
+                        <span class="fpc-u">dona</span>
+                    </span>
+
+                    <span class="fpc-chip fpc-diff"
+                          invisible="feliza_diff_qty == 0">
+                        <span class="fpc-k">Farq</span>
+                        <field name="feliza_diff_qty" nolabel="1"
+                               class="fpc-v" digits="[16,0]" readonly="1"/>
+                        <span class="fpc-u">dona</span>
+                    </span>
+
+                    <span class="fpc-chip fpc-ok"
+                          invisible="feliza_diff_qty != 0 or feliza_line_count == 0">
+                        ✓ Talab bilan mos
+                    </span>
+
+                    <span class="fpc-note">
+                        Jadval ostidagi yig'indi faqat ko'rinib turgan sahifani
+                        qo'shadi — bu yerdagi raqamlar esa hujjatning barcha
+                        qatorlari bo'yicha.
+                    </span>
+                </div>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

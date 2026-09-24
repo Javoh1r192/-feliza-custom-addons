@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_feliza_size_dist_wizard,feliza.size.distribution.wizard,model_feliza_size_distribution_wizard,stock.group_stock_user,1,1,1,1
+access_feliza_size_dist_wizard_line,feliza.size.distribution.wizard.line,model_feliza_size_distribution_wizard_line,stock.group_stock_user,1,1,1,1
+access_feliza_size_dist_wizard_alloc,feliza.size.distribution.wizard.alloc,model_feliza_size_distribution_wizard_alloc,stock.group_stock_user,1,1,1,1

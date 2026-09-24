@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 1) Standart "Coupon Code" reportida chiziqli barcode o'rniga QR -->
+    <template id="loyalty_report_qr" inherit_id="loyalty.loyalty_report">
+        <xpath expr="//span[@t-field='o.code'][@t-options]" position="replace">
+            <img t-att-src="'/report/barcode/QR/%s?width=300&amp;height=300' % o.code"
+                 style="width:300px;height:300px" alt="QR"/>
+        </xpath>
+    </template>
+
+    <!-- 2) Standart "Gift Card" reportida ham QR -->
+    <template id="gift_card_report_qr" inherit_id="loyalty.gift_card_report">
+        <xpath expr="//img[contains(@t-att-src, '/report/barcode/Code128/')]" position="replace">
+            <img t-att-src="'/report/barcode/QR/%s?width=300&amp;height=300' % o.code"
+                 style="width:300px;height:300px" alt="QR"/>
+        </xpath>
+    </template>
+
+    <!-- 58 x 40 mm birka o'lchamli qog'oz (birka bilan bir xil) -->
+    <record id="paperformat_voucher_label" model="report.paperformat">
+        <field name="name">Vaucher 58x40</field>
+        <field name="default" eval="False"/>
+        <field name="format">custom</field>
+        <field name="page_width">58</field>
+        <field name="page_height">40</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">0</field>
+        <field name="margin_bottom">0</field>
+        <field name="margin_left">0</field>
+        <field name="margin_right">0</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">96</field>
+        <field name="disable_shrinking" eval="True"/>
+    </record>
+
+    <!-- 3) Vaucher: 58x40 mm birka o'lchamида — summa + QR + kod.
+         Birka'дек `article` (kirill buzilmasin) + `zoom` (wkhtmltopdf mm). -->
+    <template id="voucher_qr_report">
+        <t t-call="web.html_container">
+            <div class="article">
+                <t t-set="vscale" t-value="docs and docs[0]._fz_voucher_scale() or '1'"/>
+                <style>
+                    @page { margin: 0; }
+                    html, body, .article {
+                        margin: 0 !important; padding: 0 !important;
+                        max-width: none !important; width: auto !important;
+                    }
+                    .article { font-size: 0; line-height: 0; }
+                    .vch {
+                        width: 58mm; height: 39.5mm; box-sizing: border-box;
+                        padding: 1mm 2mm; overflow: hidden;
+                        text-align: center !important;
+                        font-family: Arial, Helvetica, sans-serif; color: #000;
+                        background: #fff;
+                    }
+                    .vch + .vch { page-break-before: always; }
+                    .vch-amt { font-size: 12pt; font-weight: bold; line-height: 1.1;
+                               text-align: center !important; white-space: nowrap; }
+                    .vch-qr { line-height: 0; text-align: center !important; }
+                    .vch-qr img { width: 23mm !important; height: 23mm !important;
+                                  display: inline-block; max-width: none !important; }
+                    .vch-code { font-family: "Courier New", monospace;
+                                font-size: 8pt; letter-spacing: 1pt; font-weight: bold;
+                                line-height: 1.1; text-align: center !important; }
+                    .vch-exp { font-size: 6pt; color: #555; line-height: 1;
+                               text-align: center !important; }
+                </style>
+                <t t-foreach="docs" t-as="o">
+                    <div class="vch" t-attf-style="zoom: {{ vscale }}">
+                        <div class="vch-amt"><span t-out="o._fz_voucher_amount()"/></div>
+                        <div class="vch-qr"><img t-att-src="o._fz_qr_datauri()" alt="QR"/></div>
+                        <div class="vch-code"><span t-out="o.code"/></div>
+                        <div class="vch-exp" t-if="o.expiration_date">Muddat: <span t-field="o.expiration_date"/></div>
+                    </div>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    <record id="action_report_voucher_qr" model="ir.actions.report">
+        <field name="name">Vaucher QR (birka)</field>
+        <field name="model">loyalty.card</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">feliza_pos_giftcard_manual.voucher_qr_report</field>
+        <field name="report_file">feliza_pos_giftcard_manual.voucher_qr_report</field>
+        <field name="paperformat_id" ref="paperformat_voucher_label"/>
+        <field name="print_report_name">'Vaucher - %s' % (object.code)</field>
+        <field name="binding_model_id" ref="loyalty.model_loyalty_card"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

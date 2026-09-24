@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_hr.Navbar" t-inherit="point_of_sale.Navbar" t-inherit-mode="extension">
+        <xpath expr="//DropdownItem[normalize-space(text())='Close Register']" position="attributes">
+            <attribute name="t-if">!pos.cashier.pw_disable_closeregister</attribute>
+        </xpath>
+        <xpath expr="//DropdownItem[normalize-space(text())='Cash In/Out']" position="attributes">
+            <attribute name="t-if">!pos.cashier.pw_disable_cashinout</attribute>
+        </xpath>
+       
+
+    </t>
+</templates>

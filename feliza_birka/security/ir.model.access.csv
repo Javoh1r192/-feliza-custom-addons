@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_feliza_picking_label,feliza.picking.label,model_feliza_picking_label,stock.group_stock_user,1,1,1,1
+access_feliza_artikul_series_user,feliza.artikul.series.user,model_feliza_artikul_series,base.group_user,1,0,0,0
+access_feliza_artikul_series_mgr,feliza.artikul.series.mgr,model_feliza_artikul_series,stock.group_stock_manager,1,1,1,1
+access_feliza_product_label_wizard,feliza.product.label.wizard,model_feliza_product_label_wizard,stock.group_stock_user,1,1,1,1
+access_feliza_product_label_wizard_line,feliza.product.label.wizard.line,model_feliza_product_label_wizard_line,stock.group_stock_user,1,1,1,1

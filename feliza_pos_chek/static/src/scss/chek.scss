@@ -1,0 +1,162 @@
+// FELIZA CHEKI — 58 mm termal printer (Xprinter XP-365B) uchun.
+//
+// MUHIM: ichki o'lchamlarning hammasi `em` da. Sababi — chek uch xil
+// yo'l bilan ko'rsatiladi va har birida boshqa kenglik kerak:
+//   1) ekranda (kassir ko'radi)            — bazaviy 13px;
+//   2) brauzer orqali chop etish           — 45 mm kenglik, 10px baza;
+//   3) rasmga aylantirib yuborish (canvas) — 384px kenglik, 22px baza.
+// `em` bo'lgani uchun bitta bazaviy font-size'ni almashtirsak butun
+// chek proporsional kichrayadi/kattarayadi — hech narsa kesilmaydi.
+.pos-receipt.fz-chek {
+    font-family: Arial, "DejaVu Sans", sans-serif;
+    color: #000;
+    font-size: 13px;
+    line-height: 1.35;
+
+    .fz-logo {
+        text-align: center;
+        margin-bottom: 0.45em;
+
+        img {
+            max-width: 74%;
+            max-height: 6.5em;
+        }
+    }
+
+    .fz-yur { text-align: center; font-weight: bold; font-size: 1.08em; }
+    .fz-dok { text-align: center; font-weight: bold; font-size: 1.23em;
+              margin-top: 0.15em; }
+    .fz-man { text-align: center; font-size: 0.92em; margin-top: 0.1em; }
+
+    .fz-uz  { border-top: 1px dashed #000; margin: 0.6em 0; }
+    .fz-uzb { border-top: 1px solid #000;  margin: 0.55em 0; }
+
+    // «BONUSLAR» — chiziq o'rtasida yozuv
+    .fz-nomli {
+        display: flex;
+        align-items: center;
+        gap: 0.45em;
+        margin: 0.7em 0;
+        font-weight: bold;
+        font-size: 0.92em;
+        letter-spacing: 0.14em;
+
+        &:before, &:after {
+            content: "";
+            flex: 1;
+            border-top: 1px dashed #000;
+        }
+    }
+
+    table.fz-kv { width: 100%; border-collapse: collapse; }
+    table.fz-kv td { padding: 0; vertical-align: top; }
+    .fz-lbl { white-space: nowrap; padding-right: 0.45em; }
+    .fz-r   { text-align: right; white-space: nowrap; }
+    .fz-b   { font-weight: bold; }
+    .fz-katta { font-size: 1.15em; }
+    .fz-sana { float: right; }
+    .fz-tolov td:first-child { padding-left: 1.05em; }
+
+    .fz-tovar { margin-top: 0.45em; }
+    .fz-nom {
+        font-weight: bold;
+        font-size: 1.08em;
+        line-height: 1.25;
+        // uzun tovar nomi keyingi qatorga o'tsin, chetidan kesilmasin
+        overflow-wrap: break-word;
+        word-break: break-word;
+    }
+    .fz-his {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.4em;
+        font-size: 0.96em;
+
+        // summa (o'ngdagi) HECH QACHON qisilmasin — kerak bo'lsa
+        // chapdagi «artikul · soni x narx» qismi keyingi qatorga o'tadi
+        > span:first-child { overflow-wrap: anywhere; }
+        > .fz-b { white-space: nowrap; flex-shrink: 0; }
+    }
+
+    .fz-izoh {
+        text-align: center;
+        margin-top: 0.75em;
+        font-size: 0.92em;
+        white-space: pre-line;
+    }
+    .fz-rahmat {
+        text-align: center;
+        margin-top: 1.05em;
+        font-weight: bold;
+        font-size: 1.08em;
+    }
+}
+
+// ------------------------------------------------------------------
+// BRAUZER ORQALI CHOP ETISH (window.print) — asosiy yo'l.
+//
+// Odoo bu rejimda chekka `width: 266px !important` beradi — bu 80 mm
+// qog'ozga mo'ljallangan (266px ≈ 70 mm). Bizning printerlar esa
+// 58 mm: chop maydoni bor-yo'g'i 48 mm. Natija chekning o'ng ~1/3
+// qismi qog'ozdan tashqarida qolib KESILIB ketardi: «195 000» -> «195».
+//
+// Yechim: kenglikni millimetrda qat'iy 45 mm qilamiz (48 mm chop
+// maydoniga zaxira bilan sig'adi), bazaviy shriftni 10px ga tushiramiz.
+// Selektor Odoo'nikidan aniqroq (.fz-chek qo'shilgan), shuning uchun
+// bizniki g'olib chiqadi.
+// ------------------------------------------------------------------
+@media print {
+    @page {
+        margin: 0;
+        padding: 0;
+    }
+
+    // Odoo chek qutisini yuqoridan/chapdan 10px surib qo'yadi —
+    // termal chekda bu bekorga bo'sh joy. Nolga tushiramiz.
+    // (Chekning tepasida baribir ozgina bo'sh joy qoladi — printer
+    // qog'ozni yirtish tishigacha o'zi suradi, bu temir xususiyati.)
+    .render-container {
+        top: 0 !important;
+        left: 0 !important;
+    }
+
+    .render-container .pos-receipt.fz-chek {
+        width: 45mm !important;
+        max-width: 45mm !important;
+        font-size: 10px !important;
+        line-height: 1.3 !important;
+    }
+
+    // 80 mm PRINTER (masalan XP-80C, chop maydoni 72 mm).
+    // Chop etishda media so'rovi QOG'OZ ENIga qarab ishlaydi:
+    // qog'oz 65 mm dan keng bo'lsa — bu 80 mm printer, chek to'liq
+    // kenglikda va kattaroq shriftda chiqadi. 58 mm printerda esa
+    // yuqoridagi 45 mm qoida amal qiladi.
+    @media (min-width: 65mm) {
+        .render-container .pos-receipt.fz-chek {
+            width: 66mm !important;
+            max-width: 66mm !important;
+            font-size: 13px !important;
+            line-height: 1.35 !important;
+        }
+    }
+
+    .render-container .pos-receipt.fz-chek .fz-logo {
+        margin-top: 0 !important;
+    }
+}
+
+// ------------------------------------------------------------------
+// RASM QILIB YUBORISH (IoT / ePOS printer) — zaxira yo'l.
+//
+// Bu rejimda Odoo chekni `pos-receipt-print` klassi bilan 512px
+// kenglikda rasmga aylantiradi — bu ham 80 mm ga mo'ljal. 58 mm
+// printerning eni 384 nuqta, shunga tenglashtiramiz; shrift esa
+// rasm o'lchamiga mos yiriklashadi (22px ≈ qog'ozda 2.7 mm).
+// ------------------------------------------------------------------
+.pos-receipt-print.fz-chek,
+.pos-receipt-print .pos-receipt.fz-chek {
+    width: 384px !important;
+    max-width: 384px !important;
+    font-size: 22px !important;
+}

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_pos_config_form_feliza" model="ir.ui.view">
+        <field name="name">pos.config.form.feliza.dashboard</field>
+        <field name="model">pos.config</field>
+        <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <group string="Feliza Dashboard"
+                       groups="feliza_dashboard.group_feliza_dashboard_manager">
+                    <field name="feliza_store_group"
+                           placeholder="Masalan: Chilonzor"/>
+                    <field name="feliza_store_name" readonly="1"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_pos_config_list_feliza" model="ir.ui.view">
+        <field name="name">pos.config.list.feliza.dashboard</field>
+        <field name="model">pos.config</field>
+        <field name="arch" type="xml">
+            <list string="Kassalar" editable="bottom">
+                <field name="name" string="Kassa"/>
+                <field name="feliza_store_group" string="Do'kon guruhi"/>
+                <field name="feliza_store_name" string="Panel nomi" readonly="1"/>
+                <field name="company_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_feliza_pos_config" model="ir.actions.act_window">
+        <field name="name">Do'konlar (kassalar)</field>
+        <field name="res_model">pos.config</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="view_pos_config_list_feliza"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Kassalarni do'konlarga guruhlang</p>
+            <p>
+                Bitta do'konda bir nechta kassa bo'lsa, ularning hammasiga
+                <b>bir xil «Do'kon guruhi»</b> nomini yozing — panelda ular
+                bitta do'kon bo'lib ko'rinadi.
+            </p>
+            <p>
+                Bo'sh qoldirilsa, kassaning o'z nomi ishlatiladi.
+            </p>
+        </field>
+    </record>
+
+</odoo>

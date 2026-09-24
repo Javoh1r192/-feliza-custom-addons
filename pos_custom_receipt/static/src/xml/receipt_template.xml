@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-inherit="point_of_sale.OrderReceipt" t-inherit-mode="extension">
+
+        <!-- 1. «Discount»/«Скидка» mukofot qatori chekda ko'rsatilmasin -->
+        <xpath expr="//Orderline" position="attributes">
+            <attribute name="t-if">!isDiscountRewardLine(line)</attribute>
+        </xpath>
+
+        <!-- 2. Yakuniy summadan oldin «Chegirma» qatori -->
+        <xpath expr="//div[hasclass('receipt-total')]" position="before">
+            <div t-if="customTotalDiscount"
+                 class="pos-receipt-amount d-flex justify-content-between fw-bolder">
+                <span>Chegirma</span>
+                <span t-out="customTotalDiscount" class="font-monospace"/>
+            </div>
+        </xpath>
+
+        <!-- 3. Odoo'ning o'z «Discounts» qatori olib tashlanadi (takrorlanmasin) -->
+        <xpath expr="//span[hasclass('label-discount')]/.." position="replace"/>
+
+    </t>
+
+</templates>

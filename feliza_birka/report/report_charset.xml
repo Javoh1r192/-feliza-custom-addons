@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- =====================================================================
+         PDF'DA KIRILL HARFLARI
+         `wkhtmltopdf` sahifa kodlashini faylning BIRINCHI kilobaytiga qarab
+         aniqlaydi. Odoo'ning `web.minimal_layout` qolipida esa
+         `<meta charset="utf-8">` uzun CSS/JS havolalaridan KEYIN turadi —
+         natijada kirill matn «Ð¨Ð¾Ñ‚» bo'lib chiqadi (sinovda shunday bo'ldi).
+
+         Shu sababli `<meta charset>` ni <head> ning eng boshiga qo'yamiz.
+         Bu barcha PDF hisobotlarga foydali: hech narsani buzmaydi, faqat
+         kodlashni aniq aytadi.
+         ===================================================================== -->
+    <template id="minimal_layout_charset_first" inherit_id="web.minimal_layout">
+        <xpath expr="//head/base" position="before">
+            <meta charset="utf-8"/>
+        </xpath>
+    </template>
+
+</odoo>

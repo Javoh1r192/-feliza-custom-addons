@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <!--
+        FELIZA CHEKI — to'liq o'z shablonimiz.
+
+        Odoo'ning shablonini `xpath` bilan qismlab tuzatish o'rniga
+        butunlay almashtirdik: talab qilingan joylashuv standartdan
+        juda farq qiladi, qismlab tuzatilsa har Odoo yangilanishida
+        buzilib turardi.
+
+        Hisob-kitob Odoo'niki — bu yerda faqat ko'rsatiladi.
+    -->
+    <t t-name="feliza_pos_chek.FelizaReceipt">
+        <div class="pos-receipt fz-chek">
+
+            <!-- logotip -->
+            <div class="fz-logo" t-if="felizaLogo">
+                <img t-att-src="felizaLogo" alt="Feliza"/>
+            </div>
+
+            <div class="fz-yur" t-out="felizaCfg.feliza_yuridik"/>
+            <div class="fz-dok" t-out="felizaCfg.feliza_dokon"/>
+            <div class="fz-man" t-if="felizaCfg.feliza_manzil"
+                 t-out="felizaCfg.feliza_manzil"/>
+
+            <div class="fz-uz"/>
+
+            <!-- kim, kimga, qachon -->
+            <table class="fz-kv">
+                <tr><td class="fz-lbl">Kassir:</td>
+                    <td class="fz-b" t-out="felizaKassir"/></tr>
+                <tr><td class="fz-lbl">Sotuvchi:</td>
+                    <td class="fz-b" t-out="felizaSotuvchi"/></tr>
+                <tr><td class="fz-lbl">Mijoz:</td>
+                    <td class="fz-b" t-out="felizaMijoz"/></tr>
+                <tr><td class="fz-lbl">Savdo chek:</td>
+                    <td>
+                        <span class="fz-b" t-out="felizaChekRaqam"/>
+                        <span class="fz-sana" t-out="felizaSana"/>
+                    </td></tr>
+            </table>
+
+            <div class="fz-uzb"/>
+
+            <!-- tovarlar -->
+            <t t-foreach="felizaQatorlar" t-as="qator" t-key="qator_index">
+                <div class="fz-tovar">
+                    <div class="fz-nom" t-out="qator.nom"/>
+                    <div class="fz-his">
+                        <span t-out="qator.chap"/>
+                        <span class="fz-b" t-out="qator.summa"/>
+                    </div>
+                </div>
+            </t>
+
+            <div class="fz-uz"/>
+
+            <!-- yakun -->
+            <table class="fz-kv">
+                <tr><td class="fz-lbl fz-b">HAMMASI:</td>
+                    <td class="fz-r fz-b fz-katta" t-out="felizaJami"/></tr>
+                <tr><td class="fz-lbl">Chegirma:</td>
+                    <td class="fz-r" t-out="felizaChegirma"/></tr>
+                <tr><td class="fz-lbl fz-b">To'landi:</td>
+                    <td class="fz-r fz-b" t-out="felizaTolandi"/></tr>
+            </table>
+            <table class="fz-kv fz-tolov">
+                <tr t-foreach="felizaTolovlar" t-as="tolov" t-key="tolov_index">
+                    <td class="fz-lbl" t-out="tolov.nom"/>
+                    <td class="fz-r" t-out="tolov.summa"/>
+                </tr>
+            </table>
+
+            <!-- bonuslar -->
+            <t t-if="felizaBonus">
+                <div class="fz-nomli"><span>BONUSLAR</span></div>
+                <table class="fz-kv">
+                    <tr><td class="fz-lbl">Bor edi:</td>
+                        <td class="fz-r" t-out="felizaBonus.boredi"/></tr>
+                    <tr><td class="fz-lbl">Jami qo'shildi:</td>
+                        <td class="fz-r" t-out="felizaBonus.qoshildi"/></tr>
+                    <tr><td class="fz-lbl">Olib qolindi:</td>
+                        <td class="fz-r" t-out="felizaBonus.olindi"/></tr>
+                    <tr><td class="fz-lbl fz-b">Qoldi:</td>
+                        <td class="fz-r fz-b" t-out="felizaBonus.qoldi"/></tr>
+                </table>
+            </t>
+
+            <!-- do'kon o'z izohini yozgan bo'lsa -->
+            <div t-if="order.config.receipt_footer" class="fz-izoh"
+                 t-out="order.config.receipt_footer"/>
+
+            <div class="fz-rahmat">Xaridingiz uchun rahmat!</div>
+        </div>
+    </t>
+
+</templates>

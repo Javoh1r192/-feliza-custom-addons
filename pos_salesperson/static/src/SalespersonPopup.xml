@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="pos_salesperson.SalespersonPopup">
+        <Dialog title="props.title" size="'md'" footer="false">
+            <div class="salesperson-popup-body p-2">
+
+                <!-- Olib tashlash tugmasi – faqat sotuvchi tanlangan bo'lsa ko'rinadi -->
+                <t t-if="props.currentSalesperson">
+                    <button
+                        class="btn btn-outline-danger w-100 mb-3 d-flex align-items-center justify-content-center gap-2"
+                        t-on-click="onRemove">
+                        <i class="fa fa-times-circle"/>
+                        Sotuvchini olib tashlash
+                    </button>
+                    <hr class="my-2"/>
+                </t>
+
+                <!-- Xodimlar ro'yxati -->
+                <t t-if="props.employees.length">
+                    <t t-foreach="props.employees" t-as="emp" t-key="emp.id">
+                        <button
+                            class="btn w-100 mb-2 d-flex align-items-center gap-2"
+                            t-att-class="{
+                                'btn-primary': props.currentSalesperson and props.currentSalesperson.id === emp.id,
+                                'btn-light border': !props.currentSalesperson or props.currentSalesperson.id !== emp.id
+                            }"
+                            t-on-click="() => this.onSelect(emp)">
+                            <i class="fa fa-user"/>
+                            <t t-esc="emp.name"/>
+                            <t t-if="props.currentSalesperson and props.currentSalesperson.id === emp.id">
+                                <i class="fa fa-check ms-auto"/>
+                            </t>
+                        </button>
+                    </t>
+                </t>
+
+                <t t-else="">
+                    <p class="text-center text-muted mt-3">Sotuvchi topilmadi</p>
+                </t>
+
+            </div>
+        </Dialog>
+    </t>
+
+</templates>

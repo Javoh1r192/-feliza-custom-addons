@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates id="template" xml:space="preserve">
+
+    <!--
+        E'TIBOR: bu xpath Odoo 19.0 core static/src/app/screens/payment_screen/
+        payment_screen.xml faylidagi "paymentmethods-container" klassiga tayanadi.
+        Agar modul o'rnatishda yoki POS ochilganda brauzer konsolida shu fayl
+        haqida xato chiqsa (yoki banner ko'rinmasa), README.md dagi
+        "Muammoni bartaraf etish" bo'limiga qarang — bu FAQAT vizual bannerga
+        tegishli, hamyon hisob-kitobi va cheklovlar (pos_payment.js) bunga
+        bog'liq emas va baribir to'g'ri ishlaydi.
+    -->
+    <t t-name="pos_customer_wallet.PaymentScreenMethodsWallet"
+       t-inherit="point_of_sale.PaymentScreenMethods"
+       t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('paymentmethods-container')]" position="before">
+            <div t-if="getWalletBalanceInfo()"
+                 class="wallet-balance-banner alert alert-info py-1 px-2 mb-2 d-flex justify-content-between align-items-center small">
+                <span>Mijoz cashback balansi:</span>
+                <span class="fw-bold">
+                    <t t-esc="formatWalletAmount(getWalletBalanceInfo().remaining)"/>
+                    <t t-if="getWalletBalanceInfo().used > 0">
+                        <span class="text-muted fw-normal">
+                            (bu buyurtmada ishlatildi: <t t-esc="formatWalletAmount(getWalletBalanceInfo().used)"/>)
+                        </span>
+                    </t>
+                </span>
+            </div>
+        </xpath>
+    </t>
+
+</templates>

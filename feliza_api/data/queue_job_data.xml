@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="channel_feliza_webhook" model="queue.job.channel">
+        <field name="name">feliza_webhook</field>
+        <field name="parent_id" ref="queue_job.channel_root"/>
+    </record>
+
+    <!-- Qayta urinish jadvali TZ'dagi 1s->5s->30s->5daq->30daq->2soatga
+         yaqinlashtirilgan: 5s -> 30s -> 5daq -> 30daq -> 2soat (5 urinish) -->
+
+    <record id="job_function_product_product_feliza_send_upsert" model="queue.job.function">
+        <field name="model_id" ref="product.model_product_product"/>
+        <field name="method">_feliza_send_upsert</field>
+        <field name="channel_id" ref="channel_feliza_webhook"/>
+        <field name="retry_pattern" eval="{1: 5, 2: 30, 3: 300, 4: 1800, 5: 7200}"/>
+    </record>
+
+    <record id="job_function_product_product_feliza_send_archive" model="queue.job.function">
+        <field name="model_id" ref="product.model_product_product"/>
+        <field name="method">_feliza_send_archive</field>
+        <field name="channel_id" ref="channel_feliza_webhook"/>
+        <field name="retry_pattern" eval="{1: 5, 2: 30, 3: 300, 4: 1800, 5: 7200}"/>
+    </record>
+
+    <record id="job_function_product_product_feliza_send_stock_updated" model="queue.job.function">
+        <field name="model_id" ref="product.model_product_product"/>
+        <field name="method">_feliza_send_stock_updated</field>
+        <field name="channel_id" ref="channel_feliza_webhook"/>
+        <field name="retry_pattern" eval="{1: 5, 2: 30, 3: 300, 4: 1800, 5: 7200}"/>
+    </record>
+
+    <record id="job_function_res_partner_feliza_send_customer_updated" model="queue.job.function">
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="method">_feliza_send_customer_updated</field>
+        <field name="channel_id" ref="channel_feliza_webhook"/>
+        <field name="retry_pattern" eval="{1: 5, 2: 30, 3: 300, 4: 1800, 5: 7200}"/>
+    </record>
+
+</odoo>

@@ -1,0 +1,289 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* warehouse_transfer_custom_19v
+# BUILD-MARKER: FIX-v3-2026-08-04 (code: refs include file+line; no ir.module.module entries)
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-04 14:44+0000\n"
+"PO-Revision-Date: 2026-08-04 14:44+0000\n"
+"Last-Translator: \n"
+"Language-Team: Russian\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields,field_description:warehouse_transfer_custom_19v.field_stock_move__real_source_warehouse_id
+msgid "Haqiqiy yuboruvchi ombor"
+msgstr "Фактический склад-отправитель"
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields,help:warehouse_transfer_custom_19v.field_stock_move__real_source_warehouse_id
+msgid "Tranzit lokatsiyasidan (Inter Warehouse Transfer) qat'i nazar, yukning haqiqiy jo'natilgan ombori. Faqat omborlar aro o'tkazma harakatlari uchun to'ldiriladi."
+msgstr "Фактический склад отправления груза, независимо от транзитной локации (Inter Warehouse Transfer). Заполняется только для межскладских перемещений."
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields,field_description:warehouse_transfer_custom_19v.field_stock_move__real_dest_warehouse_id
+msgid "Haqiqiy qabul qiluvchi ombor"
+msgstr "Фактический склад-получатель"
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields,help:warehouse_transfer_custom_19v.field_stock_move__real_dest_warehouse_id
+msgid "Tranzit lokatsiyasidan (Inter Warehouse Transfer) qat'i nazar, yukning haqiqiy yetib borgan ombori. Faqat omborlar aro o'tkazma harakatlari uchun to'ldiriladi."
+msgstr "Фактический склад назначения груза, независимо от транзитной локации (Inter Warehouse Transfer). Заполняется только для межскладских перемещений."
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields,field_description:warehouse_transfer_custom_19v.field_stock_move__interwh_report_status
+msgid "Omborlar aro hisobot holati"
+msgstr "Статус межскладского отчёта"
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields,help:warehouse_transfer_custom_19v.field_stock_move__interwh_report_status
+msgid "Omborlar aro tarqatish hisobotida ushbu harakat ko'rsatilishi kerakmi va qanday holatda ko'rsatilishi kerakligini belgilaydi. Bo'sh bo'lsa - hisobotda ko'rinmaydi. Eslatma: 'Return' (qaytarish) harakatlari ataylab hisobotda alohida qator sifatida ko'rsatilmaydi - ular faqat bog'liq Delivery'ning 'Yo'lda' qoldig'ini kamaytirish uchun fonda hisobga olinadi (_interwh_resolved_qty orqali)."
+msgstr "Определяет, должно ли данное перемещение отображаться в отчёте по межскладским перемещениям и в каком статусе. Если пусто — в отчёте не отображается. Примечание: операции 'Return' (возврат) намеренно не показываются отдельной строкой — они лишь уменьшают остаток 'В пути' связанной доставки в фоне (через _interwh_resolved_qty)."
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields,field_description:warehouse_transfer_custom_19v.field_stock_move__interwh_report_qty
+msgid "Hisobot miqdori"
+msgstr "Количество в отчёте"
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields,help:warehouse_transfer_custom_19v.field_stock_move__interwh_report_qty
+msgid "Hisobotda ko'rsatiladigan miqdor. 'Yetib bordi' uchun - haqiqiy qabul qilingan miqdor. 'Yo'lda' uchun - hali hal qilinMAGAN qoldiq miqdor (qabul qilingan VA qaytarilgan miqdorlar ayrilgandan keyin)."
+msgstr "Количество, отображаемое в отчёте. Для 'Доставлено' — фактически принятое количество. Для 'В пути' — ещё не урегулированный остаток (после вычета принятого И возвращённого количества)."
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields,field_description:warehouse_transfer_custom_19v.field_stock_move__interwh_report_dest_display
+msgid "Qabul qiluvchi ombor (matn)"
+msgstr "Склад-получатель (текст)"
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields,help:warehouse_transfer_custom_19v.field_stock_move__interwh_report_dest_display
+msgid "Ro'yxat ko'rinishi uchun qulay matn ko'rinishi."
+msgstr "Удобное текстовое представление для табличного вида."
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields,field_description:warehouse_transfer_custom_19v.field_stock_move__interwh_report_unit_cost
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_stock_move_list_interwh
+msgid "Tannarx (dona)"
+msgstr "Себестоимость (шт.)"
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields,help:warehouse_transfer_custom_19v.field_stock_move__interwh_report_unit_cost
+msgid "Ushbu transfer voqeasi sodir bo'lgan (yoki hisobotga so'nggi marta yangilangan) paytdagi mahsulot tannarxi - keyinchalik mahsulot narxi o'zgarsa ham bu qiymat o'zgarmaydi (muzlatilgan)."
+msgstr "Себестоимость товара на момент этого перемещения (или последнего обновления отчёта) — значение не меняется даже при последующем изменении цены товара (зафиксировано)."
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields,field_description:warehouse_transfer_custom_19v.field_stock_move__interwh_report_total_cost
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_stock_move_list_interwh
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_stock_move_pivot_interwh
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_stock_move_graph_interwh
+msgid "Tannarx (jami)"
+msgstr "Себестоимость (всего)"
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields.selection,name:warehouse_transfer_custom_19v.selection__stock_move__interwh_report_status__in_transit
+msgid "Yo'lda"
+msgstr "В пути"
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields.selection,name:warehouse_transfer_custom_19v.selection__stock_move__interwh_report_status__arrived
+msgid "Yetib bordi"
+msgstr "Доставлено"
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields,field_description:warehouse_transfer_custom_19v.field_stock_warehouse__allowed_user_ids
+msgid "Ruxsat etilgan foydalanuvchilar"
+msgstr "Разрешённые пользователи"
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields,help:warehouse_transfer_custom_19v.field_stock_warehouse__allowed_user_ids
+msgid "Agar belgilansa, faqat shu foydalanuvchilar ushbu omborni ko'ra oladi va unda ichki o'tkazma (internal transfer) yarata oladi. Bo'sh qoldirilsa — hamma foydalanuvchi ko'ra oladi."
+msgstr "Если задано, только эти пользователи смогут видеть данный склад и создавать в нём внутренние перемещения. Если оставить пустым — склад видят все пользователи."
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields,field_description:warehouse_transfer_custom_19v.field_stock_picking__warehouse_id
+msgid "Ombor"
+msgstr "Склад"
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields,field_description:warehouse_transfer_custom_19v.field_stock_picking__destination_warehouse_id
+#: model:ir.model.fields,field_description:warehouse_transfer_custom_19v.field_stock_picking__destination_warehouse_display
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_stock_move_list_interwh
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_stock_move_pivot_interwh
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_stock_move_graph_interwh
+msgid "Qabul qiluvchi ombor"
+msgstr "Склад-получатель"
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields,help:warehouse_transfer_custom_19v.field_stock_picking__destination_warehouse_id
+msgid "Agar bu tanlansa, mahsulot boshqa omborga tranzit orqali o'tkaziladi."
+msgstr "Если выбрано, товар будет перемещён на другой склад через транзит."
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields,field_description:warehouse_transfer_custom_19v.field_stock_picking__source_warehouse_id
+#: model:ir.model.fields,field_description:warehouse_transfer_custom_19v.field_stock_picking__source_warehouse_display
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_stock_move_list_interwh
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_stock_move_pivot_interwh
+msgid "Yuboruvchi ombor"
+msgstr "Склад-отправитель"
+
+#. module: warehouse_transfer_custom_19v
+#: model:ir.model.fields,field_description:warehouse_transfer_custom_19v.field_stock_picking__inter_wh_delivery_id
+msgid "Bog'liq Delivery"
+msgstr "Связанная доставка"
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_stock_move_list_interwh
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_stock_move_pivot_interwh
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_stock_move_graph_interwh
+#: model:ir.ui.menu,name:warehouse_transfer_custom_19v.menu_stock_move_interwh_report
+#: model:ir.actions.act_window,name:warehouse_transfer_custom_19v.action_stock_move_interwh_report
+msgid "Omborlar aro tarqatish hisoboti"
+msgstr "Отчёт по межскладским перемещениям"
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_stock_move_list_interwh
+msgid "Sana"
+msgstr "Дата"
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_stock_move_list_interwh
+msgid "Holat"
+msgstr "Статус"
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_stock_move_list_interwh
+msgid "Mahsulot"
+msgstr "Товар"
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_stock_move_list_interwh
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_stock_move_pivot_interwh
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_stock_move_graph_interwh
+msgid "Miqdor"
+msgstr "Количество"
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_stock_move_list_interwh
+msgid "Jami"
+msgstr "Итого"
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_stock_move_list_interwh
+msgid "O'lchov birligi"
+msgstr "Единица измерения"
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_stock_move_list_interwh
+msgid "Hujjat"
+msgstr "Документ"
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_warehouse_form_inherit_allowed_users
+msgid "Foydalanuvchi cheklovlari (Kirish huquqi)"
+msgstr "Ограничения пользователей (право доступа)"
+
+#. module: warehouse_transfer_custom_19v
+#: model_terms:ir.ui.view,arch_db:warehouse_transfer_custom_19v.view_warehouse_form_inherit_allowed_users
+msgid "Bo'sh qoldirilsa — barcha foydalanuvchilar ko'ra oladi"
+msgstr "Если оставить пустым — склад видят все пользователи"
+
+#. module: warehouse_transfer_custom_19v
+#: code:addons/warehouse_transfer_custom_19v/models/stock_location.py:15
+#, python-format
+msgid "Siz 'Inter Warehouse Transfer' lokatsiyasini o'chira olmaysiz, chunki u omborlar aro o'tkazmalar tizimi uchun zarur."
+msgstr "Вы не можете удалить локацию 'Inter Warehouse Transfer', так как она необходима для системы межскладских перемещений."
+
+#. module: warehouse_transfer_custom_19v
+#: code:addons/warehouse_transfer_custom_19v/models/custom_warehouse.py:64
+#: code:addons/warehouse_transfer_custom_19v/models/stock_picking.py:128
+#, python-format
+msgid "%s ombori uchun 'Delivery' turi topilmadi."
+msgstr "Для склада %s не найден тип операции 'Delivery'."
+
+#. module: warehouse_transfer_custom_19v
+#: code:addons/warehouse_transfer_custom_19v/models/custom_warehouse.py:173
+#: code:addons/warehouse_transfer_custom_19v/models/stock_picking.py:398
+#, python-format
+msgid "Mahsulotni ayni shu omborning o'ziga yubora olmaysiz!"
+msgstr "Нельзя отправить товар на тот же самый склад!"
+
+#. module: warehouse_transfer_custom_19v
+#: code:addons/warehouse_transfer_custom_19v/models/custom_warehouse.py:122
+#: code:addons/warehouse_transfer_custom_19v/models/stock_picking.py:216
+#, python-format
+msgid "Ushbu zayavkani qabul qila olmaysiz! Avval yuboruvchi ombor yukni jo'natishi kerak."
+msgstr "Вы не можете принять эту заявку! Сначала склад-отправитель должен отгрузить груз."
+
+#. module: warehouse_transfer_custom_19v
+#: code:addons/warehouse_transfer_custom_19v/models/stock_picking.py:169
+#, python-format
+msgid "Sizga **%s** omboriga yuk yetkazib berish uchun so'rov kelib tushdi. So'rov raqami: **%s**. \nDelivery order raqami: **%s**. \n\n**So'rov yuborgan shaxs:** %s"
+msgstr "Поступил запрос на поставку груза на склад **%s**. Номер запроса: **%s**. \nНомер заказа на доставку: **%s**. \n\n**Отправитель запроса:** %s"
+
+#. module: warehouse_transfer_custom_19v
+#: code:addons/warehouse_transfer_custom_19v/models/stock_picking.py:362
+#, python-format
+msgid "Diqqat! Ushbu Delivery bo'yicha \"%s\" mahsulotidan hali hal qilinmagan qoldiq bor%s: yuborilgan %s, hozirgacha hal qilingan (qabul qilingan + qaytarilgan) %s, qolgan %s dona hali tranzitda kutilmoqda. Agar bu miqdor haqiqatda yetishmayotgan/topilmayotgan bo'lsa, ushbu Delivery hujjatidan 'Return' qilib qoldiqni qaytarib olishni ko'rib chiqing."
+msgstr "Внимание! По этой доставке по товару \"%s\" есть неурегулированный остаток%s: отправлено %s, на данный момент урегулировано (принято + возвращено) %s, оставшиеся %s шт. всё ещё ожидаются в транзите. Если это количество действительно отсутствует/не находится, рассмотрите возможность оформить 'Return' по этому документу доставки и вернуть остаток."
+
+#. module: warehouse_transfer_custom_19v
+#: code:addons/warehouse_transfer_custom_19v/models/stock_picking.py:516
+#, python-format
+msgid "Sizga **%s** omboridan **%s** raqamli yuk yuborildi. Qabul qilib olishingizni so'raymiz! \n\n**Yuborgan shaxs:** %s"
+msgstr "Вам со склада **%s** отправлен груз №**%s**. Просим принять его! \n\n**Отправитель:** %s"
+
+#. module: warehouse_transfer_custom_19v
+#: code:addons/warehouse_transfer_custom_19v/models/stock_picking.py:724
+#, python-format
+msgid "Diqqat! <b>%s</b> delivery bo'yicha yuborilgan miqdorlar zayavkadagidan farq qiladi:<ul>%s</ul>Zayavka miqdorlari haqiqiy yuborilgan miqdorga moslab yangilandi."
+msgstr "Внимание! По доставке <b>%s</b> отправленные количества отличаются от заявки:<ul>%s</ul>Количества в заявке обновлены в соответствии с фактически отправленными."
+
+#. module: warehouse_transfer_custom_19v
+#: code:addons/warehouse_transfer_custom_19v/models/stock_picking.py:360
+#, python-format
+msgid " (%s hujjati bo'yicha)"
+msgstr " (по документу %s)"
+
+#. module: warehouse_transfer_custom_19v
+#: code:addons/warehouse_transfer_custom_19v/models/stock_picking.py:720
+#, python-format
+msgid "<li><b>%s</b> — so'ralgan: %s, yuborilgan: %s</li>"
+msgstr "<li><b>%s</b> — запрошено: %s, отправлено: %s</li>"
+
+#. module: warehouse_transfer_custom_19v
+#: code:addons/warehouse_transfer_custom_19v/models/stock_picking.py:788
+#, python-format
+msgid "'%s' mahsulotidan yuborilganidan ko'p qabul qilib bo'lmaydi!\nYuborilgan: %s, qabul qilinmoqchi: %s"
+msgstr "Нельзя принять товара '%s' больше, чем было отправлено!\nОтправлено: %s, принимается: %s"
+
+#. module: warehouse_transfer_custom_19v
+#: code:addons/warehouse_transfer_custom_19v/models/stock_picking.py:186
+#, python-format
+msgid "Ushbu zayavka hali 'Draft' holatida. Avval 'Mark as Todo' tugmasini bosing!"
+msgstr "Эта заявка ещё в статусе 'Черновик'. Сначала нажмите кнопку 'Mark as Todo'!"
+
+#. module: warehouse_transfer_custom_19v
+#: code:addons/warehouse_transfer_custom_19v/models/stock_picking.py:450
+#, python-format
+msgid "%s ombori uchun 'Receipt' turi topilmadi."
+msgstr "Для склада %s не найден тип операции 'Receipt'."
+
+#. module: warehouse_transfer_custom_19v
+#: code:addons/warehouse_transfer_custom_19v/models/stock_picking.py:379
+#, python-format
+msgid "Kamomad: %s"
+msgstr "Недостача: %s"
+
+#. module: warehouse_transfer_custom_19v
+#: code:addons/warehouse_transfer_custom_19v/models/stock_picking.py:834
+#, python-format
+msgid "Yuk yuborildi: %s"
+msgstr "Груз отправлен: %s"
+

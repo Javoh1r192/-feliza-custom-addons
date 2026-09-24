@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_picking_form_size_split" model="ir.ui.view">
+        <field name="name">stock.picking.form.size.split</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_open_size_distribution"
+                        type="object"
+                        string="O'lchamlarga taqsimlash"
+                        class="btn-secondary"
+                        invisible="picking_type_code != 'incoming' or state in ('done', 'cancel')"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

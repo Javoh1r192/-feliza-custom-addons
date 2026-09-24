@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="pos_template" xml:space="preserve">
+    <t t-name="pw_disable_pos_features.ActionpadWidget"
+       t-inherit="point_of_sale.ActionpadWidget"
+       t-inherit-mode="extension">
+        <xpath expr="//button[hasclass('pay-order-button')]" position="attributes">
+            <attribute name="t-att-class">
+                {'pw_disable_button': pos.cashier and pos.cashier.pw_disable_payment}
+            </attribute>
+        </xpath>
+    </t>
+</templates>

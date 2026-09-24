@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="hr_employee_view_form_pos_restrict" model="ir.ui.view">
+        <field name="name">hr.employee.form.pos.restrict</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <!-- Add a new "POS" page after the last notebook page -->
+            <xpath expr="//notebook" position="inside">
+                <page string="POS" name="pos_restrictions">
+                    <group string="POS Cheklovlar">
+                        <field name="pw_disable_discount"/>
+                        <field name="pw_disable_price"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
