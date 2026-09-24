@@ -33,6 +33,14 @@ class ProductTemplate(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        # "Kim zakup qilgan" avto-to'ldirish: yaratuvchi (zakupchi) ismi.
+        # Import/migratsiya (system=1, admin=2) mustasno; qo'lda berilgan
+        # qiymat buzilmaydi. Zakupchi paneli daromadni shu bo'yicha hisoblaydi.
+        if self.env.uid not in (1, 2):
+            uname = self.env.user.name
+            for vals in vals_list:
+                if not vals.get('x_zakup_qilgan'):
+                    vals['x_zakup_qilgan'] = uname
         templates = super().create(vals_list)
         for template in templates:
             if template.x_publish_web:

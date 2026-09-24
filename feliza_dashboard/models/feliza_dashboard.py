@@ -4460,6 +4460,15 @@ class FelizaDashboard(models.AbstractModel):
                     "узбекистан", "uz")
     _POS_DONE_SQL = "('paid', 'done', 'invoiced')"
 
+    # Eski/migratsiya tovarlari zakupchisi `x_zakup_qilgan` (matn) da yozilgan,
+    # `create_uid` esa admin/import. Shu bilan bog'lash uchun: uid -> (include,
+    # exclude) LIKE naqshlari. Ikki kishilik ("Razida Qunduz") FAQAT Razidaga
+    # (Qunduzda 'razida' bor bo'lsa chiqarib tashlanadi).
+    ZAKUP_NAME_MATCH = {
+        7:  ("%razida%", None),         # Razida Masharipova (razida.m)
+        54: ("%qunduz%", "%razida%"),   # Xasanova Qunduzxon (xasanova.171)
+    }
+
     @api.model
     def _zakupchi_uid(self, zakupchi=None):
         """Qaysi zakupchining ma'lumoti: oddiy zakupchi — faqat o'ziniki."""
@@ -4474,7 +4483,8 @@ class FelizaDashboard(models.AbstractModel):
         if uid is None:                    # rahbar: barcha tovarlar
             return ("scope AS (SELECT id AS product_id FROM product_product)",
                     {})
-        return ("""scope AS (
+        params = {"zuid": uid}
+        body = """
             SELECT pp.id AS product_id
               FROM product_product pp
               JOIN product_template pt ON pt.id = pp.product_tmpl_id
@@ -4484,8 +4494,24 @@ class FelizaDashboard(models.AbstractModel):
               FROM purchase_order_line pol
               JOIN purchase_order po ON po.id = pol.order_id
              WHERE po.state IN ('purchase', 'done')
-               AND (po.user_id = %(zuid)s OR po.create_uid = %(zuid)s)
-        )""", {"zuid": uid})
+               AND (po.user_id = %(zuid)s OR po.create_uid = %(zuid)s)"""
+        # Eski tovarlar: `x_zakup_qilgan` (matn) bo'yicha ham bog'lash
+        match = self.ZAKUP_NAME_MATCH.get(uid)
+        if match:
+            inc, exc = match
+            params["zinc"] = inc
+            cond = "LOWER(COALESCE(pt.x_zakup_qilgan, '')) LIKE %(zinc)s"
+            if exc:
+                params["zexc"] = exc
+                cond += (" AND LOWER(COALESCE(pt.x_zakup_qilgan, '')) "
+                         "NOT LIKE %(zexc)s")
+            body += """
+            UNION
+            SELECT pp.id AS product_id
+              FROM product_product pp
+              JOIN product_template pt ON pt.id = pp.product_tmpl_id
+             WHERE """ + cond
+        return ("scope AS (" + body + "\n        )", params)
 
     @api.model
     def _zakupchi_attr_ids(self):
