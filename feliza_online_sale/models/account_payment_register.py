@@ -11,9 +11,10 @@ class AccountPaymentRegister(models.TransientModel):
         FAQAT online jurnallar bilan cheklanadi (nomida 'online')."""
         super()._compute_available_journal_ids()
         if self.env.context.get('feliza_online_pay'):
+            # FAQAT 3 online sotuv jurnali: Naqd online(CSH4), Click online(BNK12),
+            # UzCard online(BNK13). Code barqaror identifikator.
             online = self.env['account.journal'].search([
-                ('type', 'in', ('bank', 'cash')),
-                ('name', 'ilike', 'online'),
+                ('code', 'in', ('CSH4', 'BNK12', 'BNK13')),
             ])
             for wizard in self:
                 wizard.available_journal_ids = \
