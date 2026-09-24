@@ -23,6 +23,9 @@ class SaleOrder(models.Model):
         self.ensure_one()
         if not self.order_line:
             raise UserError(_("Sotuvda tovar yo'q."))
+        if (self.amount_total or 0.0) <= 0:
+            raise UserError(_("Sotuvda to'lanadigan summa yo'q (0 so'm). "
+                              "Tovar va uning narxini qo'shing."))
         # 1) tasdiqlash
         if self.state in ('draft', 'sent'):
             self.action_confirm()
