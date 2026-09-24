@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_order_form_online_pay" model="ir.ui.view">
+        <field name="name">sale.order.form.online.confirm.pay</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <field name="x_is_online" invisible="1"/>
+            </xpath>
+            <xpath expr="//header/button[@name='action_confirm']" position="before">
+                <button name="action_confirm_and_pay" type="object"
+                        string="✅ Tasdiqlash va to'lash" class="btn-primary"
+                        invisible="not x_is_online or state not in ('draft', 'sent')"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
