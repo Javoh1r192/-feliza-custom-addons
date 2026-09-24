@@ -286,9 +286,11 @@ class FelizaInventoryBulkLocWizard(models.TransientModel):
             all_lines = Line.search([('session_id', '=', session.id),
                                      ('product_id', '=', prod.id)])
             # 1) JOY: hammasini yangi javonga jamlaymiz (ko'chirish, sof=0)
-            total = 0.0
+            # MUHIM: total ni ko'chirishdan OLDIN hisoblaymiz. Aks holda new_line
+            # (agar mavjud bo'lsa) siklda ko'chirilgandan keyin qo'shilib, soni
+            # IKKI MARTA sanaladi -> total shishadi -> delta manfiy -> 0 ga tushadi.
+            total = sum(all_lines.mapped('counted_qty'))
             for line in all_lines:
-                total += line.counted_qty
                 if line.id == new_line.id:
                     continue
                 cur = line.counted_qty

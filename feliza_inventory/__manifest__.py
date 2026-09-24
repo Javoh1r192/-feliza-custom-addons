@@ -13,7 +13,7 @@ Mustaqil inventarizatsiya moduli (Odoo yadrosiga tegmaydi):
 """,
     'author': "SferaIT",
     'category': 'Inventory',
-    'version': '19.0.1.11.2',
+    'version': '19.0.1.11.3',
     'depends': ['stock', 'product'],
     'data': [
         'security/inventory_security.xml',
