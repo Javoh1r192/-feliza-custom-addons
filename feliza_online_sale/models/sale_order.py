@@ -50,5 +50,6 @@ class SaleOrder(models.Model):
             'context': {
                 'active_model': 'account.move',
                 'active_ids': inv.ids,
+                'feliza_online_pay': True,
             },
         }
